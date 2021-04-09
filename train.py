@@ -62,10 +62,10 @@ class RLTraining(pl.LightningModule):
         epsilon = max(self.hparams.eps_end, self.hparams.eps_start -
                       self.episode + 1 / self.hparams.eps_last_episode)
 
-        reward, done = self.agent.play_step(self.dqn, epsilon=epsilon)
+        reward, done = self.agent.play_step(self.dqn, epsilon=epsilon, device=device)
         self.episode_reward += reward
 
-        loss = self.dqn_mse_loss(batch)
+        loss = self.dqn_mse_loss(batch, device)
 
         if done:
             self.total_reward = self.episode_reward
@@ -145,7 +145,7 @@ class RLTraining(pl.LightningModule):
     def get_device(self, batch) -> str:
         return batch[0][0].device.index if self.on_gpu else 'cpu'
 
-    def dqn_mse_loss(self, batch: Tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
+    def dqn_mse_loss(self, batch: Tuple[torch.Tensor, torch.Tensor], device: Text) -> torch.Tensor:
         """
         Calculates the mse loss using a mini batch from the replay buffer
         Args:
@@ -154,6 +154,7 @@ class RLTraining(pl.LightningModule):
             loss
         """
         states, actions, rewards, dones, next_states = batch
+        states = torch.tensor(states[0]).to(device), torch.tensor(states[1]).to(device)
 
         state_action_values = self.dqn(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
 

@@ -1,4 +1,6 @@
 import random
+from typing import Text
+
 import numpy as np
 import torch
 from torch import nn
@@ -12,11 +14,11 @@ class Agent:
         self.total_reward = 0
         self.reset()
 
-    def choose_action(self, dqn: nn.Module, epsilon: float):
+    def choose_action(self, dqn: nn.Module, epsilon: float, device: Text):
         if np.random.random() < epsilon:
             action = self.env.action_space.sample()
         else:
-            state = torch.tensor(self.state[0]).unsqueeze(0), torch.tensor(self.state[1]).unsqueeze(0)
+            state = torch.tensor(self.state[0]).unsqueeze(0).to(device), torch.tensor(self.state[1]).unsqueeze(0).to(device)
             q_values = dqn(state).squeeze(0)
             _, action = torch.max(q_values, dim=0)
             action = int(action.item())
@@ -27,8 +29,8 @@ class Agent:
         """ Resents the environment and updates the state"""
         self.state = self.env.reset()
 
-    def play_step(self, dqn: nn.Module, epsilon=0.0):
-        action = self.choose_action(dqn, epsilon)
+    def play_step(self, dqn: nn.Module, epsilon=0.0, device: Text='cpu'):
+        action = self.choose_action(dqn, epsilon, device)
 
         # do step in the environment
         new_state, reward, done, _ = self.env.step(action)
