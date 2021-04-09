@@ -42,6 +42,7 @@ class RLTraining(pl.LightningModule):
             bbox_transformer='base',
             ior_marker_type='cross',
             has_termination_action='false',
+            mode='test'
         )
 
         self.agent = Agent(env)
@@ -83,11 +84,10 @@ class RLTraining(pl.LightningModule):
         return {'loss': loss}
 
     def training_epoch_end(self, outputs: List[Any]) -> None:
-        if self.current_epoch % 10 == 0:
+        if self.current_epoch % self.hparams.evaluate_every == 0:
             avg_iou = self.evaluate()
 
             self.log('avg_iou', avg_iou)
-            print(f'Avg IOU: {avg_iou}')
 
     def evaluate(self):
         avg_iou = 0
