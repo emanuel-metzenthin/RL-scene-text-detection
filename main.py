@@ -1,6 +1,7 @@
 import argparse
 import importlib
 
+import torch
 from pytorch_lightning import Trainer
 
 from ICDAR_dataset import ICDARDataset
@@ -37,7 +38,8 @@ args = parser.parse_args()
 
 rl_training = RLTraining(args)
 
-trainer = Trainer()
+use_gpus = 1 if torch.cuda.is_available() else 0
+trainer = Trainer(gpus=1)
 
 trainer.fit(rl_training)
 
