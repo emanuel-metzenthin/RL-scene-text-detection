@@ -17,6 +17,7 @@ parser.add_argument("--batch_size", type=int, default=16, help="size of the batc
 parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
 parser.add_argument("--env", type=str, default="CartPole-v0", help="gym environment tag")
 parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
+parser.add_argument("--epochs", type=int, default=50, help="how many epochs to train")
 parser.add_argument("--sync_rate", type=int, default=10,
                     help="how many frames do we update the target network")
 parser.add_argument("--replay_size", type=int, default=1000,
@@ -39,7 +40,7 @@ args = parser.parse_args()
 rl_training = RLTraining(args)
 
 use_gpus = 1 if torch.cuda.is_available() else 0
-trainer = Trainer(gpus=1)
+trainer = Trainer(gpus=1, max_epochs=50)
 
 trainer.fit(rl_training)
 
