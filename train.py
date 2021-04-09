@@ -18,6 +18,7 @@ from utils import get_closest_gt, display_image_tensor_with_bbox
 class RLTraining(pl.LightningModule):
     def __init__(self, hparams: argparse.Namespace):
         super().__init__()
+        self.hparams = hparams
 
         dataset = ICDARDataset(path='../data/ICDAR2013')
         self.test_dataset = ICDARDataset(path='../data/ICDAR2013', split='test')
@@ -50,7 +51,6 @@ class RLTraining(pl.LightningModule):
         self.dqn = ImageDQN(num_actions=len(env.action_set))
         self.target_dqn = ImageDQN(num_actions=len(env.action_set))
 
-        self.hparams = hparams
         self.populate(self.hparams.warm_start_steps)
         self.episode = 0
         self.batch_reward = 0
