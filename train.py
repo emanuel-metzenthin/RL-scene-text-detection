@@ -83,7 +83,7 @@ class RLTraining(pl.LightningModule):
         return {'loss': loss}
 
     def training_epoch_end(self, outputs: List[Any]) -> None:
-        if self.current_epoch > 1:
+        if self.current_epoch % 10 == 0:
             avg_iou = self.evaluate()
 
             self.log('avg_iou', avg_iou)
@@ -108,8 +108,6 @@ class RLTraining(pl.LightningModule):
 
             if image_idx < 5:
                 self.logger.experiment.log_image(f'sample_image_{image_idx}', self.test_env.render(return_as_file=True))
-
-            print(f'finished image {image_idx}')
 
         return avg_iou / num_images
 
