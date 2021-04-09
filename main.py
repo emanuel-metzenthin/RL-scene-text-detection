@@ -14,6 +14,8 @@ parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
 parser.add_argument("--epochs", type=int, default=50, help="how many epochs to train")
 parser.add_argument("--sync_rate", type=int, default=10,
                     help="how many frames do we update the target network")
+parser.add_argument("--steps_per_image", type=int, default=200,
+                    help="max number of steps per image")
 parser.add_argument("--replay_size", type=int, default=1000,
                     help="capacity of the replay buffer")
 parser.add_argument("--warm_start_size", type=int, default=1000,

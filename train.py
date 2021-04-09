@@ -26,22 +26,22 @@ class RLTraining(pl.LightningModule):
             dataset.images, dataset.gt,
             playout_episode=False,
             premasking=False,
-            max_steps_per_image=50,
+            max_steps_per_image=self.hparams.steps_per_image,
             bbox_scaling=0,
             bbox_transformer='base',
             ior_marker_type='cross',
-            has_termination_action='false',
+            has_termination_action=False,
         )
 
         self.test_env = TextLocEnv(
             self.test_dataset.images, self.test_dataset.gt,
             playout_episode=False,
             premasking=False,
-            max_steps_per_image=50,
+            max_steps_per_image=self.hparams.steps_per_image,
             bbox_scaling=0,
             bbox_transformer='base',
             ior_marker_type='cross',
-            has_termination_action='false',
+            has_termination_action=False,
             mode='test'
         )
 
@@ -90,6 +90,8 @@ class RLTraining(pl.LightningModule):
             self.log('avg_iou', avg_iou)
 
     def evaluate(self):
+        self.target_dqn.eval()
+
         avg_iou = 0
         num_images = min(self.hparams.num_epoch_eval_images, len(self.test_env.image_paths)) \
             if self.hparams.num_epoch_eval_images \
@@ -129,12 +131,6 @@ class RLTraining(pl.LightningModule):
                                 sampler=None
                                 )
         return dataloader
-
-    # def val_dataloader(self) -> DataLoader:
-    #     dataloader = DataLoader(dataset=self.test_dataset,
-    #                             batch_size=self.hparams.batch_size,
-    #                             collate_fn=self.test_dataset.collate_fn)
-    #     return dataloader
 
     def populate(self, steps: int = 1000) -> None:
         """
