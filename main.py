@@ -35,17 +35,17 @@ parser.add_argument("--warm_start_steps", type=int, default=1000,
 
 args = parser.parse_args()
 
+if __name__ == '__main__:'
+    rl_training = RLTraining(args)
 
-rl_training = RLTraining(args)
+    trainer = Trainer(gpus=args.gpus, max_epochs=args.epochs)
 
-trainer = Trainer(gpus=args.gpus, max_epochs=args.epochs)
+    if args.neptune_key:
+        neptune_logger = NeptuneLogger(
+            api_key=args.neptune_key,
+            project_name="emanuelm/scene-text-detection",
+            params=args.__dict__)
+        trainer.logger = neptune_logger
 
-if args.neptune_key:
-    neptune_logger = NeptuneLogger(
-        api_key=args.neptune_key,
-        project_name="emanuelm/scene-text-detection",
-        params=args.__dict__)
-    trainer.logger = neptune_logger
-
-trainer.fit(rl_training)
+    trainer.fit(rl_training)
 
