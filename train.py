@@ -94,6 +94,7 @@ class RLTraining(pl.LightningModule):
         num_images = min(self.hparams.num_epoch_eval_images, len(self.test_env.image_paths)) \
             if self.hparams.num_epoch_eval_images \
             else len(self.test_env.image_paths)
+
         for image_idx in range(num_images):
             self.test_env.reset(image_index=image_idx)
             done = False
@@ -104,6 +105,9 @@ class RLTraining(pl.LightningModule):
 
             if len(self.test_env.episode_trigger_ious) > 0:
                 avg_iou += np.mean(self.test_env.episode_trigger_ious)
+
+            if image_idx < 5:
+                self.logger.experiment.log_image(self.test_env.render(return_as_file=True))
 
         return avg_iou / num_images
 

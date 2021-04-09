@@ -1,18 +1,12 @@
 import argparse
-import importlib
-
 import torch
 from pytorch_lightning import Trainer
-
-from ICDAR_dataset import ICDARDataset
-
-
-# from pytorch_lightning import Trainer
-
-from DQN import ImageDQN
 from train import RLTraining
+from pytorch_lightning.loggers.neptune import NeptuneLogger
+
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--neptune_key", type=str, required=False, help="Neptune.ai API key")
 parser.add_argument("--batch_size", type=int, default=16, help="size of the batches")
 parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
 parser.add_argument("--env", type=str, default="CartPole-v0", help="gym environment tag")
@@ -37,10 +31,19 @@ parser.add_argument("--warm_start_steps", type=int, default=1000,
 
 args = parser.parse_args()
 
+
 rl_training = RLTraining(args)
 
 use_gpus = 1 if torch.cuda.is_available() else 0
-trainer = Trainer(gpus=1, max_epochs=50)
+trainer = Trainer(gpus=use_gpus, max_epochs=args.epochs)
 
+if args.neptune_key:
+    neptune_logger = NeptuneLogger(
+        api_key=args.neptune_key,
+        project_name="emanuelm/scene-text-detection",
+        params=args.__dict__)
+    trainer.logger = neptune_logger
+
+neptune_logger.experiment
 trainer.fit(rl_training)
 
