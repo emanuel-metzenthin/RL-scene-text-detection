@@ -16,7 +16,7 @@ class ICDARDataset(Dataset):
         self._load_images_and_gt()
 
     def __getitem__(self, index) -> T_co:
-        image = Image.open(os.path.join(self.path, self.split + '_images', self.images[index]))
+        image = Image.open(self.images[index])
         image = image.convert('RGB')
         image = self.transform(image)
 
@@ -48,7 +48,8 @@ class ICDARDataset(Dataset):
             gt = []
 
             for line in file.readlines():
-                x1, y1, x2, y2, _ = line.split(' ')
+                sep = ', ' if ', ' in line else ' '
+                x1, y1, x2, y2 = line.split(sep)[:4]
                 gt.append((float(x1), float(y1), float(x2), float(y2)))
 
             self.gt.append(gt)

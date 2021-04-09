@@ -1,3 +1,4 @@
+import torch
 from torch import nn as nn
 from typing import *
 import torchvision.models as models
@@ -18,11 +19,22 @@ class ImageDQN(nn.Module):
             param.requires_grad = False
 
         self.dqn = nn.Sequential(
-            nn.Linear(2048, 1024),
+            nn.Linear(2048 + num_history * num_actions, 1024),
             nn.Linear(1024, num_actions)
         )
 
-    def forward(self, X):
-        features = self.feature_extractor(X).squeeze()
+        self.num_actions = num_actions
+        self.num_history = num_history
 
-        return self.dqn(features)
+    def forward(self, X):
+        images, histories = X
+
+        if images.shape[1] != 3:
+            images = images.permute([0, 3, 1, 2])
+
+        histories = torch.reshape(histories, (-1, self.num_actions * self.num_history))
+
+        features = self.feature_extractor(images).reshape(-1, 2048)
+        states = torch.cat((features, histories), dim=1)
+
+        return self.dqn(states)

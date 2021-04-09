@@ -1,6 +1,8 @@
 import argparse
 import importlib
 
+from pytorch_lightning import Trainer
+
 from ICDAR_dataset import ICDARDataset
 
 
@@ -25,6 +27,7 @@ parser.add_argument("--eps_last_episode", type=int, default=500,
 parser.add_argument("--eps_start", type=float, default=1.0, help="starting value of epsilon")
 parser.add_argument("--eps_end", type=float, default=0.01, help="final value of epsilon")
 parser.add_argument("--episode_length", type=int, default=200, help="max length of an episode")
+parser.add_argument("--num_epoch_eval_images", type=int, default=None, help="number of images to evaluate on per epoch")
 parser.add_argument("--max_episode_reward", type=int, default=200,
                     help="max episode reward in the environment")
 parser.add_argument("--warm_start_steps", type=int, default=1000,

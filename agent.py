@@ -2,9 +2,6 @@ import random
 import numpy as np
 import torch
 from torch import nn
-
-from actions import MoveAction, Direction, ResizeAction, Size, ChangeAspectAction, AspectRatio, TriggerAction
-from environment import Environment
 from replay_buffer import Experience, ReplayBuffer
 
 
@@ -19,9 +16,8 @@ class Agent:
         if np.random.random() < epsilon:
             action = self.env.action_space.sample()
         else:
-            state = torch.tensor([self.state])
-
-            q_values = dqn(state)
+            state = torch.tensor(self.state[0]).unsqueeze(0), torch.tensor(self.state[1]).unsqueeze(0)
+            q_values = dqn(state).squeeze(0)
             _, action = torch.max(q_values, dim=0)
             action = int(action.item())
 
@@ -32,7 +28,7 @@ class Agent:
         self.state = self.env.reset()
 
     def play_step(self, dqn: nn.Module, epsilon=0.0):
-        action = self.get_action(dqn, epsilon)
+        action = self.choose_action(dqn, epsilon)
 
         # do step in the environment
         new_state, reward, done, _ = self.env.step(action)
