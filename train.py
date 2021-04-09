@@ -107,7 +107,7 @@ class RLTraining(pl.LightningModule):
                 avg_iou += np.mean(self.test_env.episode_trigger_ious)
 
             if image_idx < 5:
-                self.logger.experiment.log_image(self.test_env.render(return_as_file=True))
+                self.logger.experiment.log_image(f'sample_image_{image_idx}', self.test_env.render(return_as_file=True))
 
             print(f'finished image {image_idx}')
 
