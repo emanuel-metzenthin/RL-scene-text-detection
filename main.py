@@ -44,6 +44,5 @@ if args.neptune_key:
         params=args.__dict__)
     trainer.logger = neptune_logger
 
-neptune_logger.experiment
 trainer.fit(rl_training)
 
