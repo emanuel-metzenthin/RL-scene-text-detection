@@ -35,7 +35,7 @@ parser.add_argument("--warm_start_steps", type=int, default=1000,
 
 args = parser.parse_args()
 
-if __name__ == '__main__:'
+if __name__ == '__main__':
     rl_training = RLTraining(args)
 
     trainer = Trainer(gpus=args.gpus, max_epochs=args.epochs)
