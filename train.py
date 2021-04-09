@@ -143,7 +143,7 @@ class RLTraining(pl.LightningModule):
             self.agent.play_step(self.dqn, epsilon=1.0)
 
     def get_device(self, batch) -> str:
-        return batch[0].device.index if self.on_gpu else 'cpu'
+        return batch[0][0].device.index if self.on_gpu else 'cpu'
 
     def dqn_mse_loss(self, batch: Tuple[torch.Tensor, torch.Tensor]) -> torch.Tensor:
         """
