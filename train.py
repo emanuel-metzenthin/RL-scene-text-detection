@@ -99,7 +99,7 @@ class RLTraining(pl.LightningModule):
             done = False
 
             while not done:
-                action = self.agent.choose_action(self.target_dqn, 0)
+                action = self.agent.choose_action(self.target_dqn, 0, device=self.device)
                 state, reward, done, _ = self.test_env.step(action)
 
             if len(self.test_env.episode_trigger_ious) > 0:
