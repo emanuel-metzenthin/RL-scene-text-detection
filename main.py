@@ -12,6 +12,7 @@ parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
 parser.add_argument("--env", type=str, default="CartPole-v0", help="gym environment tag")
 parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
 parser.add_argument("--epochs", type=int, default=50, help="how many epochs to train")
+parser.add_argument("--gpus", type=int, default=0, help="number of gpus to train on")
 parser.add_argument("--sync_rate", type=int, default=10,
                     help="how many frames do we update the target network")
 parser.add_argument("--steps_per_image", type=int, default=200,
@@ -37,8 +38,7 @@ args = parser.parse_args()
 
 rl_training = RLTraining(args)
 
-use_gpus = 1 if torch.cuda.is_available() else 0
-trainer = Trainer(gpus=use_gpus, max_epochs=args.epochs)
+trainer = Trainer(gpus=args.gpus, max_epochs=args.epochs)
 
 if args.neptune_key:
     neptune_logger = NeptuneLogger(
