@@ -66,6 +66,8 @@ class RLTraining(pl.LightningModule):
         if self.global_step % self.hparams.sync_rate == 0:
             self.target_dqn.load_state_dict(self.dqn.state_dict())
 
+        self.log('loss', loss, on_step=True)
+
         return {'loss': loss}
 
     def training_epoch_start(self) -> None:

@@ -23,6 +23,7 @@ class ImageDQN(nn.Module):
             nn.Linear(1024, num_actions)
         )
 
+        self.dqn.apply(self.init_weights)
         self.num_actions = num_actions
         self.num_history = num_history
 
@@ -38,3 +39,9 @@ class ImageDQN(nn.Module):
         states = torch.cat((features, histories), dim=1)
 
         return self.dqn(states)
+
+    @staticmethod
+    def init_weights(m):
+        if type(m) == nn.Linear:
+            torch.nn.init.xavier_uniform(m.weight)
+            m.bias.data.fill_(0.01)
