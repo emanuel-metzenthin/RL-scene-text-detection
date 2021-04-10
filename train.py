@@ -72,11 +72,11 @@ class RLTraining(pl.LightningModule):
         if self.current_epoch == 0:
             return
         self.populate(self.hparams.warm_start_steps)
-        self.log('total_reward', self.total_reward, on_epoch=True, prog_bar=True)
-        self.log('episodes', self.episode, on_epoch=True, prog_bar=True)
+        self.log('total_reward', self.total_reward)
+        self.log('episodes', self.episode)
 
     def training_epoch_end(self, outputs: List[Any]) -> None:
-        if self.current_epoch % self.hparams.evaluate_every == 1:
+        if self.current_epoch > 0 and self.current_epoch % self.hparams.evaluate_every == 0:
             avg_iou = self.evaluate()
 
             self.log('avg_iou', avg_iou)
