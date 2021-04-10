@@ -51,40 +51,32 @@ class RLTraining(pl.LightningModule):
         self.dqn = ImageDQN(num_actions=len(env.action_set))
         self.target_dqn = ImageDQN(num_actions=len(env.action_set))
 
-        self.populate(self.hparams.warm_start_steps)
         self.episode = 0
         self.batch_reward = 0
         self.episode_reward = 0
         self.total_reward = 0
+        self.populate(self.hparams.warm_start_steps)
 
     def training_step(self, batch, idx):
         device = self.get_device(batch)
 
-        epsilon = max(self.hparams.eps_end, self.hparams.eps_start -
-                      self.episode + 1 / self.hparams.eps_last_episode)
-
-        reward, done = self.agent.play_step(self.dqn, epsilon=epsilon, device=device)
-        self.episode_reward += reward
-
         loss = self.dqn_mse_loss(batch, device)
-
-        if done:
-            self.total_reward = self.episode_reward
-            self.episode_reward = 0
-            self.episode += 1
 
         # Soft update of target network
         if self.global_step % self.hparams.sync_rate == 0:
             self.target_dqn.load_state_dict(self.dqn.state_dict())
 
-        self.log('total_reward', torch.tensor(self.total_reward).to(device), on_step=True, prog_bar=True)
-        self.log('reward', torch.tensor(reward).to(device), on_step=True, prog_bar=True)
-        self.log('episodes', self.episode, on_step=True, prog_bar=True)
-
         return {'loss': loss}
 
+    def training_epoch_start(self) -> None:
+        if self.current_epoch == 0:
+            return
+        self.populate(self.hparams.warm_start_steps)
+        self.log('total_reward', self.total_reward, on_epoch=True, prog_bar=True)
+        self.log('episodes', self.episode, on_epoch=True, prog_bar=True)
+
     def training_epoch_end(self, outputs: List[Any]) -> None:
-        if self.current_epoch % self.hparams.evaluate_every == 0:
+        if self.current_epoch % self.hparams.evaluate_every == 1:
             avg_iou = self.evaluate()
 
             self.log('avg_iou', avg_iou)
@@ -108,7 +100,7 @@ class RLTraining(pl.LightningModule):
             if len(self.test_env.episode_trigger_ious) > 0:
                 avg_iou += np.mean(self.test_env.episode_trigger_ious)
 
-            if image_idx < 5:
+            if self.hparams.neptune_key and image_idx < 5:
                 self.logger.experiment.log_image(f'sample_image_{image_idx}', self.test_env.render(return_as_file=True))
 
         return avg_iou / num_images
@@ -121,11 +113,8 @@ class RLTraining(pl.LightningModule):
 
         return torch.optim.Adam(params_to_update, lr=0.01)
 
-    def calculate_trigger_reward(self, iou, steps):
-        return self.NU * iou - steps * self.P
-
     def train_dataloader(self) -> DataLoader:
-        dataset = RLDataset(self.agent.replay_buffer, self.hparams.episode_length)
+        dataset = RLDataset(self.agent.replay_buffer, min(1_000, self.hparams.replay_buffer_sample_size))
         dataloader = DataLoader(dataset=dataset,
                                 batch_size=self.hparams.batch_size,
                                 sampler=None
@@ -140,7 +129,16 @@ class RLTraining(pl.LightningModule):
             steps: number of random steps to populate the buffer with
         """
         for i in range(steps):
-            self.agent.play_step(self.dqn, epsilon=1.0)
+            epsilon = max(self.hparams.eps_end, self.hparams.eps_start -
+                          self.episode + 1 / self.hparams.eps_last_episode)
+            reward, done = self.agent.play_step(self.dqn, epsilon=epsilon)
+
+            self.episode_reward += reward
+
+            if done:
+                self.total_reward = self.episode_reward
+                self.episode_reward = 0
+                self.episode += 1
 
     def get_device(self, batch) -> str:
         return batch[0][0].device.index if self.on_gpu else 'cpu'

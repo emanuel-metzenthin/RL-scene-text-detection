@@ -20,12 +20,12 @@ parser.add_argument("--steps_per_image", type=int, default=200,
 parser.add_argument("--replay_size", type=int, default=1000,
                     help="capacity of the replay buffer")
 parser.add_argument("--warm_start_size", type=int, default=1000,
-                    help="how many samples do we use to fill our buffer at the start of training")
+                    help="how many samples do we use to fill our buffer at the start of every epoch")
 parser.add_argument("--eps_last_episode", type=int, default=500,
                     help="what episode should epsilon stop decaying")
 parser.add_argument("--eps_start", type=float, default=1.0, help="starting value of epsilon")
 parser.add_argument("--eps_end", type=float, default=0.01, help="final value of epsilon")
-parser.add_argument("--episode_length", type=int, default=200, help="max length of an episode")
+parser.add_argument("--replay_buffer_sample_size", type=int, default=200, help="how many sample to take from replay buffer")
 parser.add_argument("--num_epoch_eval_images", type=int, default=None, help="number of images to evaluate on per epoch")
 parser.add_argument("--evaluate_every", type=int, default=10, help="evaluate every n epochs")
 parser.add_argument("--max_episode_reward", type=int, default=200,
