@@ -20,6 +20,9 @@ class ImageDQN(nn.Module):
 
         self.dqn = nn.Sequential(
             nn.Linear(2048 + num_history * num_actions, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 1024),
+            nn.ReLU(),
             nn.Linear(1024, num_actions)
         )
 

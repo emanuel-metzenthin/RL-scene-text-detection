@@ -50,6 +50,7 @@ class RLTraining(pl.LightningModule):
 
         self.dqn = ImageDQN(num_actions=len(env.action_set))
         self.target_dqn = ImageDQN(num_actions=len(env.action_set))
+        self.target_dqn.eval()
 
         self.episode = 0
         self.batch_reward = 0
@@ -84,8 +85,6 @@ class RLTraining(pl.LightningModule):
             self.log('avg_iou', avg_iou)
 
     def evaluate(self):
-        self.target_dqn.eval()
-
         avg_iou = 0
         num_images = min(self.hparams.num_epoch_eval_images, len(self.test_env.image_paths)) \
             if self.hparams.num_epoch_eval_images \

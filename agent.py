@@ -19,7 +19,10 @@ class Agent:
             action = self.env.action_space.sample()
         else:
             state = torch.tensor(self.state[0]).unsqueeze(0).to(device), torch.tensor(self.state[1]).unsqueeze(0).to(device)
-            q_values = dqn(state).squeeze(0)
+            dqn.eval()
+            with torch.no_grad():
+                q_values = dqn(state).squeeze(0)
+            dqn.train()
             _, action = torch.max(q_values, dim=0)
             action = int(action.item())
 
