@@ -134,14 +134,6 @@ def train(hparams: argparse.Namespace):
     mean_reward = 0
 
     for current_epoch in range(hparams.epochs):
-        reward, done = agent.play_step(dqn, device=device)
-
-        if done:
-            current_episode += 1
-            running_reward.append(reward)
-            mean_reward = np.mean(running_reward)
-
-
         # TODO run whole image dataset per epoch or predefined num. of steps
         with tqdm(range(hparams.steps_per_epoch), unit='step') as tepoch:
             for current_step in tepoch:
@@ -149,7 +141,12 @@ def train(hparams: argparse.Namespace):
 
                 epsilon = max(hparams.eps_end, hparams.eps_start -
                               current_episode / hparams.eps_last_episode)
-                agent.play_step(dqn, epsilon)
+                reward, done = agent.play_step(dqn, epsilon, device=device)
+
+                if done:
+                    current_episode += 1
+                    running_reward.append(reward)
+                    mean_reward = np.mean(running_reward)
 
                 if current_step % hparams.update_every == 0:
                     training_step += 1
