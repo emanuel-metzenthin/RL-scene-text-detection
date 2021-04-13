@@ -163,3 +163,4 @@ def train(hparams: argparse.Namespace):
 
                     if training_step % hparams.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
+        torch.save(target_dqn.state_dict(), './last_model.pt')
