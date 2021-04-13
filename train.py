@@ -49,7 +49,7 @@ def configure_optimizers(dqn):
     return torch.optim.Adam(params_to_update, lr=0.01)
 
 
-def populate(agent, dqn, steps: int = 1000) -> None:
+def populate(agent, dqn, steps: int = 1000, device='cpu') -> None:
     """
     Carries out several random steps through the environment to initially fill
     up the replay buffer with experiences
@@ -57,7 +57,7 @@ def populate(agent, dqn, steps: int = 1000) -> None:
         steps: number of random steps to populate the buffer with
     """
     for i in range(steps):
-        agent.play_step(dqn, epsilon=1)
+        agent.play_step(dqn, epsilon=1, device=device)
 
 
 def get_device(self, batch) -> str:
@@ -134,7 +134,7 @@ def train(hparams: argparse.Namespace):
     mean_reward = 0
 
     for current_epoch in range(hparams.epochs):
-        reward, done = agent.play_step(dqn)
+        reward, done = agent.play_step(dqn, device=device)
 
         if done:
             current_episode += 1
