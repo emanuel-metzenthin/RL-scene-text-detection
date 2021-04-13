@@ -85,7 +85,7 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
         next_state_values[dones] = 0.0
         next_state_values = next_state_values.detach()
 
-    expected_state_action_values = torch.tensor(next_state_values * hparams.gamma + torch.tensor(rewards), dtype=torch.float32)
+    expected_state_action_values = torch.tensor(next_state_values * hparams.gamma + torch.tensor(rewards).to(device), dtype=torch.float32)
 
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
