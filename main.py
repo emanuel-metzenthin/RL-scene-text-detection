@@ -7,7 +7,6 @@ parser.add_argument("--neptune_key", type=str, required=False, help="Neptune.ai 
 parser.add_argument("--run_name", type=str, default='experiment', help="Neptune.ai run name")
 parser.add_argument("--batch_size", type=int, default=16, help="size of the batches")
 parser.add_argument("--lr", type=float, default=1e-2, help="learning rate")
-parser.add_argument("--env", type=str, default="CartPole-v0", help="gym environment tag")
 parser.add_argument("--gamma", type=float, default=0.99, help="discount factor")
 parser.add_argument("--epochs", type=int, default=50, help="how many epochs to train")
 parser.add_argument("--gpus", type=int, default=0, help="number of gpus to train on")

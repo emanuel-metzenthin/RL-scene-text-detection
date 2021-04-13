@@ -91,6 +91,7 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
 
 
 def train(hparams: argparse.Namespace):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     dataset = ICDARDataset(path='../data/ICDAR2013')
     test_dataset = ICDARDataset(path='../data/ICDAR2013', split='test')
 
@@ -118,14 +119,15 @@ def train(hparams: argparse.Namespace):
     )
 
     dqn = ImageDQN(num_actions=len(env.action_set))
+    dqn.to(device)
     target_dqn = ImageDQN(num_actions=len(env.action_set))
     target_dqn.eval()
+    target_dqn.to(device)
     optimizer = configure_optimizers(dqn)
 
     agent = Agent(env)
     populate(agent, dqn)
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     current_episode = 0
     training_step = 0
     running_reward = deque(maxlen=10)
