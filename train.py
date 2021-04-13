@@ -78,7 +78,7 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
     states = torch.tensor(states[0]).to(device), torch.tensor(states[1]).to(device)
     next_states = torch.tensor(next_states[0]).to(device), torch.tensor(next_states[1]).to(device)
 
-    state_action_values = dqn(states).gather(1, torch.tensor(actions).unsqueeze(-1)).squeeze(-1)
+    state_action_values = dqn(states).gather(1, torch.tensor(actions).unsqueeze(-1).to(device)).squeeze(-1)
 
     with torch.no_grad():
         next_state_values = target_dqn(next_states).max(1)[0]
@@ -138,7 +138,6 @@ def train(hparams: argparse.Namespace):
 
         if done:
             current_episode += 1
-            print(reward)
             running_reward.append(reward)
             mean_reward = np.mean(running_reward)
 
