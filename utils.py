@@ -1,20 +1,5 @@
-from typing import Tuple, List
-
 from PIL import ImageDraw
 from torchvision.transforms import ToPILImage
-
-
-def get_closest_gt(bbox: Tuple, gt: List) -> Tuple:
-    closest_gt = None
-    max_iou = None
-
-    for gt_box in gt:
-        iou = intersection_over_union(bbox, gt_box)
-        if max_iou is None or max_iou < iou:
-            max_iou = iou
-            closest_gt = gt_box
-
-    return closest_gt, max_iou
 
 
 def intersection_over_union(box1, box2):
@@ -35,9 +20,11 @@ def intersection_over_union(box1, box2):
 
     return iou
 
+
 def display_image_tensor_with_bbox(tensor, bbox):
     img = ToPILImage()(tensor)
     display_image_with_bbox(img, bbox)
+
 
 def display_image_with_bbox(image, bbox):
     draw = ImageDraw.Draw(image)
