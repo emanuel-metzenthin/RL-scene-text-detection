@@ -32,10 +32,8 @@ class ImageDQN(nn.Module):
 
     def forward(self, X):
         images, histories = X
-        print(images.device)
         if images.shape[1] != 3:
             images = images.permute([0, 3, 1, 2])
-        print(images.device)
         histories = torch.reshape(histories, (-1, self.num_actions * self.num_history))
 
         features = self.feature_extractor(images).reshape(-1, 2048)
