@@ -16,38 +16,16 @@ from tqdm import tqdm
 from DQN import ImageDQN
 from ICDAR_dataset import ICDARDataset
 from agent import Agent
+from evaluate import evaluate
 
 
-def evaluate(self):
-    avg_iou = 0
-    num_images = min(self.hparams.num_epoch_eval_images, len(self.test_env.image_paths)) \
-        if self.hparams.num_epoch_eval_images \
-        else len(self.test_env.image_paths)
-
-    for image_idx in range(num_images):
-        self.test_env.reset(image_index=image_idx)
-        done = False
-
-        while not done:
-            action = self.agent.choose_action(self.target_dqn, 0, device=self.device)
-            state, reward, done, _ = self.test_env.step(action)
-
-        if len(self.test_env.episode_trigger_ious) > 0:
-            avg_iou += np.mean(self.test_env.episode_trigger_ious)
-
-        if self.hparams.neptune_key and image_idx < 5:
-            self.logger.experiment.log_image(f'sample_image_{image_idx}', self.test_env.render(return_as_file=True))
-
-    return avg_iou / num_images
-
-
-def configure_optimizers(dqn):
+def configure_optimizers(dqn, lr):
     params_to_update = []
     for param in dqn.parameters():
         if param.requires_grad:
             params_to_update.append(param)
-
-    return torch.optim.Adam(params_to_update, lr=0.01)
+    print(len(params_to_update))
+    return torch.optim.Adam(params_to_update, lr=lr)
 
 
 def populate(agent, dqn, steps: int = 1000, device='cpu') -> None:
@@ -109,7 +87,6 @@ def save_model(target_dqn, file_name):
 def train(hparams: argparse.Namespace):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     dataset = ICDARDataset(path='../data/ICDAR2013')
-    test_dataset = ICDARDataset(path='../data/ICDAR2013', split='test')
 
     env = TextLocEnv(
         dataset.images, dataset.gt,
@@ -120,18 +97,6 @@ def train(hparams: argparse.Namespace):
         bbox_transformer='base',
         ior_marker_type='cross',
         has_termination_action=False,
-    )
-
-    test_env = TextLocEnv(
-        test_dataset.images, test_dataset.gt,
-        playout_episode=False,
-        premasking=False,
-        max_steps_per_image=hparams.steps_per_image,
-        bbox_scaling=0,
-        bbox_transformer='base',
-        ior_marker_type='cross',
-        has_termination_action=False,
-        mode='test'
     )
 
     if hparams.checkpoint:
@@ -147,7 +112,7 @@ def train(hparams: argparse.Namespace):
     dqn.to(device)
     target_dqn.eval()
     target_dqn.to(device)
-    optimizer = configure_optimizers(dqn)
+    optimizer = configure_optimizers(dqn, hparams.lr)
 
     agent = Agent(env)
     populate(agent, dqn)
@@ -189,6 +154,10 @@ def train(hparams: argparse.Namespace):
 
                     if training_step % hparams.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
+
+        if current_epoch % 10 == 0:
+            avg_iou = evaluate(agent, target_dqn, device)
+            neptune.log_metric('avg_iou', avg_iou)
 
         # TODO also save epoch etc., log model to neptune
         save_model(target_dqn, '{hparams.run_name}_epoch{current_epoch}_loss{loss}.pt')
