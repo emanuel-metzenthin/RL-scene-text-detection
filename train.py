@@ -139,6 +139,10 @@ def train(hparams: argparse.Namespace):
     else:
         dqn = ImageDQN(num_actions=len(env.action_set))
         target_dqn = ImageDQN(num_actions=len(env.action_set))
+
+    if torch.cuda.device_count() > 1:
+        dqn = nn.DataParallel(dqn)
+
     dqn.to(device)
     target_dqn.eval()
     target_dqn.to(device)
