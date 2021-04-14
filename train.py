@@ -1,4 +1,5 @@
 import argparse
+import os
 from collections import deque
 from typing import Text, List, Tuple, Any
 
@@ -90,6 +91,21 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
+def load_model_from_checkpoint(checkpoint):
+    dqn = ImageDQN(num_actions=9)
+    target_dqn = ImageDQN(num_actions=9)
+    dqn.load_state_dict(torch.load(checkpoint))
+    target_dqn.load_state_dict(torch.load(checkpoint))
+
+    return dqn, target_dqn
+
+
+def save_model(target_dqn, file_name):
+    if not os.path.exists('./checkpoints'):
+        os.makedirs('./checkpoints')
+    torch.save(target_dqn.state_dict(), './checkpoints' + file_name)
+
+
 def train(hparams: argparse.Namespace):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     dataset = ICDARDataset(path='../data/ICDAR2013')
@@ -118,9 +134,12 @@ def train(hparams: argparse.Namespace):
         mode='test'
     )
 
-    dqn = ImageDQN(num_actions=len(env.action_set))
+    if hparams.checkpoint:
+        dqn, target_dqn = load_model_from_checkpoint(hparams.checkpoint)
+    else:
+        dqn = ImageDQN(num_actions=len(env.action_set))
+        target_dqn = ImageDQN(num_actions=len(env.action_set))
     dqn.to(device)
-    target_dqn = ImageDQN(num_actions=len(env.action_set))
     target_dqn.eval()
     target_dqn.to(device)
     optimizer = configure_optimizers(dqn)
@@ -135,18 +154,20 @@ def train(hparams: argparse.Namespace):
 
     for current_epoch in range(hparams.epochs):
         # TODO run whole image dataset per epoch or predefined num. of steps
+        render = True
         with tqdm(range(hparams.steps_per_epoch), unit='step') as tepoch:
             for current_step in tepoch:
                 tepoch.set_description(f"Epoch {current_epoch}")
 
                 epsilon = max(hparams.eps_end, hparams.eps_start -
                               current_episode / hparams.eps_last_episode)
-                reward, done = agent.play_step(dqn, epsilon, device=device)
+                reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=render)
 
                 if done:
                     current_episode += 1
                     running_reward.append(reward)
                     mean_reward = np.mean(running_reward)
+                    render = False
 
                 if current_step % hparams.update_every == 0:
                     training_step += 1
@@ -163,4 +184,6 @@ def train(hparams: argparse.Namespace):
 
                     if training_step % hparams.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
-        torch.save(target_dqn.state_dict(), './last_model.pt')
+
+        # TODO also save epoch etc., log model to neptune
+        save_model(target_dqn, '{hparams.run_name}_epoch{current_epoch}_loss{loss}.pt')

@@ -31,6 +31,8 @@ parser.add_argument("--max_episode_reward", type=int, default=200,
                     help="max episode reward in the environment")
 parser.add_argument("--update_every", type=int, default=5,
                     help="after how many agent steps to update DQN")
+parser.add_argument("--checkpoint", type=str, required=False,
+                    help="resume from checkpoint")
 
 args = parser.parse_args()
 
