@@ -1,6 +1,8 @@
 import random
+import uuid
 from typing import Text
 
+import neptune
 import numpy as np
 import torch
 from torch import nn
@@ -32,8 +34,11 @@ class Agent:
         """ Resents the environment and updates the state"""
         self.state = self.env.reset()
 
-    def play_step(self, dqn: nn.Module, epsilon=0.0, device: Text='cpu'):
+    def play_step(self, dqn: nn.Module, epsilon=0.0, device: Text='cpu', render_on_trigger=False):
         action = self.choose_action(dqn, epsilon, device)
+
+        if self.env.is_trigger(action) and render_on_trigger:
+            neptune.log_image(f'sample_image_{str(uuid.uuid4())[:8]}', self.env.render(return_as_file=True))
 
         # do step in the environment
         new_state, reward, done, _ = self.env.step(action)
