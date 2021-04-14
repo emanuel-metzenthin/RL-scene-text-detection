@@ -142,6 +142,7 @@ def train(hparams: argparse.Namespace):
 
     if torch.cuda.device_count() > 1:
         dqn = nn.DataParallel(dqn)
+        target_dqn = nn.DataParallel(target_dqn)
 
     dqn.to(device)
     target_dqn.eval()
