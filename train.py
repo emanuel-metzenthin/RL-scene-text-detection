@@ -154,7 +154,7 @@ def train(hparams: argparse.Namespace):
                     if training_step % hparams.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
 
-        if current_epoch % 10 == 0:
+        if current_epoch > 0 and current_epoch % 10 == 0:
             avg_iou = evaluate(hparams, agent, target_dqn, device)
             neptune.log_metric('avg_iou', avg_iou)
 
