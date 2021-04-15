@@ -99,15 +99,15 @@ def train(hparams: argparse.Namespace):
         has_termination_action=False,
     )
 
-    if hparams.checkpoint:
-        dqn, target_dqn = load_model_from_checkpoint(hparams.checkpoint)
-    else:
-        dqn = ImageDQN(num_actions=len(env.action_set))
-        target_dqn = ImageDQN(num_actions=len(env.action_set))
+    dqn = ImageDQN(num_actions=len(env.action_set))
+    target_dqn = ImageDQN(num_actions=len(env.action_set))
 
     if torch.cuda.device_count() > 1:
         dqn = nn.DataParallel(dqn)
         target_dqn = nn.DataParallel(target_dqn)
+
+    if hparams.checkpoint:
+        dqn, target_dqn = load_model_from_checkpoint(hparams.checkpoint)
 
     dqn.to(device)
     target_dqn.eval()
