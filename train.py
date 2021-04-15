@@ -105,7 +105,7 @@ def train(hparams: argparse.Namespace):
         target_dqn = nn.DataParallel(target_dqn)
 
     if hparams.checkpoint:
-        dqn, target_dqn = load_model_from_checkpoint(hparams.checkpoint)
+        dqn, target_dqn = load_model_from_checkpoint(hparams.checkpoint, dqn, target_dqn)
 
     dqn.to(device)
     target_dqn.eval()
