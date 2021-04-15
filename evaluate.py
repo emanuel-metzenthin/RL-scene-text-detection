@@ -11,12 +11,12 @@ def f_score(precision, recall):
     return 2 * precision * recall / (precision + recall)
 
 
-def evaluate(agent, dqn, device='cpu'):
+def evaluate(hparams, agent, dqn, device='cpu'):
     avg_iou = 0
 
     test_env = TextLocEnv(
         test_dataset.images, test_dataset.gt,
-        playout_episode=False,
+        playout_episode=hparams.full_playout,
         premasking=False,
         max_steps_per_image=200,
         bbox_scaling=0,

@@ -88,7 +88,7 @@ def train(hparams: argparse.Namespace):
 
     env = TextLocEnv(
         dataset.images, dataset.gt,
-        playout_episode=False,
+        playout_episode=hparams.full_playout,
         premasking=False,
         max_steps_per_image=hparams.steps_per_image,
         bbox_scaling=0,
@@ -155,7 +155,7 @@ def train(hparams: argparse.Namespace):
                         target_dqn.load_state_dict(dqn.state_dict())
 
         if current_epoch % 10 == 0:
-            avg_iou = evaluate(agent, target_dqn, device)
+            avg_iou = evaluate(hparams, agent, target_dqn, device)
             neptune.log_metric('avg_iou', avg_iou)
 
         # TODO also save epoch etc., log model to neptune

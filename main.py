@@ -33,6 +33,8 @@ parser.add_argument("--update_every", type=int, default=5,
                     help="after how many agent steps to update DQN")
 parser.add_argument("--checkpoint", type=str, required=False,
                     help="resume from checkpoint")
+parser.add_argument("--full_playout", action='store_true',
+                    help="play episode until max_steps")
 
 args = parser.parse_args()
 
