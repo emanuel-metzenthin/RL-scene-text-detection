@@ -81,7 +81,7 @@ def load_model_from_checkpoint(checkpoint):
 def save_model(target_dqn, file_name):
     if not os.path.exists('./checkpoints'):
         os.makedirs('./checkpoints')
-    torch.save(target_dqn.state_dict(), './checkpoints' + file_name)
+    torch.save(target_dqn.state_dict(), './checkpoints/' + file_name)
 
 
 def train(hparams: argparse.Namespace):
@@ -161,4 +161,4 @@ def train(hparams: argparse.Namespace):
             neptune.log_metric('avg_iou', avg_iou)
 
         # TODO also save epoch etc., log model to neptune
-        save_model(target_dqn, '{hparams.run_name}_epoch{current_epoch}_loss{loss}.pt')
+        save_model(target_dqn, f'{hparams.run_name}_epoch{current_epoch}_loss{loss}.pt')
