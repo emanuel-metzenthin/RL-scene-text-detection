@@ -52,19 +52,19 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
         loss
     """
     states, actions, rewards, dones, next_states = batch
-    states = list(zip(*states))
-    next_states = list(zip(*next_states))
-    states = torch.tensor(states[0]).to(device), torch.tensor(states[1]).to(device)
-    next_states = torch.tensor(next_states[0]).to(device), torch.tensor(next_states[1]).to(device)
+    states = torch.tensor(states[0], device=device), torch.tensor(states[1], device=device)
+    actions = torch.tensor(actions, device=device)
+    rewards = torch.tensor(rewards, device=device)
+    next_states = torch.tensor(next_states[0], device=device), torch.tensor(next_states[1], device=device)
 
-    state_action_values = dqn(states).gather(1, torch.tensor(actions).unsqueeze(-1).to(device)).squeeze(-1)
+    state_action_values = dqn(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
 
     with torch.no_grad():
         next_state_values = target_dqn(next_states).max(1)[0]
         next_state_values[dones] = 0.0
         next_state_values = next_state_values.detach()
 
-    expected_state_action_values = torch.tensor(next_state_values * hparams.gamma + torch.tensor(rewards).to(device), dtype=torch.float32)
+    expected_state_action_values = torch.tensor(next_state_values * hparams.gamma + rewards, dtype=torch.float32)
 
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 

@@ -38,7 +38,7 @@ class Agent:
         action = self.choose_action(dqn, epsilon, device)
 
         if self.env.is_trigger(action) and render_on_trigger:
-            neptune.log_image(f'sample_image_{str(uuid.uuid4())[:8]}', self.env.render(return_as_file=True))
+            neptune.log_image(f'sample_image_{str(uuid.uuid4())[:8]}', self.env.render(return_as_file=True, include_true_bboxes=True))
 
         # do step in the environment
         new_state, reward, done, _ = self.env.step(action)
