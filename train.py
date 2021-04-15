@@ -69,9 +69,7 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
 
-def load_model_from_checkpoint(checkpoint):
-    dqn = ImageDQN(num_actions=9)
-    target_dqn = ImageDQN(num_actions=9)
+def load_model_from_checkpoint(checkpoint, dqn, target_dqn):
     dqn.load_state_dict(torch.load(checkpoint))
     target_dqn.load_state_dict(torch.load(checkpoint))
 
