@@ -24,7 +24,6 @@ def configure_optimizers(dqn, lr):
     for param in dqn.parameters():
         if param.requires_grad:
             params_to_update.append(param)
-    print(len(params_to_update))
     return torch.optim.Adam(params_to_update, lr=lr)
 
 
@@ -97,8 +96,8 @@ def train(hparams: argparse.Namespace):
         has_termination_action=False,
     )
 
-    dqn = ImageDQN(num_actions=len(env.action_set))
-    target_dqn = ImageDQN(num_actions=len(env.action_set))
+    dqn = ImageDQN(backbone=hparams.backbone, num_actions=len(env.action_set))
+    target_dqn = ImageDQN(backbone=hparams.backbone, num_actions=len(env.action_set))
 
     if torch.cuda.device_count() > 1:
         dqn = nn.DataParallel(dqn)
