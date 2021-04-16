@@ -19,7 +19,7 @@ class ImageDQN(nn.Module):
             param.requires_grad = False
 
         self.dqn = nn.Sequential(
-            nn.Linear(2048 + num_history * num_actions, 1024),
+            nn.Linear(backbone_model.fc.in_features + num_history * num_actions, 1024),
             nn.ReLU(),
             nn.Linear(1024, 1024),
             nn.ReLU(),
@@ -36,7 +36,7 @@ class ImageDQN(nn.Module):
             images = images.permute([0, 3, 1, 2])
         histories = torch.reshape(histories, (-1, self.num_actions * self.num_history))
 
-        features = self.feature_extractor(images).reshape(-1, 2048)
+        features = self.feature_extractor(images).reshape(-1, self.dqn[0].in_features - self.num_actions * self.num_history)
         states = torch.cat((features, histories), dim=1)
 
         return self.dqn(states)
