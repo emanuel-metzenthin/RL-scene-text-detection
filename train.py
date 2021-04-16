@@ -63,7 +63,7 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
         next_state_values[dones] = 0.0
         next_state_values = next_state_values.detach()
 
-    expected_state_action_values = torch.tensor(next_state_values * hparams.gamma + rewards, dtype=torch.float32)
+    expected_state_action_values = torch.tensor(next_state_values * hparams.training.loss.gamma + rewards, dtype=torch.float32)
 
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
@@ -87,29 +87,29 @@ def train(hparams: argparse.Namespace):
 
     env = TextLocEnv(
         dataset.images, dataset.gt,
-        playout_episode=hparams.full_playout,
+        playout_episode=hparams.env.full_playout,
         premasking=False,
-        max_steps_per_image=hparams.steps_per_image,
+        max_steps_per_image=hparams.env.steps_per_image,
         bbox_scaling=0,
         bbox_transformer='base',
         ior_marker_type='cross',
         has_termination_action=False,
     )
 
-    dqn = ImageDQN(backbone=hparams.backbone, num_actions=len(env.action_set))
-    target_dqn = ImageDQN(backbone=hparams.backbone, num_actions=len(env.action_set))
+    dqn = ImageDQN(backbone=hparams.training.backbone, num_actions=len(env.action_set))
+    target_dqn = ImageDQN(backbone=hparams.training.backbone, num_actions=len(env.action_set))
 
     if torch.cuda.device_count() > 1:
         dqn = nn.DataParallel(dqn)
         target_dqn = nn.DataParallel(target_dqn)
 
-    if hparams.checkpoint:
-        dqn, target_dqn = load_model_from_checkpoint(hparams.checkpoint, dqn, target_dqn)
+    if hparams.training.checkpoint:
+        dqn, target_dqn = load_model_from_checkpoint(hparams.training.checkpoint, dqn, target_dqn)
 
     dqn.to(device)
     target_dqn.eval()
     target_dqn.to(device)
-    optimizer = configure_optimizers(dqn, hparams.lr)
+    optimizer = configure_optimizers(dqn, hparams.training.lr)
 
     agent = Agent(env)
     populate(agent, dqn)
@@ -119,15 +119,15 @@ def train(hparams: argparse.Namespace):
     running_reward = deque(maxlen=10)
     mean_reward = 0
 
-    for current_epoch in range(hparams.epochs):
+    for current_epoch in range(hparams.training.epochs):
         # TODO run whole image dataset per epoch or predefined num. of steps
         render = True
-        with tqdm(range(hparams.steps_per_epoch), unit='step') as tepoch:
+        with tqdm(range(hparams.env.steps_per_epoch), unit='step') as tepoch:
             for current_step in tepoch:
                 tepoch.set_description(f"Epoch {current_epoch}")
 
-                epsilon = max(hparams.eps_end, hparams.eps_start -
-                              current_episode / hparams.eps_last_episode)
+                epsilon = max(hparams.env.epsilon.end, hparams.env.epsilon.start -
+                              current_episode / hparams.env.epsilon.last_episode)
                 reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=render)
 
                 if done:
@@ -136,9 +136,9 @@ def train(hparams: argparse.Namespace):
                     mean_reward = np.mean(running_reward)
                     render = False
 
-                if current_step % hparams.update_every == 0:
+                if current_step % hparams.training.update_interval == 0:
                     training_step += 1
-                    experience_batch = agent.replay_buffer.sample(hparams.batch_size)
+                    experience_batch = agent.replay_buffer.sample(hparams.training.batch_size)
 
                     loss = dqn_mse_loss(experience_batch, dqn ,target_dqn, hparams, device)
                     optimizer.zero_grad()
@@ -150,7 +150,7 @@ def train(hparams: argparse.Namespace):
                     neptune.log_metric('mean_episode_reward', mean_reward)
                     neptune.log_metric('epsilon', epsilon)
 
-                    if training_step % hparams.sync_rate == 0:
+                    if training_step % hparams.training.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
 
         if current_epoch > 0 and current_epoch % 10 == 0:
@@ -158,4 +158,4 @@ def train(hparams: argparse.Namespace):
             neptune.log_metric('avg_iou', avg_iou)
 
         # TODO also save epoch etc., log model to neptune
-        save_model(target_dqn, f'{hparams.run_name}_epoch{current_epoch}_loss{loss}.pt')
+        save_model(target_dqn, f'{hparams.neptune.run_name}_epoch{current_epoch}_loss{loss}.pt')

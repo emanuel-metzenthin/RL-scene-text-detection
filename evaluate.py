@@ -16,7 +16,7 @@ def evaluate(hparams, agent, dqn, device='cpu'):
 
     test_env = TextLocEnv(
         test_dataset.images, test_dataset.gt,
-        playout_episode=hparams.full_playout,
+        playout_episode=hparams.env.full_playout,
         premasking=False,
         max_steps_per_image=200,
         bbox_scaling=0,

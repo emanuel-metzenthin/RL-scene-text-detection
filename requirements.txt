@@ -3,3 +3,4 @@ typing-extensions==3.7.4.3
 pytorch-lightning
 torchvision
 neptune-client
+hydra-core

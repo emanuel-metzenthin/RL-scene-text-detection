@@ -1,0 +1,46 @@
+hydra:
+  run:
+    dir: .
+  output_subdir: null
+
+hydra/job_logging: disabled
+hydra/hydra_logging: disabled
+
+neptune:
+  offline: true
+  key: "secret"
+  run_name: "experiment"
+
+training:
+  batch_size: 16
+  lr: 0.0001
+  epochs: 50
+  backbone: "resnet18"
+  checkpoint: null
+
+  sync_rate: 100
+  update_interval: 50
+
+  loss:
+    gamma: 0.99
+
+valdation:
+  every: 10
+
+env:
+  steps_per_image: 200
+  steps_per_epoch: 1000
+
+  replay_buffer:
+    size: 1000
+    warm_up_steps: 1000
+
+  epsilon:
+    start: 1
+    end: 0.01
+    last_episode: 500
+
+  reward:
+    max: 200
+
+  full_playout: True
