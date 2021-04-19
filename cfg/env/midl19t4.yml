@@ -13,7 +13,7 @@ epsilon:
 
 max_reward: 200
 
-full_playout: true
+full_playout: false
 
 premasking: true
 
