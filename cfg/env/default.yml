@@ -12,4 +12,8 @@ epsilon:
 
 max_reward: 200
 
-full_playout: True
+full_playout: False
+
+premasking: False
+
+termination: False

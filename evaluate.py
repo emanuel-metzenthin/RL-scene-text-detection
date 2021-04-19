@@ -2,7 +2,8 @@ import numpy as np
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
 
-from ICDAR_dataset import ICDARDataset
+from dataset.ICDAR_dataset import ICDARDataset
+from agent import Agent
 
 test_dataset = ICDARDataset(path='../data/ICDAR2013', split='test')
 
@@ -11,20 +12,21 @@ def f_score(precision, recall):
     return 2 * precision * recall / (precision + recall)
 
 
-def evaluate(hparams, agent, dqn, device='cpu'):
+def evaluate(hparams, dqn, device='cpu'):
     avg_iou = 0
 
     test_env = TextLocEnv(
         test_dataset.images, test_dataset.gt,
         playout_episode=hparams.env.full_playout,
-        premasking=False,
+        premasking=hparams.env.premasking,
         max_steps_per_image=200,
         bbox_scaling=0,
         bbox_transformer='base',
         ior_marker_type='cross',
-        has_termination_action=False,
+        has_termination_action=hparams.env.termination,
         mode='test'
     )
+    agent = Agent(test_env)
     num_images = len(test_dataset.images)
 
     tqdm.write('Evaluating...')

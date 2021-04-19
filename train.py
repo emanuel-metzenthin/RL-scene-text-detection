@@ -1,20 +1,18 @@
 import argparse
 import os
 from collections import deque
-from typing import Text, List, Tuple, Any
+from typing import Text, Tuple
 
 import neptune
 import numpy as np
-import pytorch_lightning as pl
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
-from torchvision.transforms import Resize
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
 
 from DQN import ImageDQN
-from ICDAR_dataset import ICDARDataset
+from dataset.ICDAR_dataset import ICDARDataset
+from SignDataset import SignDataset
 from agent import Agent
 from evaluate import evaluate
 
@@ -75,25 +73,40 @@ def load_model_from_checkpoint(checkpoint, dqn, target_dqn):
     return dqn, target_dqn
 
 
-def save_model(target_dqn, file_name):
+def save_model(target_dqn, file_name, *kwargs):
     if not os.path.exists('./checkpoints'):
         os.makedirs('./checkpoints')
-    torch.save(target_dqn.state_dict(), './checkpoints/' + file_name)
+
+    save_dict = {
+        "state_dict": target_dqn.state_dict(),
+        **kwargs
+    }
+    torch.save(save_dict, './checkpoints/' + file_name)
+    neptune.log_artifact('./checkpoints/' + file_name)
+
+
+def load_dataset(dataset, split: Text = 'train'):
+    if dataset == "icdar2013":
+        return ICDARDataset(path='../data/ICDAR2013', split=split)
+    elif dataset == "sign":
+        return SignDataset(path='../data/600_3_signs_3_words', split=split)
+    else:
+        raise Exception(f"Dataset name {dataset} not supported.")
 
 
 def train(hparams: argparse.Namespace):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    dataset = ICDARDataset(path='../data/ICDAR2013')
+    dataset = load_dataset(hparams.dataset)
 
     env = TextLocEnv(
         dataset.images, dataset.gt,
         playout_episode=hparams.env.full_playout,
-        premasking=False,
+        premasking=hparams.env.premasking,
         max_steps_per_image=hparams.env.steps_per_image,
         bbox_scaling=0,
         bbox_transformer='base',
         ior_marker_type='cross',
-        has_termination_action=False,
+        has_termination_action=hparams.env.termination,
     )
 
     dqn = ImageDQN(backbone=hparams.training.backbone, num_actions=len(env.action_set))
@@ -116,8 +129,9 @@ def train(hparams: argparse.Namespace):
 
     current_episode = 0
     training_step = 0
-    running_reward = deque(maxlen=10)
+    running_reward = deque(maxlen=100)
     mean_reward = 0
+    last_mean_reward = 0
 
     for current_epoch in range(hparams.training.epochs):
         # TODO run whole image dataset per epoch or predefined num. of steps
@@ -133,6 +147,7 @@ def train(hparams: argparse.Namespace):
                 if done:
                     current_episode += 1
                     running_reward.append(reward)
+                    last_mean_reward = mean_reward
                     mean_reward = np.mean(running_reward)
                     render = False
 
@@ -153,9 +168,12 @@ def train(hparams: argparse.Namespace):
                     if training_step % hparams.training.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
 
-        if current_epoch > 0 and current_epoch % hparams.evaluate_every == 0:
+        if current_epoch > 0 and current_epoch % hparams.validation.every == 0:
             avg_iou = evaluate(hparams, agent, target_dqn, device)
             neptune.log_metric('avg_iou', avg_iou)
 
         # TODO also save epoch etc., log model to neptune
-        save_model(target_dqn, f'{hparams.neptune.run_name}_epoch{current_epoch}_loss{loss}.pt')
+        if mean_reward > last_mean_reward:
+            file_name = f'{hparams.neptune.run_name}_best.pt'
+            save_model(target_dqn, file_name,
+                       mean_reward=mean_reward, loss=loss, current_epoch=current_epoch, epsilon=epsilon)
