@@ -129,7 +129,7 @@ def train(hparams: argparse.Namespace):
 
     current_episode = 0
     training_step = 0
-    running_reward = deque(maxlen=100)
+    running_reward = deque(maxlen=500)
     mean_reward = 0
     last_mean_reward = 0
 
