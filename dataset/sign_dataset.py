@@ -10,6 +10,8 @@ class SignDataset(Dataset):
         gt_json = json.loads(gt_file.read())
 
         self.images = []
+        self.gt = []
+
         for entry in gt_json:
             self.images.append(entry['file_name'])
             self.gt.append(entry['bounding_boxes'])
