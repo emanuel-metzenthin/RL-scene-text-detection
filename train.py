@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 from DQN import ImageDQN
 from dataset.ICDAR_dataset import ICDARDataset
-from SignDataset import SignDataset
+from dataset.sign_dataset import SignDataset
 from agent import Agent
 from evaluate import evaluate
 

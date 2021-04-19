@@ -3,7 +3,7 @@ steps_per_epoch: 60000
 
 replay_buffer:
   size: 20000
-  warm_up_steps: 100
+  warm_up_steps: 300
 
 epsilon:
   start: 1
