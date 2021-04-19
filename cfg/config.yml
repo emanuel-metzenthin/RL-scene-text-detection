@@ -7,7 +7,7 @@ hydra/job_logging: disabled
 hydra/hydra_logging: disabled
 
 defaults:
-  - env: default
+  - env: default.yml
 
 neptune:
   offline: true
