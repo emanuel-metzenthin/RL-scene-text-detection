@@ -8,7 +8,7 @@ from train import train
 def main(cfg: DictConfig):
     if not cfg.neptune.offline:
         neptune.init(api_token=cfg.neptune.key, project_qualified_name='emanuelm/scene-text-detection')
-        neptune.create_experiment(cfg.neptune.run_name, params=cfg)
+        neptune.create_experiment(cfg.neptune.run_name, params=cfg.__dict__)
 
     train(cfg)
 
