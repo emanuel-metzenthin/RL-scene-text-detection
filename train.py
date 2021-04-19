@@ -142,7 +142,7 @@ def train(hparams: argparse.Namespace):
 
                 epsilon = max(hparams.env.epsilon.end, hparams.env.epsilon.start -
                               current_episode / hparams.env.epsilon.last_episode)
-                reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=render)
+                reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=False)
 
                 if done:
                     current_episode += 1
