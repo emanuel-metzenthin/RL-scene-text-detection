@@ -160,19 +160,18 @@ def train(hparams: argparse.Namespace):
                     loss.backward()
                     optimizer.step()
 
-                    tepoch.set_postfix({'loss': loss.item(), 'mean_episode_reward': mean_reward, 'epsilon': epsilon})
-                    neptune.log_metric('loss', loss)
-                    neptune.log_metric('mean_episode_reward', mean_reward)
-                    neptune.log_metric('epsilon', epsilon)
-
                     if training_step % hparams.training.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
+
+                tepoch.set_postfix({'loss': loss.item(), 'mean_episode_reward': mean_reward, 'epsilon': epsilon})
+                neptune.log_metric('loss', loss)
+                neptune.log_metric('mean_episode_reward', mean_reward)
+                neptune.log_metric('epsilon', epsilon)
 
         if current_epoch > 0 and current_epoch % hparams.validation.every == 0:
             avg_iou = evaluate(hparams, agent, target_dqn, device)
             neptune.log_metric('avg_iou', avg_iou)
 
-        # TODO also save epoch etc., log model to neptune
         if mean_reward > last_mean_reward:
             file_name = f'{hparams.neptune.run_name}_best.pt'
             save_model(target_dqn, file_name,

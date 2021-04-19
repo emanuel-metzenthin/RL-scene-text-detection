@@ -10,7 +10,7 @@ defaults:
   - env: default.yml
 
 neptune:
-  offline: true
+  offline: false
   key: "secret"
   run_name: "experiment"
 
