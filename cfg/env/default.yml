@@ -1,0 +1,15 @@
+steps_per_image: 200
+steps_per_epoch: 1000
+
+replay_buffer:
+  size: 1000
+  warm_up_steps: 1000
+
+epsilon:
+  start: 1
+  end: 0.1
+  last_episode: 500
+
+max_reward: 200
+
+full_playout: True
