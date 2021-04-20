@@ -5,7 +5,7 @@ from tqdm import tqdm
 from dataset.ICDAR_dataset import ICDARDataset
 from agent import Agent
 
-test_dataset = ICDARDataset(path='../data/ICDAR2013', split='test')
+test_dataset = ICDARDataset(path='../../data/ICDAR2013', split='test')
 
 
 def f_score(precision, recall):
