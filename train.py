@@ -14,7 +14,7 @@ from DQN import ImageDQN
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.sign_dataset import SignDataset
 from agent import Agent
-from evaluate import evaluate
+# from evaluate import evaluate
 
 
 def configure_optimizers(dqn, lr):
@@ -168,9 +168,9 @@ def train(hparams: argparse.Namespace):
                 neptune.log_metric('mean_episode_reward', mean_reward)
                 neptune.log_metric('epsilon', epsilon)
 
-        if current_epoch > 0 and current_epoch % hparams.validation.every == 0:
-            avg_iou = evaluate(hparams, agent, target_dqn, device)
-            neptune.log_metric('avg_iou', avg_iou)
+        # if current_epoch > 0 and current_epoch % hparams.validation.every == 0:
+        #     avg_iou = evaluate(hparams, agent, target_dqn, device)
+        #     run['val/avg_iou'].log(avg_iou)
 
         if mean_reward > last_mean_reward:
             file_name = f'{hparams.neptune.run_name}_best.pt'
