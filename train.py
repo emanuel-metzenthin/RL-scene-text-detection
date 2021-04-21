@@ -49,11 +49,11 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
         loss
     """
     states, actions, rewards, dones, next_states = batch
-    states = torch.tensor(np.array(states[0]), device=device, dtype=torch.float32), torch.tensor(np.array(states[1]), device=device, dtype=torch.float32)
-    actions = torch.tensor(actions, device=device, dtype=torch.float32)
-    rewards = torch.tensor(rewards, device=device, dtype=torch.float32)
+    states = torch.from_numpy(np.array(states[0])).to(device), torch.from_numpy(np.array(states[1])).to(device)
+    actions = torch.from_numpy(np.array(actions)).to(device)
+    rewards = torch.from_numpy(np.array(rewards)).to(device)
     # np.array calls as performance fix: https://github.com/pytorch/pytorch/issues/13918
-    next_states = torch.tensor(np.array(next_states[0]), device=device, dtype=torch.float32), torch.tensor(np.array(next_states[1]), device=device, dtype=torch.float32)
+    next_states = torch.from_numpy(np.array(next_states[0])).to(device), torch.from_numpy(np.array(next_states[1])).to(device)
 
     state_action_values = dqn(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
 
