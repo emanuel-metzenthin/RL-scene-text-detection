@@ -1,16 +1,17 @@
 import argparse
 import os
 from collections import deque
-from typing import Text, Tuple
+from typing import Text, Tuple, Dict
 
-import neptune
 import numpy as np
 import torch
-from torch import nn
 from text_localization_environment import TextLocEnv
+from torch import nn
+from torch.cuda.amp import GradScaler, autocast
 from tqdm import tqdm
 
 from DQN import ImageDQN
+from agent import Agent
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.sign_dataset import SignDataset
 from agent import Agent
@@ -97,6 +98,7 @@ def load_dataset(dataset, split: Text = 'train'):
 
 def train(hparams: argparse.Namespace):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    scaler = GradScaler()
     dataset = load_dataset(hparams.dataset)
 
     env = TextLocEnv(
@@ -156,10 +158,12 @@ def train(hparams: argparse.Namespace):
                     training_step += 1
                     experience_batch = agent.replay_buffer.sample(hparams.training.batch_size)
 
-                    loss = dqn_mse_loss(experience_batch, dqn ,target_dqn, hparams, device)
                     optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
+                    with autocast():
+                        loss = dqn_mse_loss(experience_batch, dqn, target_dqn, hparams, device)
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
 
                     if training_step % hparams.training.sync_rate == 0:
                         target_dqn.load_state_dict(dqn.state_dict())
