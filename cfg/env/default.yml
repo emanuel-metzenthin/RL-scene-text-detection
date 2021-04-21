@@ -18,3 +18,5 @@ full_playout: false
 premasking: false
 
 termination: false
+
+intermediate_reward: false

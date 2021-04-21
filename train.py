@@ -9,12 +9,13 @@ from text_localization_environment import TextLocEnv
 from torch import nn
 from torch.cuda.amp import GradScaler, autocast
 from tqdm import tqdm
-
+import neptune
 from DQN import ImageDQN
 from agent import Agent
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.sign_dataset import SignDataset
-from agent import Agent
+
+
 # from evaluate import evaluate
 
 
@@ -39,7 +40,6 @@ def populate(agent, dqn, steps: int = 1000, device='cpu') -> None:
 
 def get_device(self, batch) -> str:
     return batch[0][0].device.index if self.on_gpu else 'cpu'
-
 
 def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, target_dqn: nn.Module, hparams, device: Text) -> torch.Tensor:
     """
@@ -75,7 +75,7 @@ def load_model_from_checkpoint(checkpoint, dqn, target_dqn):
     return dqn, target_dqn
 
 
-def save_model(target_dqn, file_name, *kwargs):
+def save_model(target_dqn, file_name, run, **kwargs):
     if not os.path.exists('./checkpoints'):
         os.makedirs('./checkpoints')
 
@@ -84,7 +84,7 @@ def save_model(target_dqn, file_name, *kwargs):
         **kwargs
     }
     torch.save(save_dict, './checkpoints/' + file_name)
-    neptune.log_artifact('./checkpoints/' + file_name)
+    run['model_checkpoint'].upload('./checkpoints/' + file_name)
 
 
 def load_dataset(dataset, split: Text = 'train'):
@@ -96,7 +96,7 @@ def load_dataset(dataset, split: Text = 'train'):
         raise Exception(f"Dataset name {dataset} not supported.")
 
 
-def train(hparams: argparse.Namespace):
+def train(hparams: argparse.Namespace, run: Dict):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     scaler = GradScaler()
     dataset = load_dataset(hparams.dataset)
@@ -110,6 +110,7 @@ def train(hparams: argparse.Namespace):
         bbox_transformer='base',
         ior_marker_type='cross',
         has_termination_action=hparams.env.termination,
+        has_intermediate_reward=hparams.env.intermediate_reward
     )
 
     dqn = ImageDQN(backbone=hparams.training.backbone, num_actions=len(env.action_set))
@@ -133,6 +134,7 @@ def train(hparams: argparse.Namespace):
     current_episode = 0
     training_step = 0
     running_reward = deque(maxlen=10)
+    episode_rewards = []
     mean_reward = 0
     last_mean_reward = 0
 
@@ -147,9 +149,12 @@ def train(hparams: argparse.Namespace):
                               training_step / hparams.env.epsilon.decay_steps)
                 reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=False)
 
+                episode_rewards.append(reward)
                 if done:
                     current_episode += 1
-                    running_reward.append(reward)
+                    total_reward = sum(episode_rewards)
+                    episode_rewards = []
+                    running_reward.append(total_reward)
                     last_mean_reward = mean_reward
                     mean_reward = np.mean(running_reward)
                     render = False
@@ -169,9 +174,9 @@ def train(hparams: argparse.Namespace):
                         target_dqn.load_state_dict(dqn.state_dict())
 
                 tepoch.set_postfix({'loss': loss.item(), 'mean_episode_reward': mean_reward, 'epsilon': epsilon})
-                neptune.log_metric('loss', loss)
-                neptune.log_metric('mean_episode_reward', mean_reward)
-                neptune.log_metric('epsilon', epsilon)
+                run['train/loss'].log(loss)
+                run['train/mean_episode_reward'].log(mean_reward)
+                run['train/epsilon'].log(epsilon)
 
         # if current_epoch > 0 and current_epoch % hparams.validation.every == 0:
         #     avg_iou = evaluate(hparams, agent, target_dqn, device)
@@ -179,5 +184,5 @@ def train(hparams: argparse.Namespace):
 
         if mean_reward > last_mean_reward:
             file_name = f'{hparams.neptune.run_name}_best.pt'
-            save_model(target_dqn, file_name,
+            save_model(target_dqn, file_name, run,
                        mean_reward=mean_reward, loss=loss, current_epoch=current_epoch, epsilon=epsilon)

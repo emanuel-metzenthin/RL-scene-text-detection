@@ -1,16 +1,19 @@
+import json
+
 import hydra
-import neptune
-from omegaconf import DictConfig
+import neptune.new as neptune
+from omegaconf import DictConfig, OmegaConf
 from train import train
 
 
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg: DictConfig):
+    run = None
     if not cfg.neptune.offline:
-        neptune.init(api_token=cfg.neptune.key, project_qualified_name='emanuelm/scene-text-detection')
-        neptune.create_experiment(cfg.neptune.run_name, params=cfg.__dict__)
-
-    train(cfg)
+        run = neptune.init(api_token=cfg.neptune.key, project='emanuelm/rl-scene-text-detection', name=cfg.neptune.run_name)
+        neptune_dict = json.loads(str(cfg).replace("\'", '"').replace('True', "true").replace("False", "false").replace("None", "null"))
+        run['parameters'] = neptune_dict
+    train(cfg, run)
 
 
 if __name__ == '__main__':
