@@ -144,7 +144,7 @@ def train(hparams: argparse.Namespace):
                 tepoch.set_description(f"Epoch {current_epoch}")
 
                 epsilon = max(hparams.env.epsilon.end, hparams.env.epsilon.start -
-                              current_episode / hparams.env.epsilon.last_episode)
+                              training_step / hparams.env.epsilon.decay_steps)
                 reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=False)
 
                 if done:
