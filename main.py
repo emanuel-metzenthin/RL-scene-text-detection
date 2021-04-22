@@ -10,7 +10,7 @@ from train import train
 def main(cfg: DictConfig):
     run = None
     if not cfg.neptune.offline:
-        run = neptune.init(api_token=cfg.neptune.key, project='emanuelm/rl-scene-text-detection', name=cfg.neptune.run_name)
+        run = neptune.init(run=cfg.neptune.run_id, api_token=cfg.neptune.key, project='emanuelm/rl-scene-text-detection', name=cfg.neptune.run_name)
         neptune_dict = json.loads(str(cfg).replace("\'", '"').replace('True', "true").replace("False", "false").replace("None", "null"))
         run['parameters'] = neptune_dict
     train(cfg, run)

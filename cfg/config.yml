@@ -13,6 +13,7 @@ neptune:
   offline: false
   key: "secret"
   run_name: "experiment"
+  run_id: null
 
 training:
   batch_size: 16
