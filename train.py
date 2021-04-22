@@ -41,7 +41,8 @@ def populate(agent, dqn, steps: int = 1000, device='cpu') -> None:
 def get_device(self, batch) -> str:
     return batch[0][0].device.index if self.on_gpu else 'cpu'
 
-def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, target_dqn: nn.Module, hparams, device: Text) -> torch.Tensor:
+
+def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, target_dqn: nn.Module, hparams, device: Text, use_mse=False) -> torch.Tensor:
     """
     Calculates the mse loss using a mini batch from the replay buffer
     Args:
@@ -65,7 +66,10 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
 
     expected_state_action_values = torch.tensor(next_state_values * hparams.training.loss.gamma + rewards, dtype=torch.float32)
 
-    return nn.MSELoss()(state_action_values, expected_state_action_values)
+    if use_mse:
+        return nn.MSELoss()(state_action_values, expected_state_action_values)
+    else:
+        return nn.SmoothL1Loss()(state_action_values, expected_state_action_values)
 
 
 def load_model_from_checkpoint(checkpoint, dqn, target_dqn):
