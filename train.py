@@ -133,6 +133,7 @@ def train(hparams: argparse.Namespace, run: Dict):
 
     current_episode = 0
     training_step = 0
+    total_steps = 0
     running_reward = deque(maxlen=10)
     episode_rewards = []
     mean_reward = 0
@@ -144,9 +145,9 @@ def train(hparams: argparse.Namespace, run: Dict):
         with tqdm(range(hparams.env.steps_per_epoch), unit='step') as tepoch:
             for current_step in tepoch:
                 tepoch.set_description(f"Epoch {current_epoch}")
-
+                total_steps += 1
                 epsilon = max(hparams.env.epsilon.end, hparams.env.epsilon.start -
-                              training_step / hparams.env.epsilon.decay_steps)
+                              total_steps / hparams.env.epsilon.decay_steps)
                 reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=False)
 
                 episode_rewards.append(reward)
