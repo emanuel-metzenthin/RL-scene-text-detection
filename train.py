@@ -73,10 +73,11 @@ def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, targe
 
 
 def load_model_from_checkpoint(checkpoint, dqn, target_dqn):
-    dqn.load_state_dict(torch.load(checkpoint))
-    target_dqn.load_state_dict(torch.load(checkpoint))
+    checkpoint_dict = torch.load(checkpoint)
+    dqn.load_state_dict(checkpoint_dict['state_dict'])
+    target_dqn.load_state_dict(checkpoint_dict['state_dict'])
 
-    return dqn, target_dqn
+    return dqn, target_dqn, checkpoint_dict
 
 
 def save_model(target_dqn, file_name, run, **kwargs):
@@ -105,6 +106,14 @@ def train(hparams: argparse.Namespace, run: Dict):
     scaler = GradScaler()
     dataset = load_dataset(hparams.dataset)
 
+    current_episode = 0
+    training_step = 0
+    total_steps = 0
+    running_reward = deque(maxlen=10)
+    episode_rewards = []
+    mean_reward = 0
+    last_mean_reward = 0
+
     env = TextLocEnv(
         dataset.images, dataset.gt,
         playout_episode=hparams.env.full_playout,
@@ -125,7 +134,10 @@ def train(hparams: argparse.Namespace, run: Dict):
         target_dqn = nn.DataParallel(target_dqn)
 
     if hparams.training.checkpoint:
-        dqn, target_dqn = load_model_from_checkpoint(hparams.training.checkpoint, dqn, target_dqn)
+        dqn, target_dqn, checkpoint_dict = load_model_from_checkpoint(hparams.training.checkpoint, dqn, target_dqn)
+        current_episode = checkpoint_dict['current_epoch']
+        mean_reward = checkpoint_dict['mean_reward']
+        hparams.env.epsilon.start = checkpoint_dict['epsilon']
 
     dqn.to(device)
     target_dqn.eval()
@@ -134,14 +146,6 @@ def train(hparams: argparse.Namespace, run: Dict):
 
     agent = Agent(env)
     populate(agent, dqn)
-
-    current_episode = 0
-    training_step = 0
-    total_steps = 0
-    running_reward = deque(maxlen=10)
-    episode_rewards = []
-    mean_reward = 0
-    last_mean_reward = 0
 
     for current_epoch in range(hparams.training.epochs):
         # TODO run whole image dataset per epoch or predefined num. of steps
