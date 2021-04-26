@@ -1,47 +1,61 @@
+import os
+import time
+
 import numpy as np
+import torch
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
 
+from DQN import ImageDQN
 from dataset.ICDAR_dataset import ICDARDataset
 from agent import Agent
+from dataset.sign_dataset import SignDataset
 
-test_dataset = ICDARDataset(path='../data/ICDAR2013', split='test')
-
-
-def f_score(precision, recall):
-    return 2 * precision * recall / (precision + recall)
+test_dataset = SignDataset(path='../data/600_3_signs_3_words', split='validation')
 
 
-def evaluate(hparams, dqn, device='cpu'):
+def evaluate(dqn, env, device='cpu'):
     avg_iou = 0
 
+    agent = Agent(env)
+    num_images = len(test_dataset.images)
+
+    with tqdm(range(num_images)) as timages:
+        for image_idx in timages:
+            if not os.path.exists('./results'):
+                os.makedirs('./results')
+            test_file = open(f'./results/res_img_{image_idx}.txt', 'w+')
+            agent.reset(image_index=image_idx)
+            done = False
+
+            while not done:
+                _, done = agent.play_step(dqn, device=device)
+                # env.render(mode='interactive')
+                # time.sleep(0.1)
+
+            for bbox in env.episode_pred_bboxes:
+                test_file.write(f"{','.join(map(str, bbox))}\n")
+
+            test_file.close()
+
+    return avg_iou / num_images
+
+
+if __name__ == '__main__':
     test_env = TextLocEnv(
         test_dataset.images, test_dataset.gt,
-        playout_episode=hparams.env.full_playout,
-        premasking=hparams.env.premasking,
+        playout_episode=True,
+        premasking=False,
         max_steps_per_image=200,
         bbox_scaling=0,
         bbox_transformer='base',
         ior_marker_type='cross',
-        has_termination_action=hparams.env.termination,
+        has_termination_action=False,
         mode='test'
     )
-    agent = Agent(test_env)
-    num_images = len(test_dataset.images)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    dqn = ImageDQN(num_actions=len(test_env.action_set)).to(device)
+    checkpoint = torch.load('./checkpoints/sign_intermediate_best.pt', map_location=device)
+    dqn.load_state_dict(checkpoint['state_dict'])
 
-    tqdm.write('Evaluating...')
-    with tqdm(range(num_images)) as timages:
-        for image_idx in timages:
-            test_env.reset(image_index=image_idx)
-            done = False
-
-            while not done:
-                action = agent.choose_action(dqn, 0, device=device)
-                state, reward, done, _ = test_env.step(action)
-
-            if len(test_env.episode_trigger_ious) > 0:
-                avg_iou += np.mean(test_env.episode_trigger_ious)
-
-            timages.set_postfix({'avg_iou': avg_iou / num_images})
-
-    return avg_iou / num_images
+    evaluate(dqn, test_env, device)
