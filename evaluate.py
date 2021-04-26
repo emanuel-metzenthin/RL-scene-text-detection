@@ -29,7 +29,10 @@ def evaluate(dqn, env, device='cpu'):
             done = False
 
             while not done:
-                _, done = agent.play_step(dqn, device=device)
+                action = agent.choose_action(dqn, 0, device)
+                # do step in the environment
+                new_state, _, done, _ = env.step(action)
+                agent.state = new_state
                 # env.render(mode='interactive')
                 # time.sleep(0.1)
 

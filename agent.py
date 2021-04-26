@@ -30,9 +30,9 @@ class Agent:
 
         return action
 
-    def reset(self, image_idx=None) -> None:
+    def reset(self, image_index=None) -> None:
         """ Resents the environment and updates the state"""
-        self.state = self.env.reset(image_idx)
+        self.state = self.env.reset(image_index)
 
     def play_step(self, dqn: nn.Module, epsilon=0.0, device: Text='cpu', render_on_trigger=False):
         action = self.choose_action(dqn, epsilon, device)
