@@ -37,7 +37,7 @@ def evaluate(dqn, env, device='cpu'):
                 # time.sleep(0.1)
 
             for bbox in env.episode_pred_bboxes:
-                test_file.write(f"{','.join(map(str, bbox))}\n")
+                test_file.write(f"{','.join(map(str, map(int, bbox)))}\n")
 
             test_file.close()
 
@@ -62,3 +62,21 @@ if __name__ == '__main__':
     dqn.load_state_dict(checkpoint['state_dict'])
 
     evaluate(dqn, test_env, device)
+
+    # ious = []
+    # for i in range(1000):
+    #     gt = []
+    #     for line in open(f'sign_gt/gt_img_{i}.txt').readlines():
+    #         gt.append(list(map(int, line.split(',')[:4])))
+    #
+    #     res = []
+    #     for line in open(f'sign_res/res_img_{i}.txt').readlines():
+    #         res.append(list(map(int, line.split(',')[:4])))
+    #
+    #     test_env.episode_true_bboxes = gt
+    #     for b in res:
+    #         print('..')
+    #         test_env.bbox = b
+    #         ious.append(test_env.compute_best_iou())
+    # print(ious)
+    # print(np.mean(ious))
