@@ -144,8 +144,8 @@ def train(hparams: argparse.Namespace, run: Dict):
     target_dqn.to(device)
     optimizer = configure_optimizers(dqn, hparams.training.lr)
 
-    agent = Agent(env)
-    populate(agent, dqn)
+    agent = Agent(env, hparams.env.replay_buffer.size)
+    populate(agent, dqn, steps=hparams.env.replay_buffer.warm_up_steps)
 
     for current_epoch in range(hparams.training.epochs):
         # TODO run whole image dataset per epoch or predefined num. of steps

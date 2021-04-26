@@ -10,9 +10,9 @@ from replay_buffer import Experience, ReplayBuffer
 
 
 class Agent:
-    def __init__(self, env):
+    def __init__(self, env, buffer_capacity=1_000):
         self.env = env
-        self.replay_buffer = ReplayBuffer(1_000)
+        self.replay_buffer = ReplayBuffer(buffer_capacity)
         self.total_reward = 0
         self.reset()
 
@@ -30,9 +30,9 @@ class Agent:
 
         return action
 
-    def reset(self) -> None:
+    def reset(self, image_idx=None) -> None:
         """ Resents the environment and updates the state"""
-        self.state = self.env.reset()
+        self.state = self.env.reset(image_idx)
 
     def play_step(self, dqn: nn.Module, epsilon=0.0, device: Text='cpu', render_on_trigger=False):
         action = self.choose_action(dqn, epsilon, device)
