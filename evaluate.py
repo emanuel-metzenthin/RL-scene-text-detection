@@ -18,7 +18,7 @@ def evaluate(dqn, env, device='cpu'):
     avg_iou = 0
 
     agent = Agent(env)
-    num_images = len(test_dataset.images)
+    num_images = 1000 # len(test_dataset.images)
 
     with tqdm(range(num_images)) as timages:
         for image_idx in timages:
