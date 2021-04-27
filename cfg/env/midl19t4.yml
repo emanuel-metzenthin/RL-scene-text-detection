@@ -1,6 +1,6 @@
 # @package _group_
 steps_per_image: 100
-steps_per_epoch: 60000
+steps_per_epoch: 6000
 
 replay_buffer:
   size: 20000
