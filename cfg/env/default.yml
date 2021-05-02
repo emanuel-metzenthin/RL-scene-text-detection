@@ -20,3 +20,5 @@ premasking: false
 termination: false
 
 intermediate_reward: false
+
+upper_confidence_bound: false

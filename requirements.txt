@@ -4,3 +4,5 @@ pytorch-lightning
 torchvision
 neptune-client
 hydra-core
+line-profiler-pycharm
+ray

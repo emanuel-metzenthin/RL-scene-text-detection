@@ -5,18 +5,20 @@ from typing import Text, Tuple, Dict
 
 import numpy as np
 import torch
+from neptune.new.types import File
 from text_localization_environment import TextLocEnv
 from torch import nn
 from torch.cuda.amp import GradScaler, autocast
 from tqdm import tqdm
 import neptune
 from DQN import ImageDQN
-from agent import Agent
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.sign_dataset import SignDataset
+import plotly.express as px
 
 
 # from evaluate import evaluate
+from dataset.simple_dataset import SimpleDataset
 
 
 def configure_optimizers(dqn, lr):
@@ -42,34 +44,7 @@ def get_device(self, batch) -> str:
     return batch[0][0].device.index if self.on_gpu else 'cpu'
 
 
-def dqn_mse_loss(batch: Tuple[torch.Tensor, torch.Tensor], dqn: nn.Module, target_dqn: nn.Module, hparams, device: Text, use_mse=False) -> torch.Tensor:
-    """
-    Calculates the mse loss using a mini batch from the replay buffer
-    Args:
-        batch: current mini batch of replay data
-    Returns:
-        loss
-    """
-    states, actions, rewards, dones, next_states = batch
-    states = torch.from_numpy(np.array(states[0])).to(device), torch.from_numpy(np.array(states[1])).to(device)
-    actions = torch.from_numpy(np.array(actions)).to(device)
-    rewards = torch.from_numpy(np.array(rewards)).to(device)
-    # np.array calls as performance fix: https://github.com/pytorch/pytorch/issues/13918
-    next_states = torch.from_numpy(np.array(next_states[0])).to(device), torch.from_numpy(np.array(next_states[1])).to(device)
 
-    state_action_values = dqn(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
-
-    with torch.no_grad():
-        next_state_values = target_dqn(next_states).max(1)[0]
-        next_state_values[dones] = 0.0
-        next_state_values = next_state_values.detach()
-
-    expected_state_action_values = torch.tensor(next_state_values * hparams.training.loss.gamma + rewards, dtype=torch.float32)
-
-    if use_mse:
-        return nn.MSELoss()(state_action_values, expected_state_action_values)
-    else:
-        return nn.SmoothL1Loss()(state_action_values, expected_state_action_values)
 
 
 def load_model_from_checkpoint(checkpoint, dqn, target_dqn):
@@ -89,16 +64,8 @@ def save_model(target_dqn, file_name, run, **kwargs):
         **kwargs
     }
     torch.save(save_dict, './checkpoints/' + file_name)
-    run['model_checkpoint'].upload('./checkpoints/' + file_name)
-
-
-def load_dataset(dataset, split: Text = 'train'):
-    if dataset == "icdar2013":
-        return ICDARDataset(path='../data/ICDAR2013', split=split)
-    elif dataset == "sign":
-        return SignDataset(path='../data/600_3_signs_3_words', split=split)
-    else:
-        raise Exception(f"Dataset name {dataset} not supported.")
+    if run:
+        run['model_checkpoint'].upload('./checkpoints/' + file_name)
 
 
 def train(hparams: argparse.Namespace, run: Dict):
@@ -156,7 +123,8 @@ def train(hparams: argparse.Namespace, run: Dict):
                 total_steps += 1
                 epsilon = max(hparams.env.epsilon.end, hparams.env.epsilon.start -
                               total_steps / hparams.env.epsilon.decay_steps)
-                reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=False)
+                reward, done = agent.play_step(dqn, epsilon, device=device, render_on_trigger=False,
+                                               upper_confidence_bound=hparams.env.upper_confidence_bound, time_step=total_steps)
 
                 episode_rewards.append(reward)
                 if done:
@@ -183,9 +151,10 @@ def train(hparams: argparse.Namespace, run: Dict):
                         target_dqn.load_state_dict(dqn.state_dict())
 
                 tepoch.set_postfix({'loss': loss.item(), 'mean_episode_reward': mean_reward, 'epsilon': epsilon})
-                run['train/loss'].log(loss)
-                run['train/mean_episode_reward'].log(mean_reward)
-                run['train/epsilon'].log(epsilon)
+                if run:
+                    run['train/loss'].log(loss)
+                    run['train/mean_episode_reward'].log(mean_reward)
+                    run['train/epsilon'].log(epsilon)
 
         # if current_epoch > 0 and current_epoch % hparams.validation.every == 0:
         #     avg_iou = evaluate(hparams, agent, target_dqn, device)
@@ -195,3 +164,7 @@ def train(hparams: argparse.Namespace, run: Dict):
             file_name = f'{hparams.neptune.run_name}_best.pt'
             save_model(target_dqn, file_name, run,
                        mean_reward=mean_reward, loss=loss, current_epoch=current_epoch, epsilon=epsilon)
+
+        if run:
+            action_barchart = px.bar(x=range(env.action_space.n), y=agent.action_freq.detach())
+            run['visuals/action_frequency'].upload(File.as_html(action_barchart))

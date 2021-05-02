@@ -9,6 +9,11 @@ hydra/hydra_logging: disabled
 defaults:
   - env: default.yml
 
+apex:
+  num_actors: 4
+  learner_device: cuda
+  publish_params_interval: 10
+
 neptune:
   offline: false
   key: "secret"
