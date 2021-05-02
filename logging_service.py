@@ -12,6 +12,4 @@ class LoggingService:
         self.run['parameters'] = neptune_dict
 
     def log(self, name, value):
-        print(name)
-        print(value)
         self.run[name].log(value)

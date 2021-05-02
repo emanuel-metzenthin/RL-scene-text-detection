@@ -74,7 +74,7 @@ class Learner:
             self.target_dqn.load_state_dict(self.dqn.state_dict())
 
         if self.logger:
-            self.logger.log.remote('train/loss', loss.detach())
+            self.logger.log.remote('train/loss', loss.detach().to("cpu"))
 
         print(f"Learner: step {self.current_training_step} finished")
 
