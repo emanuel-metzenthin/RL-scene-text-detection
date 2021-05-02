@@ -23,7 +23,6 @@ class Learner:
         self.scaler = GradScaler()
         self.optimizer = self.configure_optimizers()
         self.logger = logger
-        print(f"init {torch.cuda.is_available()}")
 
     def configure_optimizers(self):
         params_to_update = []
@@ -63,7 +62,6 @@ class Learner:
             return nn.SmoothL1Loss()(state_action_values, expected_state_action_values)
 
     def training_step(self):
-        print(torch.cuda.is_available())
         self.current_training_step += 1
         self.optimizer.zero_grad()
         with autocast():
@@ -76,7 +74,7 @@ class Learner:
             self.target_dqn.load_state_dict(self.dqn.state_dict())
 
         if self.logger:
-            self.logger.log.remote('train/loss', loss)
+            self.logger.log.remote('train/loss', loss.detach())
 
         print(f"Learner: step {self.current_training_step} finished")
 
