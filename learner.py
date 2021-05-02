@@ -8,7 +8,7 @@ import numpy as np
 from torch.cuda.amp import autocast, GradScaler
 
 
-@ray.remote
+@ray.remote(num_gpus=1)
 class Learner:
     def __init__(self, dqn: nn.Module, target_dqn: nn.Module, replay_buffer_handle, param_server_handle, logger, cfg):
         self.cfg = cfg
@@ -23,6 +23,7 @@ class Learner:
         self.scaler = GradScaler()
         self.optimizer = self.configure_optimizers()
         self.logger = logger
+        print(f"init {torch.cuda.is_available()}")
 
     def configure_optimizers(self):
         params_to_update = []
@@ -62,6 +63,7 @@ class Learner:
             return nn.SmoothL1Loss()(state_action_values, expected_state_action_values)
 
     def training_step(self):
+        print(torch.cuda.is_available())
         self.current_training_step += 1
         self.optimizer.zero_grad()
         with autocast():
