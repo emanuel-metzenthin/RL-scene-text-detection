@@ -35,6 +35,7 @@ def main(cfg: DictConfig):
 
     ray.wait([worker.run.remote() for worker in all_workers])
 
+
 if __name__ == '__main__':
     ray.init()
     main()
