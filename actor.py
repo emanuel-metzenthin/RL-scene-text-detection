@@ -100,12 +100,10 @@ class Actor:
         params_ref = ray.get(self.param_server.get_current_parameters.remote())
         print(f"received parrams {params_ref}")
         if params_ref:
-            new_params_dqn = ray.get(params_ref)
+            new_state_dict = ray.get(params_ref)
             # print(f"Actor {self.actor_id}: received new params")
 
-            for param, new_param in zip(self.dqn.parameters(), new_params_dqn):
-                new_param = torch.FloatTensor(new_param).to(self.device)
-                param.data.copy_(new_param)
+            self.dqn.load_state_dict(new_state_dict)
 
     def run(self):
         while True:
