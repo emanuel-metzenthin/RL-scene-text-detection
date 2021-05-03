@@ -11,4 +11,5 @@ class ParameterServer:
         self.current_parameters = object_ref
 
     def get_current_parameters(self):
+        print(f"current params: {self.current_parameters}")
         return self.current_parameters
