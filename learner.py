@@ -1,4 +1,5 @@
 from asyncio import sleep
+from copy import deepcopy
 from typing import Tuple
 
 import ray
@@ -86,7 +87,8 @@ class Learner:
             self.current_batch = ray.get(self.replay_buffer.get_next_batch.remote())
 
     def publish_parameters(self):
-        object_ref = ray.put(self.dqn.parameters().to("cpu"))
+        dqn = deepcopy(self.dqn).cpu()
+        object_ref = ray.put(dqn.parameters())
         print("want to publish")
         self.param_server_handle.publish_parameters.remote(object_ref)
         print("have published")
