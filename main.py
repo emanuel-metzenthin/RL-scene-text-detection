@@ -26,15 +26,16 @@ def main(cfg: DictConfig):
     dqn = ImageDQN(num_actions=env.action_space.n)
     target_dqn = ImageDQN(num_actions=env.action_space.n)
 
-    ReplayBuffer.options(name="replay_buffer", lifetime="detached").remote(cfg)
-    ParameterServer.options(name="param_server", lifetime="detached").remote()
+    replay_buffer = ReplayBuffer.options(name="replay_buffer", lifetime="detached").remote(cfg)
+    param_server = ParameterServer.options(name="param_server", lifetime="detached").remote()
     learner = Learner.remote(dqn, target_dqn, logger, cfg)
     actors = [Actor.remote(deepcopy(dqn), deepcopy(target_dqn), deepcopy(env), learner, logger, cfg, i) for i in range(cfg.apex.num_actors)]
 
     all_workers = actors + [learner]
 
     ray.wait([worker.run.remote() for worker in all_workers])
-
+    print(replay_buffer)
+    print(param_server)
 
 if __name__ == '__main__':
     ray.init()
