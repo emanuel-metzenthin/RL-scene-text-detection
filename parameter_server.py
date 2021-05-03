@@ -7,7 +7,8 @@ class ParameterServer:
         self.current_parameters = None
 
     def publish_parameters(self, object_ref):
-        del self.current_parameters
+        if self.current_parameters:
+            del self.current_parameters
         self.current_parameters = object_ref
 
     def get_current_parameters(self):

@@ -98,7 +98,7 @@ class Actor:
 
     def receive_new_parameters(self):
         params = ray.get(self.param_server.get_current_parameters.remote())
-        print(f"rreceived parrams {params}")
+        print(f"received parrams {params}")
         if params:
             new_params_dqn, new_params_target_dqn = params
             # print(f"Actor {self.actor_id}: received new params")
