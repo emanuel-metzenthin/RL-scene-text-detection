@@ -12,7 +12,6 @@ class ParameterServer:
             del self.current_parameters
         print(f"published params 2")
         self.current_parameters = object_ref
-        print(f"published params 3 {self.current_parameters})")
 
     def get_current_parameters(self):
         print(f"current params: {self.current_parameters}")
