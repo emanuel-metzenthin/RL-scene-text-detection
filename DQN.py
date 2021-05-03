@@ -1,7 +1,25 @@
 import torch
-from torch import nn as nn
+from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
+from torch import nn as nn, TensorType
 from typing import *
 import torchvision.models as models
+
+
+class RLLibImageDQN(TorchModelV2, nn.Module):
+    def value_function(self) -> TensorType:
+        pass
+
+    def __init__(self, obs_space, action_space, num_outputs: int, model_config: dict, name: str):
+        TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
+                              model_config, name)
+        nn.Module.__init__(self)
+        self.model = ImageDQN(num_actions=action_space.n)
+
+    def forward(self, input_dict: Dict[str, TensorType],
+                state: List[TensorType],
+                seq_lens: TensorType) -> (TensorType, List[TensorType]):
+        print(self.model(input_dict['obs']).shape)
+        return self.model(input_dict['obs']), []
 
 
 class ImageDQN(nn.Module):
@@ -40,6 +58,8 @@ class ImageDQN(nn.Module):
         states = torch.cat((features, histories), dim=1)
 
         return self.dqn(states)
+
+
 
     @staticmethod
     def init_weights(m):
