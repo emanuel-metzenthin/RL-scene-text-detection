@@ -14,13 +14,12 @@ from replay_buffer import Experience, ReplayBuffer
 
 @ray.remote
 class Actor:
-    def __init__(self, dqn, target_dqn, env, replay_buffer_handle, learner_handle, logger, cfg, actor_id):
+    def __init__(self, dqn, target_dqn, env, learner_handle, logger, cfg, actor_id):
         self.actor_id = actor_id
         self.env = env
         self.total_reward = 0
         self.state = None
         self.local_buffer = []
-        self.remote_buffer = replay_buffer_handle
         self.action_freq = torch.from_numpy(np.zeros(self.env.action_space.n))
         self.device = torch.device("cpu")
         self.total_steps = 0
@@ -93,7 +92,7 @@ class Actor:
             self.play_step(self.dqn, epsilon=epsilon, render_on_trigger=False, upper_confidence_bound=False, time_step=None)
 
     def send_off_replay_data(self):
-        self.remote_buffer.append.remote(self.local_buffer)
+        ray.get_actor("replay_buffer").append.remote(self.local_buffer)
         # print(f"Actor {self.actor_id}: sending off replay data")
 
     def receive_new_parameters(self):
