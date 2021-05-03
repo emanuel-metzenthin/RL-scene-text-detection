@@ -28,12 +28,12 @@ def main(cfg):
     config = {
         "env": "textloc",
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-        "num_gpus": 0,
+        "num_gpus": 2,
         # "model": {
         #     "custom_model": "imagedqn",
         # },
         "lr": 1e-4,  # try different lrs
-        "num_workers": 1, #cfg.apex.num_actors,  # parallelism
+        "num_workers": 6, #cfg.apex.num_actors,  # parallelism
         "framework": "torch",
         "logger_config": {"neptune_project_name": "emanuelm/rl-scene-text-detection"}
     }
