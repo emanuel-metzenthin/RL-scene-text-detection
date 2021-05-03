@@ -86,7 +86,7 @@ class Learner:
             self.current_batch = ray.get(self.replay_buffer.get_next_batch.remote())
 
     def publish_parameters(self):
-        object_ref = ray.put((list(self.dqn.parameters().to("cpu")), list(self.target_dqn.parameters().to("cpu"))))
+        object_ref = ray.put(self.dqn.parameters().to("cpu"))
         print("want to publish")
         self.param_server_handle.publish_parameters.remote(object_ref)
         print("have published")
