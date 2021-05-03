@@ -14,7 +14,7 @@ from replay_buffer import Experience, ReplayBuffer
 
 @ray.remote
 class Actor:
-    def __init__(self, dqn, target_dqn, env, replay_buffer_handle, learner_handle, param_server_handle, logger, cfg, actor_id):
+    def __init__(self, dqn, target_dqn, env, replay_buffer_handle, learner_handle, logger, cfg, actor_id):
         self.actor_id = actor_id
         self.env = env
         self.total_reward = 0
@@ -28,7 +28,7 @@ class Actor:
         self.target_dqn = target_dqn.to(self.device)
         self.cfg = cfg
         self.learner = learner_handle
-        self.param_server = param_server_handle
+        # self.param_server = param_server_handle
         self.logger = logger
         self.last_episode_rewards = deque(maxlen=10)
         self.current_episode_reward = 0
@@ -97,7 +97,7 @@ class Actor:
         # print(f"Actor {self.actor_id}: sending off replay data")
 
     def receive_new_parameters(self):
-        params_ref = ray.get(self.param_server.get_current_parameters.remote(), timeout=0.1)
+        params_ref = ray.get(ray.get_actor("param_server").get_current_parameters.remote(), timeout=0.1)
         print(f"received parrams {params_ref}")
         if params_ref:
             new_params_dqn = ray.get(params_ref)

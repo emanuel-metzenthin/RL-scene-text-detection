@@ -27,9 +27,9 @@ def main(cfg: DictConfig):
     target_dqn = ImageDQN(num_actions=env.action_space.n)
 
     replay_buffer = ReplayBuffer.remote(cfg)
-    param_server = ParameterServer.remote()
+    param_server = ParameterServer.options(name="param_server").remote()
     learner = Learner.remote(dqn, target_dqn, replay_buffer, param_server, logger, cfg)
-    actors = [Actor.remote(deepcopy(dqn), deepcopy(target_dqn), deepcopy(env), replay_buffer, learner, param_server, logger, cfg, i) for i in range(cfg.apex.num_actors)]
+    actors = [Actor.remote(deepcopy(dqn), deepcopy(target_dqn), deepcopy(env), replay_buffer, learner, logger, cfg, i) for i in range(cfg.apex.num_actors)]
 
     all_workers = actors + [learner]
 

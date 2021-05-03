@@ -88,7 +88,7 @@ class Learner:
     def publish_parameters(self):
         object_ref = ray.put(self.dqn.parameters().to("cpu"))
         print("want to publish")
-        self.param_server_handle.publish_parameters.remote(object_ref)
+        ray.get_actor("param_server").publish_parameters.remote(object_ref)
         print("have published")
 
     def run(self):
