@@ -97,7 +97,7 @@ class Actor:
         # print(f"Actor {self.actor_id}: sending off replay data")
 
     def receive_new_parameters(self):
-        params_ref = ray.get(self.param_server.get_current_parameters.remote())
+        params_ref = ray.get(self.param_server.get_current_parameters.remote(), timeout=0.1)
         print(f"received parrams {params_ref}")
         if params_ref:
             new_params_dqn = ray.get(params_ref)
