@@ -79,16 +79,16 @@ class Learner:
         print(f"Learner: step {self.current_training_step} finished")
 
     def receive_batch(self):
-        self.current_batch = ray.get(self.replay_buffer.get_next_batch.remote())
+        self.current_batch = ray.wait([self.replay_buffer.get_next_batch.remote()])
 
         while not self.current_batch:
             sleep(1)
             self.current_batch = ray.get(self.replay_buffer.get_next_batch.remote())
 
     def publish_parameters(self):
-        # object_ref = ray.put((list(self.dqn.parameters()), list(self.target_dqn.parameters())))
+        object_ref = ray.put((list(self.dqn.parameters().to("cpu")), list(self.target_dqn.parameters().to("cpu"))))
         print("want to publish")
-        self.param_server_handle.publish_parameters.remote((list(self.dqn.parameters()), list(self.target_dqn.parameters())))
+        self.param_server_handle.publish_parameters.remote(object_ref)
         print("have published")
 
     def run(self):
