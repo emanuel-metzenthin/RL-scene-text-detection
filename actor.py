@@ -14,12 +14,13 @@ from replay_buffer import Experience, ReplayBuffer
 
 @ray.remote
 class Actor:
-    def __init__(self, dqn, target_dqn, env, learner_handle, logger, cfg, actor_id):
+    def __init__(self, dqn, target_dqn, env, replay_buffer_handle, learner_handle, param_server_handle, logger, cfg, actor_id):
         self.actor_id = actor_id
         self.env = env
         self.total_reward = 0
         self.state = None
         self.local_buffer = []
+        self.remote_buffer = replay_buffer_handle
         self.action_freq = torch.from_numpy(np.zeros(self.env.action_space.n))
         self.device = torch.device("cpu")
         self.total_steps = 0
@@ -27,7 +28,7 @@ class Actor:
         self.target_dqn = target_dqn.to(self.device)
         self.cfg = cfg
         self.learner = learner_handle
-        # self.param_server = param_server_handle
+        self.param_server = param_server_handle
         self.logger = logger
         self.last_episode_rewards = deque(maxlen=10)
         self.current_episode_reward = 0
@@ -92,11 +93,11 @@ class Actor:
             self.play_step(self.dqn, epsilon=epsilon, render_on_trigger=False, upper_confidence_bound=False, time_step=None)
 
     def send_off_replay_data(self):
-        ray.get_actor("replay_buffer").append.remote(self.local_buffer)
+        self.remote_buffer.append.remote(self.local_buffer)
         # print(f"Actor {self.actor_id}: sending off replay data")
 
     def receive_new_parameters(self):
-        params_ref = ray.get(ray.get_actor("param_server").get_current_parameters.remote(), timeout=0.1)
+        params_ref = ray.get(self.param_server.get_current_parameters.remote())
         print(f"received parrams {params_ref}")
         if params_ref:
             new_params_dqn = ray.get(params_ref)

@@ -10,11 +10,13 @@ from torch.cuda.amp import autocast, GradScaler
 
 @ray.remote(num_gpus=1)
 class Learner:
-    def __init__(self, dqn: nn.Module, target_dqn: nn.Module, logger, cfg):
+    def __init__(self, dqn: nn.Module, target_dqn: nn.Module, replay_buffer_handle, param_server_handle, logger, cfg):
         self.cfg = cfg
         self.device = torch.device(cfg.apex.learner_device)
         self.dqn = dqn.to(self.device)
         self.target_dqn = target_dqn.to(self.device)
+        self.replay_buffer = replay_buffer_handle
+        self.param_server_handle = param_server_handle
         self.current_batch = None
         self.current_training_step = 0
         self.current_params_id = None
@@ -77,11 +79,11 @@ class Learner:
         print(f"Learner: step {self.current_training_step} finished")
 
     def receive_batch(self):
-        self.current_batch = ray.get(ray.get_actor("replay_buffer").get_next_batch.remote())
+        self.current_batch = ray.get(self.replay_buffer.get_next_batch.remote())
 
         while not self.current_batch:
             sleep(1)
-            self.current_batch = ray.get(ray.get_actor("replay_buffer").get_next_batch.remote())
+            self.current_batch = ray.get(self.replay_buffer.get_next_batch.remote())
 
     def publish_parameters(self):
         object_ref = ray.put(self.dqn.parameters().to("cpu"))
