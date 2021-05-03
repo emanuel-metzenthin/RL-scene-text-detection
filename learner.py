@@ -80,7 +80,9 @@ class Learner:
         print(f"Learner: step {self.current_training_step} finished")
 
     def receive_batch(self):
-        self.current_batch = ray.get(self.replay_buffer.get_next_batch.remote())
+        batch = ray.get(self.replay_buffer.get_next_batch.remote())
+        self.current_batch = batch
+        del batch
 
         while not self.current_batch:
             sleep(1)
