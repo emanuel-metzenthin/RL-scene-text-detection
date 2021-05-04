@@ -18,7 +18,6 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
     def forward(self, input_dict: Dict[str, TensorType],
                 state: List[TensorType],
                 seq_lens: TensorType) -> (TensorType, List[TensorType]):
-        print(self.model(input_dict['obs']).shape)
         return self.model(input_dict['obs']), []
 
 
