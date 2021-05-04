@@ -1,8 +1,7 @@
-FROM pytorch/pytorch
+FROM rayproject/ray-ml:1.3.0-py38-gpu
 
-#RUN mkdir /app && chown -R $UID:$GID /app && chmod -R 700 /app
 COPY requirements.txt /app/requirements.txt
-COPY . /app/
+COPY ./text-localization-environment/ /env
 
-WORKDIR /app
-RUN pip install -r requirements.txt
+RUN pip install -e /env
+RUN pip install -r /app/requirements.txt
