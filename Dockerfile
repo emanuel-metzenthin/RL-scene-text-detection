@@ -1,6 +1,9 @@
-FROM rayproject/ray-ml:1.3.0-py38-gpu
+FROM rayproject/ray:1.3.0-py38-gpu
 
 USER root
+
+RUN apt-get update ##[edited]
+RUN apt-get install ffmpeg libsm6 libxext6  -y
 
 RUN mkdir /app
 COPY . /app
