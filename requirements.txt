@@ -1,8 +1,8 @@
-text-localization-environment==0.1.0
+-e git+https://github.com/emanuel-metzenthin/text-localization-environment.git@master#egg=text_localization_environment
 typing-extensions==3.7.4.3
 pytorch-lightning
 torchvision
 neptune-client
 hydra-core
 line-profiler-pycharm
-ray
+ray[rllib]

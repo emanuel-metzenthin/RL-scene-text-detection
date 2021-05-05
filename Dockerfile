@@ -5,5 +5,5 @@ USER root
 RUN mkdir /app
 COPY . /app
 WORKDIR /app
-RUN pip install -e text-localization-environment/
+
 RUN pip install -r requirements.txt
