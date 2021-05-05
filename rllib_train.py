@@ -34,7 +34,7 @@ def main(cfg):
         "lr": 1e-4,  # try different lrs
         "num_workers": cfg.apex.num_actors,  # parallelism
         "framework": "torch",
-        "render_env": True,
+        #"render_env": True,
         "logger_config": {"neptune_project_name": "emanuelm/rl-scene-text-detection"}
     }
 
