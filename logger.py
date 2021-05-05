@@ -1,6 +1,9 @@
-import neptune
+import json
+
+import neptune.new as neptune
 import numpy as np
 from ray import tune
+from ray.tune.utils import merge_dicts
 
 
 class NeptuneLogger(tune.logger.Logger):
@@ -26,12 +29,10 @@ class NeptuneLogger(tune.logger.Logger):
     """
 
     def _init(self):
-        logger_config = self.config.get('logger_config')
-        neptune.init(logger_config.get('neptune_project_name'))
-        self.neptune_experiment = neptune.create_experiment(
-            name=str(self.trial),  # Gets the trial name.
-            params=self.config,
-        )
+        cfg = self.config.get('logger_config')
+        self.run = neptune.init(run=cfg.neptune.run_id, api_token=cfg.neptune.key, project='emanuelm/rl-scene-text-detection', name=cfg.neptune.run_name)
+        neptune_dict = json.loads(str(cfg).replace("\'", '"').replace('True', "true").replace("False", "false").replace("None", "null"))
+        self.run['parameters'] = neptune_dict
 
     @staticmethod
     def dict_multiple_get(dict_, indices):
@@ -71,13 +72,8 @@ class NeptuneLogger(tune.logger.Logger):
             for key, value in res_.items():
                 prefixed_key = '/'.join([prefix, key])
                 if isinstance(value, float) or isinstance(value, int):
-                    self.neptune_experiment.log_metric(
-                        prefixed_key, value)
+                    self.run[prefixed_key].log(value)
                 elif (isinstance(value, np.ndarray) or
                       isinstance(value, np.number)):
-                    self.neptune_experiment.log_metric(
-                        prefixed_key, float(value))
+                    self.run[prefixed_key].log(float(value))
                 # Otherwise ignore
-
-    def close(self):
-        neptune.stop()

@@ -37,3 +37,5 @@ valdation:
   every: 500
 
 dataset: sign
+
+log_dir: /Users/Emanuel/ray_results
