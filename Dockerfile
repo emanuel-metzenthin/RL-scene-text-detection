@@ -8,5 +8,5 @@ RUN apt-get install ffmpeg libsm6 libxext6  -y
 RUN mkdir /app
 COPY . /app
 WORKDIR /app
-RUN pip install -e text-localization-environment/
+
 RUN pip install -r requirements.txt

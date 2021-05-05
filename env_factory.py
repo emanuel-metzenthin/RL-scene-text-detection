@@ -1,7 +1,6 @@
 from typing import Text
 
 from text_localization_environment import TextLocEnv
-
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.sign_dataset import SignDataset
 from dataset.simple_dataset import SimpleDataset
