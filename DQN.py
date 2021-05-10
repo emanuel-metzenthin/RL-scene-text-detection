@@ -2,6 +2,7 @@ import torch
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from torch import nn as nn, TensorType
 from typing import *
+import torch
 import torchvision.models as models
 
 
@@ -13,7 +14,8 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
         TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
                               model_config, name)
         nn.Module.__init__(self)
-        self.model = ImageDQN(num_actions=action_space.n)
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = ImageDQN(num_actions=action_space.n).to(device)
 
     def forward(self, input_dict: Dict[str, TensorType],
                 state: List[TensorType],
