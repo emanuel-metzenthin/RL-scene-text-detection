@@ -43,7 +43,7 @@ def main(cfg):
         "num_gpus_per_worker": 0.3,
         "num_envs_per_worker": 20,
         "rollout_fragment_length": 30,
-        "learning_starts": 30,
+        "learning_starts": 0,
         "framework": "torch",
         "logger_config": cfg
     }
@@ -60,10 +60,10 @@ def main(cfg):
     #     default_policy=SimpleQTFPolicy,
     #     get_policy_class=get_policy_class
     # )
-    # loggers = tune.logger.DEFAULT_LOGGERS
-    # if not cfg.neptune.offline:
-    #     loggers += (NeptuneLogger,)
-    results = tune.run(SimpleQTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop)
+    loggers = tune.logger.DEFAULT_LOGGERS
+    if not cfg.neptune.offline:
+        loggers += (NeptuneLogger,)
+    results = tune.run(SimpleQTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
 
     ray.shutdown()
 
