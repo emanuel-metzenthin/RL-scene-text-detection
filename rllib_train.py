@@ -3,7 +3,7 @@ import json
 from typing import Optional, Type
 
 import torch
-from ray.rllib.agents.dqn import SimpleQTFPolicy, ApexTrainer, SimpleQTorchPolicy
+from ray.rllib.agents.dqn import SimpleQTFPolicy, ApexTrainer, SimpleQTorchPolicy, SimpleQTrainer
 from ray.rllib.utils.typing import TrainerConfigDict
 
 from env_factory import EnvFactory
@@ -22,7 +22,7 @@ from logger import NeptuneLogger
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg):
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
-    register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg))
+    register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg.data_path, cfg))
     config = {
 
         "env": "textloc",
@@ -31,8 +31,8 @@ def main(cfg):
         "model": {
             "custom_model": "imagedqn",
         },
-        "dueling": False,
-        "double_q": False,
+        # "dueling": False,
+        # "double_q": False,
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
                 "num_replay_buffer_shards": 1,
@@ -45,7 +45,6 @@ def main(cfg):
         "rollout_fragment_length": 30,
         "learning_starts": 30,
         "framework": "torch",
-        # "render_env": True,
         "logger_config": cfg
     }
 
@@ -53,16 +52,18 @@ def main(cfg):
         "training_iteration": 1000,
     }
 
-    def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
-        return SimpleQTorchPolicy
-
-    CustomTrainer = ApexTrainer.with_updates(
-        name="SimpleQApex",
-        default_policy=SimpleQTFPolicy,
-        get_policy_class=get_policy_class
-    )
-
-    results = tune.run(CustomTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop)#, loggers=tune.logger.DEFAULT_LOGGERS + (NeptuneLogger,),)
+    # def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
+    #     return SimpleQTorchPolicy
+    #
+    # CustomTrainer = ApexTrainer.with_updates(
+    #     name="SimpleQApex",
+    #     default_policy=SimpleQTFPolicy,
+    #     get_policy_class=get_policy_class
+    # )
+    # loggers = tune.logger.DEFAULT_LOGGERS
+    # if not cfg.neptune.offline:
+    #     loggers += (NeptuneLogger,)
+    results = tune.run(SimpleQTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop)
 
     ray.shutdown()
 

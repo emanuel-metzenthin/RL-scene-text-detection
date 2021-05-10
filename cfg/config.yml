@@ -38,4 +38,6 @@ valdation:
 
 dataset: sign
 
+data_path: /data/dataset-generator
+
 log_dir: /Users/Emanuel/ray_results

@@ -8,19 +8,19 @@ from dataset.simple_dataset import SimpleDataset
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, split: Text = 'train'):
+    def load_dataset(dataset, data_path, split: Text = 'train'):
         if dataset == "icdar2013":
-            return ICDARDataset(path='../data/ICDAR2013', split=split)
+            return ICDARDataset(path=data_path, split=split)
         elif dataset == "sign":
-            return SignDataset(path='../data/600_3_signs_3_words', split=split)
+            return SignDataset(path=data_path, split=split)
         elif dataset == "simple":
-            return SimpleDataset(path='../data/dataset-generator')
+            return SimpleDataset(path=data_path)
         else:
             raise Exception(f"Dataset name {dataset} not supported.")
 
     @staticmethod
-    def create_env(name, cfg):
-        dataset = EnvFactory.load_dataset(name)
+    def create_env(name, path, cfg):
+        dataset = EnvFactory.load_dataset(name, path)
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
@@ -32,6 +32,24 @@ class EnvFactory:
             ior_marker_type='cross',
             has_termination_action=cfg.env.termination,
             has_intermediate_reward=cfg.env.intermediate_reward
+        )
+
+        return env
+
+    @staticmethod
+    def create_eval_env(name):
+        dataset = EnvFactory.load_dataset(name, "validation")
+
+        env = TextLocEnv(
+            dataset.images, dataset.gt,
+            playout_episode=False,
+            premasking=True,
+            max_steps_per_image=200,
+            bbox_scaling=0,
+            bbox_transformer='base',
+            ior_marker_type='cross',
+            has_termination_action=False,
+            mode='test'
         )
 
         return env
