@@ -74,7 +74,8 @@ class NeptuneLogger(tune.logger.Logger):
             for key, value in res_.items():
                 prefixed_key = '/'.join([prefix, key])
                 if isinstance(value, float) or isinstance(value, int):
-                    self.run[prefixed_key].log(value)
+                    self.neptune_experiment.log_metric(
+                        prefixed_key, value)
                 elif (isinstance(value, np.ndarray) or
                       isinstance(value, np.number)):
                     self.run[prefixed_key].log(float(value))
