@@ -8,7 +8,7 @@ from dataset.simple_dataset import SimpleDataset
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, split: Text = 'validation'):
+    def load_dataset(dataset, split: Text = 'train'):
         if dataset == "icdar2013":
             return ICDARDataset(path='../data/ICDAR2013', split=split)
         elif dataset == "sign":

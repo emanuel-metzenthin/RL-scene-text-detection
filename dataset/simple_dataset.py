@@ -8,7 +8,6 @@ class SimpleDataset(Dataset):
     def _load_images_and_gt(self):
         self.images = []
         self.gt = []
-
         img_files = open(os.path.join(self.path, 'image_locations.txt')).readlines()
         gt_arr = np.load(os.path.join(self.path, 'bounding_boxes.npy'), allow_pickle=True)
 

@@ -22,11 +22,11 @@ from logger import NeptuneLogger
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg):
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
-    register_env("textloc", lambda config: EnvFactory.create_env("sign", cfg))
+    register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg))
     config = {
 
         "env": "textloc",
-        "num_gpus": 1 if torch.cuda.is_available() else 0,
+        "num_gpus": 0.7 if torch.cuda.is_available() else 0,
         "buffer_size": cfg.env.replay_buffer.size,
         "model": {
             "custom_model": "imagedqn",
@@ -38,7 +38,12 @@ def main(cfg):
                 "num_replay_buffer_shards": 1,
             }),
         "lr": 1e-4,  # try different lrs
-        "num_workers": cfg.apex.num_actors,  # parallelism
+        # "num_workers": cfg.apex.num_actors,  # parallelism
+        "num_workers": 1,
+        "num_gpus_per_worker": 0.3,
+        "num_envs_per_worker": 20,
+        "rollout_fragment_length": 30,
+        "learning_starts": 30,
         "framework": "torch",
         # "render_env": True,
         "logger_config": cfg
@@ -57,7 +62,7 @@ def main(cfg):
         get_policy_class=get_policy_class
     )
 
-    results = tune.run(CustomTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=tune.logger.DEFAULT_LOGGERS + (NeptuneLogger,),)
+    results = tune.run(CustomTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop)#, loggers=tune.logger.DEFAULT_LOGGERS + (NeptuneLogger,),)
 
     ray.shutdown()
 
