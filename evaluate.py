@@ -1,67 +1,78 @@
 import os
 import time
+import zipfile
 
 import numpy as np
+import ray
 import torch
+from ray.rllib.agents.dqn import ApexTrainer
+from ray.tune import register_env
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
-
-from DQN import ImageDQN
-from dataset.ICDAR_dataset import ICDARDataset
-from agent import Agent
-from dataset.sign_dataset import SignDataset
-
-test_dataset = SignDataset(path='../data/600_3_signs_3_words', split='validation')
+from env_factory import EnvFactory
 
 
-def evaluate(dqn, env, device='cpu'):
-    avg_iou = 0
-
-    agent = Agent(env)
+def evaluate(agent, env):
     num_images = 1000 # len(test_dataset.images)
 
     with tqdm(range(num_images)) as timages:
+        _DUMMY_AGENT_ID = "agent0"
+
+        print("Creating .zip file")
+        zipf = zipfile.ZipFile('./results/res.zip', 'w', zipfile.ZIP_DEFLATED)
+
         for image_idx in timages:
             if not os.path.exists('./results'):
                 os.makedirs('./results')
             test_file = open(f'./results/res_img_{image_idx}.txt', 'w+')
-            agent.reset(image_index=image_idx)
+            obs = {_DUMMY_AGENT_ID: env.reset(image_index=image_idx)}
             done = False
 
             while not done:
-                action = agent.choose_action(dqn, 0, device)
+                action = agent.compute_actions(obs)
                 # do step in the environment
-                new_state, _, done, _ = env.step(action)
-                agent.state = new_state
-                # env.render(mode='interactive')
-                # time.sleep(0.1)
+                obs[_DUMMY_AGENT_ID], _, done, _ = env.step(action[_DUMMY_AGENT_ID])
+                env.render()
+                time.sleep(0.1)
 
             for bbox in env.episode_pred_bboxes:
                 test_file.write(f"{','.join(map(str, map(int, bbox)))}\n")
 
             test_file.close()
+            zipf.write(f'./results/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
 
-    return avg_iou / num_images
+        zipf.close()
+
+        os.system('python ICDAR13_eval_script/script.py -g=ICDAR13_eval_script/sign_gt.zip -s=results/res.zip -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\'')
 
 
 if __name__ == '__main__':
-    test_env = TextLocEnv(
-        test_dataset.images, test_dataset.gt,
-        playout_episode=True,
-        premasking=False,
-        max_steps_per_image=200,
-        bbox_scaling=0,
-        bbox_transformer='base',
-        ior_marker_type='cross',
-        has_termination_action=False,
-        mode='test'
-    )
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    dqn = ImageDQN(num_actions=len(test_env.action_set)).to(device)
-    checkpoint = torch.load('./checkpoints/sign_intermediate_best.pt', map_location=device)
-    dqn.load_state_dict(checkpoint['state_dict'])
+    ray.init()
+    test_env = EnvFactory.create_eval_env("sign")
+    register_env("textloc", lambda config: test_env)
+    config = {
+        "env": "textloc",
+        "num_gpus": 1 if torch.cuda.is_available() else 0,
+        # "buffer_size": cfg.env.replay_buffer.size,
+        # "model": {
+        #     "custom_model": "imagedqn",
+        # },
+        # "dueling": False,
+        # "double_q": False,
+        # "optimizer": merge_dicts(
+        #     DQN_CONFIG["optimizer"], {
+        #         "num_replay_buffer_shards": 1,
+        #     }),
+        # "lr": 1e-4,  # try different lrs
+        "num_workers": 1,
+        "framework": "torch",
+        # "render_env": True,
+        # "logger_config": cfg
+    }
 
-    evaluate(dqn, test_env, device)
+    agent = ApexTrainer(config=config)
+    agent.restore('./checkpoints/checkpoint-1000')
+    evaluate(agent, test_env)
 
     # ious = []
     # for i in range(1000):
