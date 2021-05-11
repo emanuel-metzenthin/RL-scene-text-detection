@@ -26,22 +26,18 @@ def main(cfg):
     config = {
 
         "env": "textloc",
-        "num_gpus": 0.7 if torch.cuda.is_available() else 0,
+        "num_gpus": 1 if torch.cuda.is_available() else 0,
         "buffer_size": cfg.env.replay_buffer.size,
-        "model": {
-            "custom_model": "imagedqn",
-        },
-        # "dueling": False,
-        # "double_q": False,
+        "prioritized_replay": True,
+        "custom_model": "imagedqn",
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
                 "num_replay_buffer_shards": 1,
             }),
         "lr": 1e-4,  # try different lrs
-        # "num_workers": cfg.apex.num_actors,  # parallelism
-        "num_workers": 1,
-        "num_gpus_per_worker": 0.3,
-        "num_envs_per_worker": 20,
+        "num_workers": cfg.apex.num_actors,  # parallelism
+        # "num_gpus_per_worker": 0.3 if torch.cuda.is_available() else 0,
+        # "num_envs_per_worker": 20,
         "rollout_fragment_length": 30,
         "learning_starts": 0,
         "framework": "torch",
