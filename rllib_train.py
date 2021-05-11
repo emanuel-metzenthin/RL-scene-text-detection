@@ -12,7 +12,7 @@ import ray
 from ray import tune
 from ray.rllib import agents, Policy
 from ray.rllib.utils import merge_dicts
-from ray.rllib.agents.dqn.dqn import DEFAULT_CONFIG as DQN_CONFIG
+from ray.rllib.agents.dqn.dqn import DEFAULT_CONFIG as DQN_CONFIG, DQNTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
 from DQN import RLLibImageDQN
@@ -29,7 +29,9 @@ def main(cfg):
         "num_gpus": 1 if torch.cuda.is_available() else 0,
         "buffer_size": cfg.env.replay_buffer.size,
         "prioritized_replay": True,
-        "custom_model": "imagedqn",
+        "model": {
+            "custom_model": "imagedqn"
+        },
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
                 "num_replay_buffer_shards": 1,
@@ -48,18 +50,18 @@ def main(cfg):
         "training_iteration": 1000,
     }
 
-    # def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
-    #     return SimpleQTorchPolicy
-    #
-    # CustomTrainer = ApexTrainer.with_updates(
-    #     name="SimpleQApex",
-    #     default_policy=SimpleQTFPolicy,
-    #     get_policy_class=get_policy_class
-    # )
+    def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
+        return SimpleQTorchPolicy
+
+    CustomTrainer = DQNTrainer.with_updates(
+        name="SimpleQApex",
+        default_policy=SimpleQTorchPolicy,
+        get_policy_class=get_policy_class
+    )
     loggers = tune.logger.DEFAULT_LOGGERS
     if not cfg.neptune.offline:
         loggers += (NeptuneLogger,)
-    results = tune.run(SimpleQTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
+    results = tune.run(CustomTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
 
     ray.shutdown()
 
