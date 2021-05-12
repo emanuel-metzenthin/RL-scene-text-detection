@@ -36,6 +36,12 @@ def main(cfg):
             DQN_CONFIG["optimizer"], {
                 "num_replay_buffer_shards": 1,
             }),
+        "exploration_config": {
+            "type": "EpsilonGreedy",
+            "initial_epsilon": cfg.env.epsilon.start,
+            "final_epsilon": cfg.env.epsilon.end,
+            "epsilon_timesteps": cfg.env.epsilon.decay_steps,
+        },
         "lr": 1e-4,  # try different lrs
         "num_workers": cfg.apex.num_actors,  # parallelism
         "num_gpus_per_worker": 1 if torch.cuda.is_available() else 0,

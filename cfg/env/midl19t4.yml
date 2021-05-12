@@ -9,7 +9,7 @@ replay_buffer:
 epsilon:
   start: 1
   end: 0.1
-  decay_steps: 200000
+  decay_steps: 400000
 
 max_reward: 200
 
