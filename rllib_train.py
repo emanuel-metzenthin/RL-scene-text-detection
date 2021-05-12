@@ -38,16 +38,16 @@ def main(cfg):
             }),
         "lr": 1e-4,  # try different lrs
         "num_workers": cfg.apex.num_actors,  # parallelism
-        # "num_gpus_per_worker": 0.3 if torch.cuda.is_available() else 0,
-        # "num_envs_per_worker": 20,
+        "num_gpus_per_worker": 1 if torch.cuda.is_available() else 0,
+        "num_envs_per_worker": 20,
         "rollout_fragment_length": 30,
         "learning_starts": 0,
         "framework": "torch",
-        "logger_config": cfg
+        "logger_config": cfg,
     }
 
     stop = {
-        "training_iteration": 1000,
+        "episode_reward_mean": 70,
     }
 
     def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
@@ -67,6 +67,6 @@ def main(cfg):
 
 
 if __name__ == "__main__":
-    ray.init()
+    ray.init(object_store_memory=10e9)
 
     main()
