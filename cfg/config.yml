@@ -21,7 +21,7 @@ neptune:
   run_id: null
 
 training:
-  batch_size: 16
+  batch_size: 512
   lr: 0.0001
   epochs: 80
   backbone: "resnet50"
@@ -36,8 +36,8 @@ training:
 valdation:
   every: 500
 
-dataset: sign
+dataset: simple
 
-data_path: /data/dataset-generator
+data_path: /Users/Emanuel/Documents/Studium/Master/Masterarbeit/data/dataset-generator
 
 log_dir: /Users/Emanuel/ray_results

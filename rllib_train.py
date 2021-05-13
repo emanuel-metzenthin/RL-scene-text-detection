@@ -28,6 +28,7 @@ def main(cfg):
         "env": "textloc",
         "num_gpus": 1 if torch.cuda.is_available() else 0,
         "buffer_size": cfg.env.replay_buffer.size,
+        "train_batch_size": cfg.training.batch_size,
         "prioritized_replay": True,
         "model": {
             "custom_model": "imagedqn"
@@ -45,9 +46,9 @@ def main(cfg):
         "lr": 1e-4,  # try different lrs
         "num_workers": cfg.apex.num_actors,  # parallelism
         "num_gpus_per_worker": 1 if torch.cuda.is_available() else 0,
-        "num_envs_per_worker": 20,
-        "rollout_fragment_length": 30,
-        "learning_starts": 0,
+        "num_envs_per_worker": 1,
+        "rollout_fragment_length": 50,
+        "learning_starts": 1000,
         "framework": "torch",
         "logger_config": cfg,
     }
