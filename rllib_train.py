@@ -74,6 +74,6 @@ def main(cfg):
 
 
 if __name__ == "__main__":
-    ray.init(object_store_memory=10e9)
+    ray.init()
 
     main()
