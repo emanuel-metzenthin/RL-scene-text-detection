@@ -31,7 +31,8 @@ def main(cfg):
         "train_batch_size": cfg.training.batch_size,
         "prioritized_replay": True,
         "model": {
-            "custom_model": "imagedqn"
+            "custom_model": "imagedqn",
+            "dueling": True
         },
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
@@ -68,7 +69,7 @@ def main(cfg):
     loggers = tune.logger.DEFAULT_LOGGERS
     if not cfg.neptune.offline:
         loggers += (NeptuneLogger,)
-    results = tune.run(CustomTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
+    results = tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
 
     ray.shutdown()
 

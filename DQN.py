@@ -14,8 +14,9 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
         TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
                               model_config, name)
         nn.Module.__init__(self)
+        dueling = model_config["dueling"]
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = ImageDQN(num_actions=action_space.n).to(device)
+        self.model = ImageDQN(dueling=dueling, num_actions=action_space.n).to(device)
 
     def forward(self, input_dict: Dict[str, TensorType],
                 state: List[TensorType],
@@ -26,7 +27,7 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
 class ImageDQN(nn.Module):
     BACKBONES = ['resnet18', 'resnet50']
 
-    def __init__(self, backbone: Text = 'resnet50', num_actions: int = 9, num_history: int = 10):
+    def __init__(self, backbone: Text = 'resnet50', dueling=False, num_actions: int = 9, num_history: int = 10):
         super().__init__()
 
         if backbone not in ImageDQN.BACKBONES:
@@ -42,7 +43,7 @@ class ImageDQN(nn.Module):
             nn.ReLU(),
             nn.Linear(1024, 1024),
             nn.ReLU(),
-            nn.Linear(1024, num_actions)
+            nn.Linear(1024, 256 if dueling else num_actions)
         )
 
         self.dqn.apply(self.init_weights)
