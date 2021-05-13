@@ -57,10 +57,18 @@ def main(cfg):
         "episode_reward_mean": 70,
     }
 
+    def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
+        return SimpleQTorchPolicy
+
+    CustomTrainer = DQNTrainer.with_updates(
+        name="SimpleQApex",
+        default_policy=SimpleQTorchPolicy,
+        get_policy_class=get_policy_class
+    )
     loggers = tune.logger.DEFAULT_LOGGERS
     if not cfg.neptune.offline:
         loggers += (NeptuneLogger,)
-    results = tune.run(SimpleQTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
+    results = tune.run(CustomTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
 
     ray.shutdown()
 
