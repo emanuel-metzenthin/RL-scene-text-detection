@@ -42,12 +42,12 @@ def main(cfg):
             "type": "EpsilonGreedy",
             "initial_epsilon": cfg.env.epsilon.start,
             "final_epsilon": cfg.env.epsilon.end,
-            "epsilon_timesteps": cfg.env.epsilon.decay_steps,
+            "epsilon_timesteps": cfg.env.epsilon.decay_steps * cfg.training.envs_per_worker,
         },
         "lr": 1e-4,  # try different lrs
         "num_workers": cfg.apex.num_actors,  # parallelism
         "num_gpus_per_worker": 1 if torch.cuda.is_available() else 0,
-        "num_envs_per_worker": 1,
+        "num_envs_per_worker": cfg.training.envs_per_worker,
         "rollout_fragment_length": 50,
         "learning_starts": 1000,
         "framework": "torch",
