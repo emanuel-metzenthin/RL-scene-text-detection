@@ -14,7 +14,7 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
         TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
                               model_config, name)
         nn.Module.__init__(self)
-        dueling = model_config["dueling"]
+        dueling = model_config["custom_model_config"]["dueling"]
         device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = ImageDQN(dueling=dueling, num_actions=action_space.n).to(device)
 

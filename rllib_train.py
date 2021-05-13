@@ -32,7 +32,9 @@ def main(cfg):
         "prioritized_replay": True,
         "model": {
             "custom_model": "imagedqn",
-            "dueling": True
+            "custom_model_config": {
+                "dueling": True
+            }
         },
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
