@@ -35,8 +35,8 @@ class ImageDQN(nn.Module):
 
         backbone_model = getattr(models, backbone)(pretrained=True)
         self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
-        for param in self.feature_extractor.parameters():
-            param.requires_grad = False
+        # for param in self.feature_extractor.parameters():
+        #     param.requires_grad = False
 
         self.dqn = nn.Sequential(
             nn.Linear(backbone_model.fc.in_features + num_history * num_actions, 1024),
@@ -52,6 +52,7 @@ class ImageDQN(nn.Module):
 
     def forward(self, X):
         images, histories = X
+
         if images.shape[1] != 3:
             images = images.permute([0, 3, 1, 2])
         histories = torch.reshape(histories, (-1, self.num_actions * self.num_history))

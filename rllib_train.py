@@ -47,12 +47,13 @@ def main(cfg):
             "epsilon_timesteps": cfg.env.epsilon.decay_steps * cfg.training.envs_per_worker,
         },
         "lr": 1e-4,  # try different lrs
-        "num_workers": cfg.apex.num_actors,  # parallelism
+        "num_workers": 1,
         "num_gpus_per_worker": 1 if torch.cuda.is_available() else 0,
         "num_envs_per_worker": cfg.training.envs_per_worker,
         "rollout_fragment_length": 50,
-        "learning_starts": 1000,
+        "learning_starts": 0,
         "framework": "torch",
+        # "render_env": True,
         "logger_config": cfg,
     }
 
@@ -60,18 +61,14 @@ def main(cfg):
         "episode_reward_mean": 70,
     }
 
-    def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
-        return SimpleQTorchPolicy
-
-    CustomTrainer = DQNTrainer.with_updates(
-        name="SimpleQApex",
-        default_policy=SimpleQTorchPolicy,
-        get_policy_class=get_policy_class
-    )
     loggers = tune.logger.DEFAULT_LOGGERS
     if not cfg.neptune.offline:
         loggers += (NeptuneLogger,)
-    results = tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
+
+    if cfg.restore:
+        tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
+    else:
+        tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
 
     ray.shutdown()
 
