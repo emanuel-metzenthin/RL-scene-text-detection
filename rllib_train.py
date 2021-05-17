@@ -30,6 +30,7 @@ def main(cfg):
         "train_batch_size": cfg.training.batch_size,
         "prioritized_replay": True,
         "model": {
+            "dim": 224,
             "conv_filters": [
                 [64, (1, 1), 1],
                 [32, (9, 9), 1],
