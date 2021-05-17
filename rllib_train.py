@@ -24,17 +24,21 @@ def main(cfg):
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg.data_path, cfg))
     config = {
-
         "env": "textloc",
         "num_gpus": 1 if torch.cuda.is_available() else 0,
         "buffer_size": cfg.env.replay_buffer.size,
         "train_batch_size": cfg.training.batch_size,
         "prioritized_replay": True,
         "model": {
-            "custom_model": "imagedqn",
-            "custom_model_config": {
-                "dueling": True
-            }
+            "conv_filters": [
+                [64, (1, 1), 1],
+                [32, (9, 9), 1],
+                [32, (8, 8), 4],
+                [16, (9, 9), 4],
+                [16, (7, 7), 5],
+                [8, (2, 2), 1],
+            ],
+            "post_fcnet_hiddens": [1024, 1024, 1024]
         },
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
@@ -61,6 +65,13 @@ def main(cfg):
         "episode_reward_mean": 70,
     }
 
+    if cfg.custom_model:
+        config["model"] = {
+            "custom_model": "imagedqn",
+            "custom_model_config": {
+                "dueling": True
+            }
+        }
     loggers = tune.logger.DEFAULT_LOGGERS
     if not cfg.neptune.offline:
         loggers += (NeptuneLogger,)
