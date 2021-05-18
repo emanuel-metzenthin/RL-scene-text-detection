@@ -125,7 +125,7 @@ def train():
     val_loader = DataLoader(val_data, batch_size=16)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4)
+    optimizer = Adam(model.parameters(), lr=1e-6)
 
     best_loss = None
 
