@@ -91,11 +91,13 @@ class AssessorModel(nn.Module):
             ResBlock2(),
             ResBlock3(),
             ResBlock3(),
+            nn.MaxPool2d(12),
+            nn.ReLU(),
             nn.Flatten(),
-            nn.Linear(401408, 1),
+            nn.Linear(2048, 1),
         )
         self.relu = nn.ReLU()
-        # self.resnet.apply(self.init_weights)
+        self.resnet.apply(self.init_weights)
 
     def forward(self, X):
         # feat = self.feature_extractor(X)
@@ -107,7 +109,7 @@ class AssessorModel(nn.Module):
     @staticmethod
     def init_weights(m):
         if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
-            torch.nn.init.xavier_uniform_(m.weight)
+            torch.nn.init.normal(m.weight, 0.02)
 
 
 def train():
@@ -117,8 +119,8 @@ def train():
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('../data/assessor_data/train')
-    val_data = AssessorDataset('../data/assessor_data/val')
+    train_data = AssessorDataset('../data/iou_samples/train')
+    val_data = AssessorDataset('../data/iou_samples/train')
     train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=16)
 
