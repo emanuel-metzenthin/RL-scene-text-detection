@@ -113,6 +113,8 @@ class AssessorModel(nn.Module):
 def train():
     EPS = 0.0001
     model = AssessorModel()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset('../data/assessor_data/train')
@@ -132,6 +134,7 @@ def train():
         model.train()
         with tqdm(train_loader) as train_epoch:
             for input, labels in train_epoch:
+                input = input.to(device)
                 optimizer.zero_grad()
                 pred = model(input)
                 mse_loss = criterion(pred.float(), labels.float())
@@ -149,6 +152,7 @@ def train():
         with tqdm(val_loader) as val_epoch:
             model.eval()
             for input, labels in val_epoch:
+                input = input.to(device)
                 pred = model(input)
                 val_loss = criterion(pred, labels)
 
