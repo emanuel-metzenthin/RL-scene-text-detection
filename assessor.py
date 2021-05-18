@@ -16,7 +16,7 @@ class ResBlock1(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 128, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(128, 128, kernel_size=(4, 4), padding=1, stride=2, bias=False)
-        self.conv3 = nn.Conv2d(3, 128, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.conv3 = nn.Conv2d(128, 128, kernel_size=(4, 4), padding=1, stride=2, bias=False)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -143,8 +143,9 @@ def train():
                 mse_loss = criterion(pred.float(), labels.float())
                 # log_mse_loss = criterion(torch.log(pred.float() + EPS), torch.log(labels.float() + EPS))
                 loss = mse_loss # + log_mse_loss
-                run['train/loss'].log(loss)
-                run['train/pred_val'].log(pred[0].float())
+                if run:
+                    run['train/loss'].log(loss)
+                    run['train/pred_val'].log(pred[0].float())
 
                 loss.backward()
                 optimizer.step()
@@ -164,7 +165,8 @@ def train():
                 mean_val_loss = np.mean(val_losses)
 
                 val_epoch.set_postfix({'val_loss': mean_val_loss})
-            run['val/loss'].log(mean_val_loss)
+            if run:
+                run['val/loss'].log(mean_val_loss)
 
         if not best_loss or mean_val_loss < best_loss:
             torch.save(model.state_dict(), 'assessor_model.pt')
