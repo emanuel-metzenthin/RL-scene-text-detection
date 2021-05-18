@@ -135,6 +135,7 @@ def train():
         with tqdm(train_loader) as train_epoch:
             for input, labels in train_epoch:
                 input = input.to(device)
+                labels = labels.to(device)
                 optimizer.zero_grad()
                 pred = model(input)
                 mse_loss = criterion(pred.float(), labels.float())
@@ -153,6 +154,7 @@ def train():
             model.eval()
             for input, labels in val_epoch:
                 input = input.to(device)
+                labels = labels.to(device)
                 pred = model(input)
                 val_loss = criterion(pred, labels)
 
