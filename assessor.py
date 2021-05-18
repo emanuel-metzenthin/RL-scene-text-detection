@@ -119,17 +119,17 @@ def train():
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('../data/assessor_data/train')
-    val_data = AssessorDataset('../data/assessor_data/val')
+    train_data = AssessorDataset('../data/iou_samples/train')
+    val_data = AssessorDataset('../data/iou_samples/val')
     train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=16)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4)
+    optimizer = Adam(model.parameters(), lr=1e-5)
 
     best_loss = None
 
-    for epoch in range(20):
+    for epoch in range(300):
         val_losses = []
         train_losses = []
 
@@ -152,6 +152,9 @@ def train():
 
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
+
+            if run:
+                run['train/loss'].log(np.mean(train_losses))
 
         with tqdm(val_loader) as val_epoch:
             model.eval()
