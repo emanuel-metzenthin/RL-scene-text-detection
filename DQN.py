@@ -63,7 +63,6 @@ class ImageDQN(nn.Module):
         return self.dqn(states)
 
 
-
     @staticmethod
     def init_weights(m):
         if type(m) == nn.Linear:
