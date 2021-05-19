@@ -98,13 +98,15 @@ class AssessorModel(nn.Module):
         )
         self.relu = nn.ReLU()
         self.resnet.apply(self.init_weights)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, X):
         # feat = self.feature_extractor(X)
         # return sigmoid(self.linear(feat.squeeze()))
         out = self.resnet(X)
         out = self.relu(out)
-        return sigmoid(out)
+
+        return self.sigmoid(out)
 
     @staticmethod
     def init_weights(m):
@@ -119,13 +121,13 @@ def train():
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('../data/iou_samples/train')
-    val_data = AssessorDataset('../data/iou_samples/val')
+    train_data = AssessorDataset('../data/assessor_data/train')
+    val_data = AssessorDataset('../data/assessor_data/val')
     train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=16)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-5)
+    optimizer = Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
