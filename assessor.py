@@ -91,22 +91,21 @@ class AssessorModel(nn.Module):
             ResBlock2(),
             ResBlock3(),
             ResBlock3(),
-            nn.MaxPool2d(12),
-            nn.ReLU(),
+            nn.AvgPool2d(12),
             nn.Flatten(),
-            nn.Linear(2048, 1),
+            nn.Linear(2048, 512),
+            nn.ReLU(),
+            nn.Linear(512, 1),
+            # nn.Sigmoid()
         )
-        self.relu = nn.ReLU()
         self.resnet.apply(self.init_weights)
-        self.sigmoid = nn.Sigmoid()
 
     def forward(self, X):
         # feat = self.feature_extractor(X)
         # return sigmoid(self.linear(feat.squeeze()))
         out = self.resnet(X)
-        out = self.relu(out)
 
-        return self.sigmoid(out)
+        return out
 
     @staticmethod
     def init_weights(m):
@@ -146,14 +145,16 @@ def train():
                 # log_mse_loss = criterion(torch.log(pred.float() + EPS), torch.log(labels.float() + EPS))
                 loss = mse_loss # + log_mse_loss
 
-                run['train/loss'].log(loss)
                 run['train/pred_val'].log(pred[0].float())
 
-                loss.backward()
+                mse_loss.backward()
                 optimizer.step()
 
+                prev_params = list(model.parameters())[0].clone()
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
+
+            run['train/loss'].log(np.mean(train_losses))
 
         with tqdm(val_loader) as val_epoch:
             model.eval()
@@ -167,7 +168,8 @@ def train():
                 mean_val_loss = np.mean(val_losses)
 
                 val_epoch.set_postfix({'val_loss': mean_val_loss})
-                run['val/loss'].log(mean_val_loss)
+
+            run['val/loss'].log(mean_val_loss)
 
         if not best_loss or mean_val_loss < best_loss:
             torch.save(model.state_dict(), 'assessor_model.pt')
