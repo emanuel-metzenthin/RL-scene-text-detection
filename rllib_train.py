@@ -3,7 +3,7 @@ import json
 from typing import Optional, Type
 
 import torch
-from ray.rllib.agents.dqn import SimpleQTFPolicy, ApexTrainer, SimpleQTorchPolicy, SimpleQTrainer
+from ray.rllib.agents.dqn import SimpleQTFPolicy, SimpleQTorchPolicy, SimpleQTrainer
 from ray.rllib.utils.typing import TrainerConfigDict
 
 from env_factory import EnvFactory
@@ -57,6 +57,7 @@ def main(cfg):
         "rollout_fragment_length": 50,
         "learning_starts": 0,
         "framework": "torch",
+        "compress_observations": True,
         # "render_env": True,
         "logger_config": cfg,
     }
