@@ -51,6 +51,7 @@ def main(cfg):
             "epsilon_timesteps": cfg.env.epsilon.decay_steps * cfg.training.envs_per_worker,
         },
         "lr": 1e-4,  # try different lrs
+        "gamma": cfg.training.loss.gamma,
         "num_workers": 1,
         "num_gpus_per_worker": 1 if torch.cuda.is_available() else 0,
         "num_envs_per_worker": cfg.training.envs_per_worker,
