@@ -22,9 +22,9 @@ class ResBlock1(nn.Module):
 
     def forward(self, x):
         residual = x
-        h1 = self.group_norm(self.conv1(x))
-        h2 = self.group_norm(self.conv2(self.relu(h1)))
-        h3 = self.group_norm(self.conv3(residual))
+        h1 = self.conv1(x)
+        h2 = self.conv2(self.relu(h1))
+        h3 = self.conv3(residual)
         h4 = h2 + h3
 
         return h4
@@ -41,9 +41,9 @@ class ResBlock2(nn.Module):
 
     def forward(self, x):
         residual = x
-        h1 = self.group_norm(self.conv1(self.relu(x)))
-        h2 = self.group_norm(self.conv2(self.relu(h1)))
-        h3 = self.group_norm(self.conv3(residual))
+        h1 = self.conv1(self.relu(x))
+        h2 = self.conv2(self.relu(h1))
+        h3 = self.conv3(residual)
         h4 = h2 + h3
 
         return h4
@@ -60,9 +60,9 @@ class ResBlock3(nn.Module):
 
     def forward(self, x):
         residual = x
-        h1 = self.group_norm(self.conv1(self.relu(x)))
-        h2 = self.group_norm(self.conv2(self.relu(h1)))
-        h3 = self.group_norm(self.conv3(residual))  # how not to use this conv? but still add h2 and residual
+        h1 = self.conv1(self.relu(x))
+        h2 = self.conv2(self.relu(h1))
+        h3 = self.conv3(residual)  # how not to use this conv? but still add h2 and residual
         h4 = h2 + h3
 
         return h4
