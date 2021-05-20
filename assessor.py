@@ -126,7 +126,7 @@ def train():
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset('../data/iou_samples/train')
-    val_data = AssessorDataset('../data/iou_samples/val')
+    val_data = AssessorDataset('../data/iou_samples/val', split="val")
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=32)
 
