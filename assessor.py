@@ -131,7 +131,7 @@ def train():
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=32)
 
-    criterion = nn.GaussianNLLLoss()
+    criterion = nn.MSELoss()
     optimizer = Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
@@ -147,7 +147,7 @@ def train():
                 labels = labels.to(device)
                 optimizer.zero_grad()
                 pred = model(input)
-                mse_loss = criterion(pred.float(), labels.float(), torch.var(pred).repeat(len(input)))
+                mse_loss = criterion(pred.float(), labels.float())
                 # log_mse_loss = criterion(torch.log(pred.float() + EPS), torch.log(labels.float() + EPS))
                 loss = mse_loss # + log_mse_loss
 
@@ -168,7 +168,7 @@ def train():
                 input = input.to(device)
                 labels = labels.to(device)
                 pred = model(input)
-                val_loss = criterion(pred, labels, torch.var(pred).repeat(len(input)))
+                val_loss = criterion(pred, labels)
 
                 val_losses.append(val_loss.item())
                 mean_val_loss = np.mean(val_losses)
