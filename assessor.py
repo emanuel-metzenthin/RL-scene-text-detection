@@ -103,7 +103,7 @@ class AssessorModel(nn.Module):
             nn.Flatten(),
             nn.Linear(4096, 1)
         )
-        self.resnet.apply(self.init_weights)
+        #self.resnet.apply(self.init_weights)
 
     def forward(self, X):
         # feat = self.feature_extractor(X)
@@ -126,9 +126,9 @@ def train():
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset('../data/iou_samples/train')
-    val_data = AssessorDataset('../data/iou_samples/train')
-    train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=16)
+    val_data = AssessorDataset('../data/iou_samples/val')
+    train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=32)
 
     criterion = nn.MSELoss()
     optimizer = Adam(model.parameters(), lr=1e-4)
