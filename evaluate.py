@@ -5,8 +5,9 @@ import zipfile
 import numpy as np
 import ray
 import torch
-from ray.rllib.agents.dqn import ApexTrainer
+from ray.rllib.agents.dqn.dqn import DQNTrainer, DEFAULT_CONFIG as DQN_CONFIG
 from ray.tune import register_env
+from ray.tune.utils import merge_dicts
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
 from env_factory import EnvFactory
@@ -31,7 +32,7 @@ def evaluate(agent, env):
             while not done:
                 action = agent.compute_actions(obs)
                 # do step in the environment
-                obs[_DUMMY_AGENT_ID], _, done, _ = env.step(action[_DUMMY_AGENT_ID])
+                obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action[_DUMMY_AGENT_ID])
                 env.render()
                 time.sleep(0.1)
 
@@ -48,30 +49,27 @@ def evaluate(agent, env):
 
 if __name__ == '__main__':
     ray.init()
-    test_env = EnvFactory.create_eval_env("sign")
+    test_env = EnvFactory.create_eval_env("simple")
     register_env("textloc", lambda config: test_env)
     config = {
         "env": "textloc",
         "num_gpus": 1 if torch.cuda.is_available() else 0,
-        # "buffer_size": cfg.env.replay_buffer.size,
-        # "model": {
-        #     "custom_model": "imagedqn",
-        # },
-        # "dueling": False,
-        # "double_q": False,
-        # "optimizer": merge_dicts(
-        #     DQN_CONFIG["optimizer"], {
-        #         "num_replay_buffer_shards": 1,
-        #     }),
-        # "lr": 1e-4,  # try different lrs
-        "num_workers": 1,
+        "model": {
+            "dim": 224,
+            "conv_filters": [
+                [64, (1, 1), 1],
+                [32, (9, 9), 1],
+                [32, (8, 8), 4],
+                [16, (9, 9), 4],
+                [16, (7, 7), 5],
+                [8, (2, 2), 2],
+            ],
+        },
         "framework": "torch",
-        # "render_env": True,
-        # "logger_config": cfg
     }
 
-    agent = ApexTrainer(config=config)
-    agent.restore('./checkpoints/checkpoint-1000')
+    agent = DQNTrainer(config=config)
+    agent.restore('./checkpoints/simple_cnn_checkpoint')
     evaluate(agent, test_env)
 
     # ious = []

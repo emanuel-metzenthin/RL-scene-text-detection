@@ -38,7 +38,7 @@ class EnvFactory:
 
     @staticmethod
     def create_eval_env(name):
-        dataset = EnvFactory.load_dataset(name, "validation")
+        dataset = EnvFactory.load_dataset(name, "../data/dataset-generator")
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
