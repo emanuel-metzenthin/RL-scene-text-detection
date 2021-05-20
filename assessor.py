@@ -102,9 +102,9 @@ class AssessorModel(nn.Module):
             nn.AdaptiveAvgPool2d(4),
             nn.Flatten(),
             nn.Linear(4096, 1),
-            nn.Sigmoid()
+            # nn.Sigmoid()
         )
-        #self.resnet.apply(self.init_weights)
+        self.resnet.apply(self.init_weights)
 
     def forward(self, X):
         # feat = self.feature_extractor(X)
