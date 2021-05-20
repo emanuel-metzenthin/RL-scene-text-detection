@@ -130,7 +130,7 @@ def train():
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=32)
 
-    criterion = nn.MSELoss()
+    criterion = nn.GaussianNLLLoss()
     optimizer = Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
