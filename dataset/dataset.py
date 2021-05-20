@@ -28,7 +28,7 @@ class Dataset(Dataset):
     def transform(image):
         transforms = Compose([
             Resize((224, 224)),
-            GaussianBlur(),
+            GaussianBlur(5),
             ColorJitter(hue=20, saturation=20),
             ToTensor(),
             Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
