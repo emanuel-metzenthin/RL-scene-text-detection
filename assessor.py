@@ -167,7 +167,7 @@ def train():
                 input = input.to(device)
                 labels = labels.to(device)
                 pred = model(input)
-                val_loss = criterion(pred, labels)
+                val_loss = criterion(pred, labels, torch.var(pred).repeat(len(input)))
 
                 val_losses.append(val_loss.item())
                 mean_val_loss = np.mean(val_losses)
