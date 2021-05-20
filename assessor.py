@@ -12,53 +12,58 @@ from dataset.assessor_dataset import AssessorDataset
 
 
 class ResBlock1(nn.Module):
-    def __init__(self):
+    def __init__(self, ch):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 128, kernel_size=(3, 3), padding=1, bias=False)
-        self.conv2 = nn.Conv2d(128, 128, kernel_size=(4, 4), padding=1, stride=2, bias=False)
-        self.conv3 = nn.Conv2d(3, 128, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.conv1 = nn.Conv2d(3, ch, kernel_size=(3, 3), padding=1, bias=False)
+        self.conv2 = nn.Conv2d(ch, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.conv3 = nn.Conv2d(3, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.group_norm = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         residual = x
-        h1 = self.conv1(x)
-        h2 = self.conv2(self.relu(h1))
-        h3 = self.conv3(residual)
+        h1 = self.group_norm(self.conv1(x))
+        h2 = self.group_norm(self.conv2(self.relu(h1)))
+        h3 = self.group_norm(self.conv3(residual))
         h4 = h2 + h3
 
         return h4
 
 
 class ResBlock2(nn.Module):
-    def __init__(self):
+    def __init__(self, ch_in, ch):
         super().__init__()
-        self.conv1 = nn.Conv2d(128, 128, kernel_size=(3, 3), padding=1, bias=False)
-        self.conv2 = nn.Conv2d(128, 128, kernel_size=(4, 4), padding=1, stride=2, bias=False)
-        self.conv3 = nn.Conv2d(128, 128, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
+        self.conv2 = nn.Conv2d(ch, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.group_norm = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         residual = x
-        h1 = self.conv1(self.relu(x))
-        h2 = self.conv2(self.relu(h1))
-        h3 = self.conv3(residual)
+        h1 = self.group_norm(self.conv1(self.relu(x)))
+        h2 = self.group_norm(self.conv2(self.relu(h1)))
+        h3 = self.group_norm(self.conv3(residual))
         h4 = h2 + h3
 
         return h4
 
 
 class ResBlock3(nn.Module):
-    def __init__(self):
+    def __init__(self, ch_in, ch):
         super().__init__()
-        self.conv1 = nn.Conv2d(128, 128, kernel_size=(3, 3), padding=1, bias=False)
-        self.conv2 = nn.Conv2d(128, 128, kernel_size=(3, 3), padding=1, bias=False)
+        self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
+        self.conv2 = nn.Conv2d(ch, ch, kernel_size=(3, 3), padding=1, bias=False)
+        self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
+        self.group_norm = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         residual = x
-        h1 = self.conv1(self.relu(x))
-        h2 = self.conv2(self.relu(h1))
-        h4 = h2 + residual
+        h1 = self.group_norm(self.conv1(self.relu(x)))
+        h2 = self.group_norm(self.conv2(self.relu(h1)))
+        h3 = self.group_norm(self.conv3(residual))  # how not to use this conv? but still add h2 and residual
+        h4 = h2 + h3
 
         return h4
 
@@ -87,16 +92,16 @@ class AssessorModel(nn.Module):
 
         self.add_coord = AddCoord()
         self.resnet = nn.Sequential(
-            ResBlock1(),
-            ResBlock2(),
-            ResBlock3(),
-            ResBlock3(),
-            nn.AvgPool2d(12),
+            ResBlock1(64),
+            nn.MaxPool2d(2),
+            ResBlock2(64, 128),
+            nn.MaxPool2d(2),
+            ResBlock3(128, 256),
+            nn.MaxPool2d(2),
+            ResBlock3(256, 256),
+            nn.AdaptiveAvgPool2d(4),
             nn.Flatten(),
-            nn.Linear(2048, 512),
-            nn.ReLU(),
-            nn.Linear(512, 1),
-            # nn.Sigmoid()
+            nn.Linear(4096, 1)
         )
         self.resnet.apply(self.init_weights)
 
