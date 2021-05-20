@@ -125,8 +125,8 @@ def train():
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('../data/iou_samples/train')
-    val_data = AssessorDataset('../data/iou_samples/val', split="val")
+    train_data = AssessorDataset('../data/assessor_data/train')
+    val_data = AssessorDataset('../data/assessor_data/val', split="val")
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=32)
 
@@ -146,7 +146,7 @@ def train():
                 labels = labels.to(device)
                 optimizer.zero_grad()
                 pred = model(input)
-                mse_loss = criterion(pred.float(), labels.float())
+                mse_loss = criterion(pred.float(), labels.float(), torch.var(pred).repeat(len(input)))
                 # log_mse_loss = criterion(torch.log(pred.float() + EPS), torch.log(labels.float() + EPS))
                 loss = mse_loss # + log_mse_loss
 
