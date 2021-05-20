@@ -125,12 +125,12 @@ def train():
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('../data/assessor_data/train')
-    val_data = AssessorDataset('../data/assessor_data/val')
+    train_data = AssessorDataset('../data/iou_samples/train')
+    val_data = AssessorDataset('../data/iou_samples/val')
     train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=16)
 
-    criterion = nn.MSELoss()
+    criterion = nn.SmoothL1Loss(reduction="sum")
     optimizer = Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
