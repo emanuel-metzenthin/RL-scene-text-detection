@@ -3,7 +3,7 @@ import json
 from typing import Optional, Type
 
 import torch
-from ray.rllib.agents.dqn import SimpleQTFPolicy, ApexTrainer, SimpleQTorchPolicy, SimpleQTrainer
+from ray.rllib.agents.dqn import SimpleQTFPolicy, SimpleQTorchPolicy, SimpleQTrainer
 from ray.rllib.utils.typing import TrainerConfigDict
 
 from env_factory import EnvFactory
@@ -37,9 +37,8 @@ def main(cfg):
                 [32, (8, 8), 4],
                 [16, (9, 9), 4],
                 [16, (7, 7), 5],
-                [8, (2, 2), 1],
+                [8, (2, 2), 2],
             ],
-            "post_fcnet_hiddens": [1024, 1024, 1024]
         },
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
@@ -59,6 +58,7 @@ def main(cfg):
         "rollout_fragment_length": 50,
         "learning_starts": 0,
         "framework": "torch",
+        "compress_observations": True,
         # "render_env": True,
         "logger_config": cfg,
     }
@@ -81,6 +81,7 @@ def main(cfg):
     if cfg.restore:
         tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
     else:
+        print(config)
         tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
 
     ray.shutdown()

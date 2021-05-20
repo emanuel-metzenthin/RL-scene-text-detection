@@ -103,7 +103,7 @@ class AssessorModel(nn.Module):
             nn.Flatten(),
             nn.Linear(4096, 1)
         )
-        self.resnet.apply(self.init_weights)
+        #self.resnet.apply(self.init_weights)
 
     def forward(self, X):
         # feat = self.feature_extractor(X)
