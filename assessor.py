@@ -179,6 +179,7 @@ def train():
 
         if not best_loss or mean_val_loss < best_loss:
             torch.save(model.state_dict(), 'assessor_model.pt')
+            run['model'].upload('assessor_model.pt')
             best_loss = mean_val_loss
 
 
