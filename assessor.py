@@ -102,7 +102,7 @@ class AssessorModel(nn.Module):
             nn.AdaptiveAvgPool2d(4),
             nn.Flatten(),
             nn.Linear(4096, 1),
-            # nn.Sigmoid()
+            #nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
 
@@ -124,10 +124,10 @@ def train():
     model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
-    # model.load_state_dict(torch.load('assessor_model.pt'))
+    #model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('../data/assessor_data/train')
-    val_data = AssessorDataset('../data/assessor_data/val', split="val")
+    train_data = AssessorDataset('/mnt/ssd/emanuel/data/iou_samples_larger')
+    val_data = AssessorDataset('/home/emanuel/data/assessor_data2/val', split="val")
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=32)
 
