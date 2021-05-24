@@ -59,7 +59,7 @@ def main(cfg):
         "learning_starts": 0,
         "framework": "torch",
         "compress_observations": True,
-        # "render_env": True,
+        "render_env": False,
         "logger_config": cfg,
     }
 
@@ -74,15 +74,14 @@ def main(cfg):
                 "dueling": True
             }
         }
-    loggers = tune.logger.DEFAULT_LOGGERS
+    logger = []
     if not cfg.neptune.offline:
-        loggers += (NeptuneLogger,)
+        logger += (NeptuneLogger(cfg),)
 
     if cfg.restore:
-        tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
+        tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=logger)
     else:
-        print(config)
-        tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=100, config=config, stop=stop, loggers=loggers)
+        tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=logger)
 
     ray.shutdown()
 
