@@ -6,6 +6,12 @@ class NormalizeFilter(Filter):
     Filter that normalizes
     """
 
+    def apply_changes(self, other, *args, **kwargs):
+        pass
+
+    def sync(self, other):
+        pass
+
     def copy(self):
         return NormalizeFilter()
 
