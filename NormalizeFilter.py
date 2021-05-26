@@ -12,6 +12,9 @@ class NormalizeFilter(Filter):
     def as_serializable(self):
         return self.copy()
 
+    def clear_buffer(self):
+        pass
+
     def __call__(self, x, update=True):
         return x / 255
 
