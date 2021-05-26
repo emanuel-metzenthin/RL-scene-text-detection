@@ -39,6 +39,7 @@ def main(cfg):
                 [16, (7, 7), 5],
                 [8, (2, 2), 2],
             ],
+            "zero_mean": False
         },
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
@@ -61,6 +62,7 @@ def main(cfg):
         "compress_observations": True,
         "render_env": False,
         "logger_config": cfg,
+        "observation_filter": "MeanStdFilter"
     }
 
     stop = {
