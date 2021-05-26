@@ -9,6 +9,7 @@ from tqdm import tqdm
 import numpy as np
 from torch import sigmoid
 from dataset.assessor_dataset import AssessorDataset
+from radam import RAdam
 
 
 class ResBlock1(nn.Module):
@@ -132,7 +133,7 @@ def train():
     val_loader = DataLoader(val_data, batch_size=32)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4)
+    optimizer = RAdam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
