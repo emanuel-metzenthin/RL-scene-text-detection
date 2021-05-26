@@ -12,11 +12,11 @@ from dataset.assessor_dataset import AssessorDataset
 
 
 class ResBlock1(nn.Module):
-    def __init__(self, ch):
+    def __init__(self, ch_in, ch):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, ch, kernel_size=(3, 3), padding=1, bias=False)
+        self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
-        self.conv3 = nn.Conv2d(3, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
+        self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
         self.group_norm = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
@@ -62,10 +62,10 @@ class ResBlock3(nn.Module):
         residual = x
         h1 = self.group_norm(self.conv1(self.relu(x)))
         h2 = self.group_norm(self.conv2(self.relu(h1)))
-        h3 = self.group_norm(self.conv3(residual))  # how not to use this conv? but still add h2 and residual
-        h4 = h2 + h3
+        h3 = h2 + residual  # how not to use this conv? but still add h2 and residual
+        # h4 = h2 + h3
 
-        return h4
+        return h3
 
 
 class AddCoord(nn.Module):
@@ -92,11 +92,11 @@ class AssessorModel(nn.Module):
 
         self.add_coord = AddCoord()
         self.resnet = nn.Sequential(
-            ResBlock1(64),
+            ResBlock1(3, 64),
             nn.MaxPool2d(2),
-            ResBlock2(64, 128),
+            ResBlock1(64, 128),
             nn.MaxPool2d(2),
-            ResBlock3(128, 256),
+            ResBlock1(128, 256),
             nn.MaxPool2d(2),
             ResBlock3(256, 256),
             nn.AdaptiveAvgPool2d(4),
@@ -148,15 +148,13 @@ def train():
                 optimizer.zero_grad()
                 pred = model(input)
                 mse_loss = criterion(pred.float(), labels.float())
-                # log_mse_loss = criterion(torch.log(pred.float() + EPS), torch.log(labels.float() + EPS))
-                loss = mse_loss # + log_mse_loss
+                loss = mse_loss
 
-                run['train/pred_val'].log(pred[0].float())
+                run['train/pred_var'].log(np.var(pred.detach().numpy()))
 
                 mse_loss.backward()
                 optimizer.step()
 
-                prev_params = list(model.parameters())[0].clone()
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
 
