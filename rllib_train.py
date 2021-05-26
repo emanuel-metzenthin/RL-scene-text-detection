@@ -6,6 +6,7 @@ import torch
 from ray.rllib.agents.dqn import SimpleQTFPolicy, SimpleQTorchPolicy, SimpleQTrainer
 from ray.rllib.utils.typing import TrainerConfigDict
 
+from NormalizeFilter import NormalizeFilter
 from env_factory import EnvFactory
 import hydra
 import ray
@@ -38,8 +39,7 @@ def main(cfg):
                 [16, (9, 9), 4],
                 [16, (7, 7), 5],
                 [8, (2, 2), 2],
-            ],
-            "zero_mean": False
+            ]
         },
         "optimizer": merge_dicts(
             DQN_CONFIG["optimizer"], {
@@ -62,7 +62,7 @@ def main(cfg):
         "compress_observations": True,
         "render_env": False,
         "logger_config": cfg,
-        "observation_filter": "MeanStdFilter"
+        "observation_filter": lambda x: NormalizeFilter()
     }
 
     stop = {
