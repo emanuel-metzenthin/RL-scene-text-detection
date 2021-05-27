@@ -133,7 +133,7 @@ def train():
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
-    optimizer = RAdam(model.parameters(), lr=1e-4)
+    optimizer = Adam(model.parameters(), lr=1e-4, weight_decay=0.1)
 
     best_loss = None
 
@@ -150,6 +150,8 @@ def train():
                 pred = model(input)
                 mse_loss = criterion(pred.float(), labels.float())
                 loss = mse_loss
+
+                run['train/pred_val'].log(pred[0].detach())
 
                 mse_loss.backward()
                 optimizer.step()
