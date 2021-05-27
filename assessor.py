@@ -127,10 +127,10 @@ def train():
     model.to(device)
     #model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('/mnt/ssd/emanuel/data/iou_samples_larger')
+    train_data = AssessorDataset('/home/emanuel/data/iou_samples/train')
     val_data = AssessorDataset('/home/emanuel/data/assessor_data2/val', split="val")
-    train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=32)
+    train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
     optimizer = RAdam(model.parameters(), lr=1e-4)
@@ -150,8 +150,6 @@ def train():
                 pred = model(input)
                 mse_loss = criterion(pred.float(), labels.float())
                 loss = mse_loss
-
-                run['train/pred_var'].log(np.var(pred.detach().numpy()))
 
                 mse_loss.backward()
                 optimizer.step()
