@@ -62,7 +62,8 @@ def main(cfg):
         "compress_observations": True,
         "render_env": False,
         "logger_config": cfg,
-        "observation_filter": lambda x: NormalizeFilter()
+        "observation_filter": lambda x: NormalizeFilter(),
+        "seed": cfg.training.random_seed
     }
 
     stop = {

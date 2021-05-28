@@ -17,7 +17,8 @@ neptune:
   run_id: null
 
 training:
-  batch_size: 512
+  random_seed: 20302
+  batch_size: 32
   lr: 0.0001
   epochs: 80
   backbone: "resnet50"
