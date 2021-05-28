@@ -125,7 +125,7 @@ def train():
     model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
-    #model.load_state_dict(torch.load('assessor_model.pt'))
+    model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset('/home/emanuel/data/iou_samples/train')
     val_data = AssessorDataset('/home/emanuel/data/assessor_data2/val', split="val")
@@ -133,7 +133,7 @@ def train():
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4, weight_decay=0.1)
+    optimizer = Adam(model.parameters(), lr=1e-5, weight_decay=0.1)
 
     best_loss = None
 
@@ -151,8 +151,6 @@ def train():
                 mse_loss = criterion(pred.float(), labels.float())
                 loss = mse_loss
 
-                run['train/pred_val'].log(pred[0].detach())
-
                 mse_loss.backward()
                 optimizer.step()
 
@@ -160,6 +158,9 @@ def train():
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
 
             run['train/loss'].log(np.mean(train_losses))
+            run['train/pred_min'].log(torch.min(pred).detach())
+            run['train/pred_max'].log(torch.max(pred).detach())
+            run['train/pred_var'].log(torch.var(pred).detach())
 
         with tqdm(val_loader) as val_epoch:
             model.eval()
@@ -183,6 +184,6 @@ def train():
 
 
 if __name__ == '__main__':
-    run = neptune.init(project='emanuelm/assessor')
+    run = neptune.init(run="AS-208", project='emanuelm/assessor')
     train()
 
