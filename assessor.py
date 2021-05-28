@@ -3,7 +3,7 @@ import torch.nn as nn
 import torchvision.models as models
 from torch import sigmoid
 import torch
-from torch.optim import Adam
+from torch.optim import Adam, SGD
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 import numpy as np
@@ -133,7 +133,7 @@ def train():
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-5, weight_decay=0.1)
+    optimizer = SGD(model.parameters(), lr=1e-5, weight_decay=0.1)
 
     best_loss = None
 
