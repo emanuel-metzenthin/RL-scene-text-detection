@@ -56,11 +56,11 @@ def main(cfg):
         "num_workers": 0,
         "num_gpus_per_worker": 0.5 if torch.cuda.is_available() else 0,
         "num_envs_per_worker": cfg.training.envs_per_worker,
-        "rollout_fragment_length": 50,
+        "rollout_fragment_length": 4,
         "learning_starts": 0,
         "framework": "torch",
         "compress_observations": True,
-        "render_env": False,
+        "render_env": True,
         "logger_config": cfg,
         "observation_filter": lambda x: NormalizeFilter(),
         "seed": cfg.training.random_seed
@@ -90,6 +90,6 @@ def main(cfg):
 
 
 if __name__ == "__main__":
-    ray.init()
+    ray.init(local_mode=True)
 
     main()
