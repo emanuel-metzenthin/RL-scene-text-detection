@@ -157,9 +157,9 @@ def train():
                 mse_loss.backward()
                 optimizer.step()
 
-                pred_mins.append(torch.min(pred).detach())
-                pred_maxs.append(torch.max(pred).detach())
-                pred_vars.append(torch.var(pred).detach())
+                pred_mins.append(torch.min(pred).detach().cpu())
+                pred_maxs.append(torch.max(pred).detach().cpu())
+                pred_vars.append(torch.var(pred).detach().cpu())
 
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
