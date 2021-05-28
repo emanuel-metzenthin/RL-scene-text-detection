@@ -127,10 +127,10 @@ def train():
     model.to(device)
     model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset('/mnt/ssd/emanuel/data/iou_samples_larger')
-    val_data = AssessorDataset('/home/emanuel/data/assessor_data2/val', split="val")
-    train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=32)
+    train_data = AssessorDataset('../data/assessor_data/christian/iou_samples/train')
+    val_data = AssessorDataset('../data/assessor_data/christian/iou_samples/val', split="val")
+    train_loader = DataLoader(train_data, batch_size=128, shuffle=False)
+    val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
     optimizer = Adam(model.parameters(), lr=1e-5, weight_decay=0.1)
@@ -140,6 +140,9 @@ def train():
     for epoch in range(300):
         val_losses = []
         train_losses = []
+        pred_mins = []
+        pred_maxs = []
+        pred_vars = []
 
         model.train()
         with tqdm(train_loader) as train_epoch:
@@ -154,13 +157,17 @@ def train():
                 mse_loss.backward()
                 optimizer.step()
 
+                pred_mins.append(torch.min(pred).detach())
+                pred_maxs.append(torch.max(pred).detach())
+                pred_vars.append(torch.var(pred).detach())
+
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
 
             run['train/loss'].log(np.mean(train_losses))
-            run['train/pred_min'].log(torch.min(pred).detach())
-            run['train/pred_max'].log(torch.max(pred).detach())
-            run['train/pred_var'].log(torch.var(pred).detach())
+            run['train/pred_min'].log(np.min(pred_mins))
+            run['train/pred_max'].log(np.max(pred_maxs))
+            run['train/pred_var'].log(np.mean(pred_vars))
 
         with tqdm(val_loader) as val_epoch:
             model.eval()
