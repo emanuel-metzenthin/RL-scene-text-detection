@@ -53,8 +53,8 @@ def main(cfg):
         },
         "lr": 1e-4,  # try different lrs
         "gamma": cfg.training.loss.gamma,
-        "num_workers": 1,
-        "num_gpus_per_worker": 1 if torch.cuda.is_available() else 0,
+        "num_workers": 0,
+        "num_gpus_per_worker": 0.5 if torch.cuda.is_available() else 0,
         "num_envs_per_worker": cfg.training.envs_per_worker,
         "rollout_fragment_length": 50,
         "learning_starts": 0,
