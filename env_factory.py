@@ -39,8 +39,8 @@ class EnvFactory:
         return env
 
     @staticmethod
-    def create_eval_env(name):
-        dataset = EnvFactory.load_dataset(name, "../data/simple")
+    def create_eval_env(name, path):
+        dataset = EnvFactory.load_dataset(name, path)
 
         env = TextLocEnv(
             dataset.images, dataset.gt,

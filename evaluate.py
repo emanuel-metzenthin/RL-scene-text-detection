@@ -47,17 +47,18 @@ def evaluate(agent, env):
 
         zipf.close()
 
-        os.system('python ICDAR13_eval_script/script.py -g=ICDAR13_eval_script/sign_gt.zip -s=results/res.zip') # -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\' ?
+        os.system('python ICDAR13_eval_script/script.py -g=ICDAR13_eval_script/simple_gt.zip -s=results/res.zip') # -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\' ?
 
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint_path", type=str)
+    parser.add_argument("data_path", type=str)
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env("simple")
+    test_env = EnvFactory.create_eval_env("simple", args.data_path)
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
