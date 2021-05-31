@@ -13,12 +13,13 @@ os.mkdir("./simple_gt")
 zipf = zipfile.ZipFile('./simple_gt/simple_gt.zip', 'w', zipfile.ZIP_DEFLATED)
 
 for i, bb_list in enumerate(bboxes):
-    test_file = open(f'./results/res_img_{i}.txt', 'w+')
+    test_file = open(f'./results/gt_img_{i}.txt', 'w+')
 
     for bb in bb_list:
         test_file.write(f"{','.join(map(str, bb))}\n")
 
     test_file.close()
-    zipf.write(f'./simple_gt/res_img_{i}.txt', arcname=f'res_img_{i}.txt')
+    zipf.write(f'./simple_gt/gt_img_{i}.txt', arcname=f'res_img_{i}.txt')
 
 zipf.close()
+os.mkdir()
