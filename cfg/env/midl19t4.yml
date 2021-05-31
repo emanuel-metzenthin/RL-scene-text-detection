@@ -1,4 +1,5 @@
 # @package _group_
+random_seed: 20301
 steps_per_image: 100
 steps_per_epoch: 6000
 
