@@ -44,7 +44,8 @@ def evaluate(agent, env):
                 # test_file.write(f"{','.join(map(str, map(int, bbox)))}\n") # ICDAR13
                 test_file.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}')  # ICDAR15
 
-            avg_ious.append(np.mean(env.episode_trigger_ious))
+            if env.episode_trigger_ious:
+                avg_ious.append(np.mean(env.episode_trigger_ious))
             test_file.close()
             zipf.write(f'./results/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
 
@@ -53,7 +54,6 @@ def evaluate(agent, env):
         os.system('python ICDAR15_eval_script/script.py -g=ICDAR15_eval_script/simple_gt.zip -s=results/res.zip')
 
         print(f"Average IoU: {np.mean(avg_ious)}")
-
 
 
 if __name__ == '__main__':
