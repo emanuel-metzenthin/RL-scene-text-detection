@@ -36,7 +36,7 @@ def evaluate(agent, env):
                 action = agent.compute_actions(obs)
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action[_DUMMY_AGENT_ID])
-                env.render()
+                #env.render()
                 # time.sleep(0.1)
 
             for bbox in env.episode_pred_bboxes:
@@ -70,6 +70,7 @@ if __name__ == '__main__':
                 "dueling": True
             }
         },
+        "num_gpus_per_worker": 1,
         "explore": False,
         "framework": "torch",
     }
