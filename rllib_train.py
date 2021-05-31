@@ -60,10 +60,10 @@ def main(cfg):
         "learning_starts": 0,
         "framework": "torch",
         "compress_observations": True,
-        "render_env": True,
         "logger_config": cfg,
         "observation_filter": lambda x: NormalizeFilter(),
-        "seed": cfg.training.random_seed
+        "seed": cfg.training.random_seed,
+        "batch_mode": "complete_episodes"
     }
 
     stop = {
