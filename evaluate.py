@@ -42,6 +42,7 @@ def evaluate(agent, env):
 
             for bbox in env.episode_pred_bboxes:
                 # test_file.write(f"{','.join(map(str, map(int, bbox)))}\n") # ICDAR13
+                bbox = list(map(int, bbox))
                 test_file.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}')  # ICDAR15
 
             if env.episode_trigger_ious:
