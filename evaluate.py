@@ -13,6 +13,7 @@ from text_localization_environment import TextLocEnv
 from tqdm import tqdm
 
 from DQN import RLLibImageDQN
+from NormalizeFilter import NormalizeFilter
 from env_factory import EnvFactory
 
 
@@ -72,6 +73,7 @@ if __name__ == '__main__':
         },
         "num_gpus_per_worker": 1,
         "explore": False,
+        "observation_filter": lambda x: NormalizeFilter(),
         "framework": "torch",
     }
 
