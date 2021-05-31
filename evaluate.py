@@ -37,18 +37,19 @@ def evaluate(agent, env):
                 action = agent.compute_actions(obs)
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action[_DUMMY_AGENT_ID])
-                #env.render()
+                # env.render()
                 # time.sleep(0.1)
 
             for bbox in env.episode_pred_bboxes:
-                test_file.write(f"{','.join(map(str, map(int, bbox)))}\n")
+                # test_file.write(f"{','.join(map(str, map(int, bbox)))}\n") # ICDAR13
+                test_file.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}')  # ICDAR15
 
             test_file.close()
             zipf.write(f'./results/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
 
         zipf.close()
 
-        os.system('python ICDAR13_eval_script/script.py -g=ICDAR13_eval_script/simple_gt.zip -s=results/res.zip') # -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\' ?
+        os.system('python ICDAR15_eval_script/script.py -g=ICDAR13_eval_script/simple_gt.zip -s=results/res.zip') # -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\' ?
 
 
 if __name__ == '__main__':
