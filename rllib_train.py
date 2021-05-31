@@ -64,6 +64,7 @@ def main(cfg):
         "logger_config": cfg,
         "observation_filter": lambda x: NormalizeFilter(),
         "seed": cfg.training.random_seed,
+        "log_sys_usage": False
     }
 
     stop = {
