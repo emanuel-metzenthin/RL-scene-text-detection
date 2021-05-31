@@ -16,7 +16,8 @@ for i, bb_list in enumerate(bboxes):
     test_file = open(f'./simple_gt/gt_img_{i}.txt', 'w+')
 
     for bb in bb_list:
-        test_file.write(f"{','.join(map(str, bb))}\n")
+        box = f"{bb[0]},{bb[0][1]},{bb[1][0]},{bb[1][1]},\n"
+        test_file.write(box)
 
     test_file.close()
     zipf.write(f'./simple_gt/gt_img_{i}.txt', arcname=f'res_img_{i}.txt')
