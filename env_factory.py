@@ -8,7 +8,7 @@ from dataset.simple_dataset import SimpleDataset
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, data_path, split: Text = 'train'):
+    def load_dataset(dataset, data_path, split: Text = 'validation'):
         if dataset == "icdar2013":
             return ICDARDataset(path=data_path, split=split)
         elif dataset == "sign":
@@ -34,11 +34,13 @@ class EnvFactory:
             has_intermediate_reward=cfg.env.intermediate_reward
         )
 
+        env.seed(cfg.env.random_seed)
+
         return env
 
     @staticmethod
-    def create_eval_env(name):
-        dataset = EnvFactory.load_dataset(name, "../data/dataset-generator")
+    def create_eval_env(name, path):
+        dataset = EnvFactory.load_dataset(name, path)
 
         env = TextLocEnv(
             dataset.images, dataset.gt,

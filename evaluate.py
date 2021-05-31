@@ -6,10 +6,13 @@ import numpy as np
 import ray
 import torch
 from ray.rllib.agents.dqn.dqn import DQNTrainer, DEFAULT_CONFIG as DQN_CONFIG
+from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
 from ray.tune.utils import merge_dicts
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
+
+from DQN import RLLibImageDQN
 from env_factory import EnvFactory
 
 
@@ -34,7 +37,7 @@ def evaluate(agent, env):
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action[_DUMMY_AGENT_ID])
                 env.render()
-                time.sleep(0.1)
+                # time.sleep(0.1)
 
             for bbox in env.episode_pred_bboxes:
                 test_file.write(f"{','.join(map(str, map(int, bbox)))}\n")
@@ -44,48 +47,33 @@ def evaluate(agent, env):
 
         zipf.close()
 
-        os.system('python ICDAR13_eval_script/script.py -g=ICDAR13_eval_script/sign_gt.zip -s=results/res.zip -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\'')
+        os.system('python ICDAR13_eval_script/script.py -g=ICDAR13_eval_script/simple_gt.zip -s=results/res.zip') # -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\' ?
 
 
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("checkpoint_path", type=str)
+    parser.add_argument("data_path", type=str)
+    args = parser.parse_args()
+
     ray.init()
-    test_env = EnvFactory.create_eval_env("simple")
+    test_env = EnvFactory.create_eval_env("simple", args.data_path)
     register_env("textloc", lambda config: test_env)
+    ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
         "env": "textloc",
         "num_gpus": 1 if torch.cuda.is_available() else 0,
         "model": {
-            "dim": 224,
-            "conv_filters": [
-                [64, (1, 1), 1],
-                [32, (9, 9), 1],
-                [32, (8, 8), 4],
-                [16, (9, 9), 4],
-                [16, (7, 7), 5],
-                [8, (2, 2), 2],
-            ],
+            "custom_model": "imagedqn",
+            "custom_model_config": {
+                "dueling": True
+            }
         },
+        "explore": False,
         "framework": "torch",
     }
 
     agent = DQNTrainer(config=config)
-    agent.restore('./checkpoints/simple_cnn_checkpoint')
+    agent.restore(args.checkpoint_path)
     evaluate(agent, test_env)
-
-    # ious = []
-    # for i in range(1000):
-    #     gt = []
-    #     for line in open(f'sign_gt/gt_img_{i}.txt').readlines():
-    #         gt.append(list(map(int, line.split(',')[:4])))
-    #
-    #     res = []
-    #     for line in open(f'sign_res/res_img_{i}.txt').readlines():
-    #         res.append(list(map(int, line.split(',')[:4])))
-    #
-    #     test_env.episode_true_bboxes = gt
-    #     for b in res:
-    #         print('..')
-    #         test_env.bbox = b
-    #         ious.append(test_env.compute_best_iou())
-    # print(ious)
-    # print(np.mean(ious))
