@@ -23,9 +23,9 @@ def evaluate(agent, env):
     with tqdm(range(num_images)) as timages:
         _DUMMY_AGENT_ID = "agent0"
 
-        print("Creating .zip file")
         zipf = zipfile.ZipFile('./results/res.zip', 'w', zipfile.ZIP_DEFLATED)
 
+        avg_ious = []
         for image_idx in timages:
             if not os.path.exists('./results'):
                 os.makedirs('./results')
@@ -44,12 +44,16 @@ def evaluate(agent, env):
                 # test_file.write(f"{','.join(map(str, map(int, bbox)))}\n") # ICDAR13
                 test_file.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}')  # ICDAR15
 
+            avg_ious.append(np.mean(env.episode_trigger_ious))
             test_file.close()
             zipf.write(f'./results/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
 
         zipf.close()
 
-        os.system('python ICDAR15_eval_script/script.py -g=ICDAR13_eval_script/simple_gt.zip -s=results/res.zip') # -p=\'{\"AREA_RECALL_CONSTRAINT\":0.5}\' ?
+        os.system('python ICDAR15_eval_script/script.py -g=ICDAR15_eval_script/simple_gt.zip -s=results/res.zip')
+
+        print(f"Average IoU: {np.mean(avg_ious)}")
+
 
 
 if __name__ == '__main__':
