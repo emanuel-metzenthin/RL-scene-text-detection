@@ -121,7 +121,6 @@ class AssessorModel(nn.Module):
 
 
 def train():
-    EPS = 0.0001
     model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
@@ -133,11 +132,11 @@ def train():
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
-    optimizer = SGD(model.parameters(), lr=1e-5, weight_decay=0.1)
+    optimizer = Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
-    for epoch in range(300):
+    for epoch in range(500):
         val_losses = []
         train_losses = []
         pred_mins = []
@@ -168,7 +167,7 @@ def train():
             run['train/pred_min'].log(np.min(pred_mins))
             run['train/pred_max'].log(np.max(pred_maxs))
             run['train/pred_var'].log(np.mean(pred_vars))
-
+        
         with tqdm(val_loader) as val_epoch:
             model.eval()
             for input, labels in val_epoch:
@@ -191,6 +190,6 @@ def train():
 
 
 if __name__ == '__main__':
-    run = neptune.init(run="AS-208", project='emanuelm/assessor')
+    run = neptune.init(project='emanuelm/assessor')
     train()
 
