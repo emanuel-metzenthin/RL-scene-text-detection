@@ -18,7 +18,7 @@ from env_factory import EnvFactory
 
 
 def evaluate(agent, env):
-    num_images = 1000 # len(test_dataset.images)
+    num_images = len(test_dataset.images)
 
     with tqdm(range(num_images)) as timages:
         _DUMMY_AGENT_ID = "agent0"
