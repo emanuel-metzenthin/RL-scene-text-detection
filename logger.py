@@ -107,3 +107,6 @@ class NeptuneLogger(tune.logger.LoggerCallback):
                     self.run[prefixed_key].log(float(value))
                 # Otherwise ignore
 
+    def upload(self, name, artefact):
+        self.run[name].upload(artefact)
+
