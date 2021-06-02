@@ -29,7 +29,8 @@ def main(cfg):
         "num_gpus": 1 if torch.cuda.is_available() else 0,
         "buffer_size": cfg.env.replay_buffer.size,
         "train_batch_size": cfg.training.batch_size,
-        "prioritized_replay": True,
+        #"train_batch_size": tune.grid_search([32, 64, 128]),
+        #"prioritized_replay": True,
         "model": {
             "dim": 224,
             "conv_filters": [
@@ -56,7 +57,7 @@ def main(cfg):
         "num_workers": 0,
         "num_gpus_per_worker": 0.5 if torch.cuda.is_available() else 0,
         "num_envs_per_worker": cfg.training.envs_per_worker,
-        "rollout_fragment_length": 4,
+        "rollout_fragment_length": 1,
         "learning_starts": 0,
         "framework": "torch",
         "compress_observations": True,
@@ -75,7 +76,7 @@ def main(cfg):
         config["model"] = {
             "custom_model": "imagedqn",
             "custom_model_config": {
-                "dueling": True
+                "dueling": False
             }
         }
     logger = []
@@ -85,12 +86,12 @@ def main(cfg):
     if cfg.restore:
         tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=logger)
     else:
-        tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=logger)
+        tune.run(SimpleQTrainer, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=logger)
 
     ray.shutdown()
 
 
 if __name__ == "__main__":
-    ray.init(local_mode=True)
+    ray.init()
 
     main()

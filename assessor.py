@@ -149,11 +149,7 @@ def train(train_path, val_path):
     model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
-<<<<<<< HEAD
-    #model.load_state_dict(torch.load('assessor_model.pt'))
-=======
     # model.load_state_dict(torch.load('assessor_model.pt'))
->>>>>>> 2194dd2368c501f31b8526aecc2483621f3e6453
 
     train_data = AssessorDataset(train_path)
     val_data = AssessorDataset(val_path, split="val")
