@@ -9,6 +9,7 @@ from tqdm import tqdm
 import numpy as np
 from torch import sigmoid
 from dataset.assessor_dataset import AssessorDataset
+from logger import NeptuneLogger
 from radam import RAdam
 
 
@@ -84,7 +85,7 @@ class AddCoord(nn.Module):
 
 
 class AssessorModel(nn.Module):
-    def __init__(self):
+    def __init__(self, train_dataloader=None):
         super().__init__()
         # backbone_model = models.resnet18(pretrained=False)
         # self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
@@ -107,6 +108,13 @@ class AssessorModel(nn.Module):
         )
         self.resnet.apply(self.init_weights)
 
+        self.optimizer = Adam(self.parameters(), lr=1e-4)
+        self.criterion = nn.MSELoss()
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+        self.train_dataloader = train_dataloader
+        # self.val_dataloader = val_dataloader
+
     def forward(self, X):
         # feat = self.feature_extractor(X)
         # return sigmoid(self.linear(feat.squeeze()))
@@ -119,12 +127,29 @@ class AssessorModel(nn.Module):
         if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
             torch.nn.init.normal(m.weight, 0.02)
 
+    def train_one_step(self):
+        self.train()
+
+        input, labels = next(iter(self.train_dataloader))
+        input = input.to(self.device)
+        labels = labels.to(self.device)
+        self.optimizer.zero_grad()
+        pred = self(input)
+        mse_loss = self.criterion(pred.float(), labels.float())
+        mse_loss.backward()
+        self.optimizer.step()
+
+        print(f"Assessor loss: {mse_loss}")
+
+    def evaluate_one_epoch(self):
+        pass
+
 
 def train():
     model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
-    model.load_state_dict(torch.load('assessor_model.pt'))
+    #model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset('/home/emanuel/data/iou_samples/train')
     val_data = AssessorDataset('/home/emanuel/data/assessor_data2/val', split="val")
@@ -132,7 +157,7 @@ def train():
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4)
+    optimizer = RAdam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
@@ -162,12 +187,15 @@ def train():
 
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
-
-            run['train/loss'].log(np.mean(train_losses))
-            run['train/pred_min'].log(np.min(pred_mins))
-            run['train/pred_max'].log(np.max(pred_maxs))
-            run['train/pred_var'].log(np.mean(pred_vars))
         
+            result = {
+                'train/loss': np.mean(train_losses),
+                'train/pred_min': np.min(pred_mins),
+                'train/pred_max': np.min(pred_maxs),
+                'train/pred_var': np.min(pred_vars),
+            }
+            logger.log_trial_result(None, None, result)
+
         with tqdm(val_loader) as val_epoch:
             model.eval()
             for input, labels in val_epoch:
@@ -181,15 +209,17 @@ def train():
 
                 val_epoch.set_postfix({'val_loss': mean_val_loss})
 
-            run['val/loss'].log(mean_val_loss)
+            logger.log_trial_result(None, None, {'val/loss': mean_val_loss})
 
         if not best_loss or mean_val_loss < best_loss:
             torch.save(model.state_dict(), 'assessor_model.pt')
-            run['model'].upload('assessor_model.pt')
+            logger.log_trial_result(None, None, {'val/loss': mean_val_loss})
+            #logger.upload('model', 'assessor_model.pt')
             best_loss = mean_val_loss
 
 
 if __name__ == '__main__':
-    run = neptune.init(project='emanuelm/assessor')
+    logger = NeptuneLogger({})
+
     train()
 
