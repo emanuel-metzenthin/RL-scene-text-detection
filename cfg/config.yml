@@ -39,6 +39,10 @@ dataset: simple
 
 data_path: /Users/Emanuel/Documents/Studium/Master/Masterarbeit/data/600_3_signs_3_words
 
+eval_data_path: null
+
+assessor_data_path: null
+
 log_dir: /Users/Emanuel/ray_results
 
 restore: null

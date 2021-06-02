@@ -1,5 +1,7 @@
 import argparse
 import json
+import os
+from os import environ
 from typing import Optional, Type
 
 import torch
@@ -7,6 +9,7 @@ from ray.rllib.agents.dqn import SimpleQTFPolicy, SimpleQTorchPolicy, SimpleQTra
 from ray.rllib.utils.typing import TrainerConfigDict
 
 from NormalizeFilter import NormalizeFilter
+from callbacks import EvaluationCallbacks
 from env_factory import EnvFactory
 import hydra
 import ray
@@ -17,11 +20,16 @@ from ray.rllib.agents.dqn.dqn import DEFAULT_CONFIG as DQN_CONFIG, DQNTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
 from DQN import RLLibImageDQN
+from evaluate import evaluate
 from logger import NeptuneLogger
-
 
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg):
+    def custom_eval_fn(trainer, eval_workers):
+        eval_env = EnvFactory.create_eval_env(cfg.dataset, cfg.eval_data_path)
+        return evaluate(trainer, eval_env)
+
+    environ['WORKING_DIR'] = os.getcwd()
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg.data_path, cfg))
     config = {
@@ -64,7 +72,9 @@ def main(cfg):
         "observation_filter": lambda x: NormalizeFilter(),
         "seed": cfg.training.random_seed,
         "batch_mode": "complete_episodes",
-        "log_sys_usage": False
+        "log_sys_usage": False,
+        "custom_eval_function": custom_eval_fn,
+        "evaluation_interval": 300
     }
 
     stop = {
@@ -78,14 +88,12 @@ def main(cfg):
                 "dueling": True
             }
         }
-    logger = []
+    callbacks = []
     if not cfg.neptune.offline:
-        logger += (NeptuneLogger(cfg),)
+        logger = NeptuneLogger(cfg)
+        callbacks += (logger,)
 
-    if cfg.restore:
-        tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=logger)
-    else:
-        tune.run(DQNTrainer, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=logger)
+    tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=callbacks)
 
     ray.shutdown()
 
