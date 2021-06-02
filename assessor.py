@@ -145,14 +145,18 @@ class AssessorModel(nn.Module):
         pass
 
 
-def train():
+def train(train_path, val_path):
     model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
+<<<<<<< HEAD
     #model.load_state_dict(torch.load('assessor_model.pt'))
+=======
+    # model.load_state_dict(torch.load('assessor_model.pt'))
+>>>>>>> 2194dd2368c501f31b8526aecc2483621f3e6453
 
-    train_data = AssessorDataset('/home/emanuel/data/iou_samples/train')
-    val_data = AssessorDataset('/home/emanuel/data/assessor_data2/val', split="val")
+    train_data = AssessorDataset(train_path)
+    val_data = AssessorDataset(val_path, split="val")
     train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=64)
 
@@ -187,14 +191,11 @@ def train():
 
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
-        
-            result = {
-                'train/loss': np.mean(train_losses),
-                'train/pred_min': np.min(pred_mins),
-                'train/pred_max': np.min(pred_maxs),
-                'train/pred_var': np.min(pred_vars),
-            }
-            logger.log_trial_result(None, None, result)
+
+            run['train/loss'].log(np.mean(train_losses))
+            run['train/pred_min'].log(np.min(pred_mins))
+            run['train/pred_max'].log(np.max(pred_maxs))
+            run['train/pred_var'].log(np.mean(pred_vars))
 
         with tqdm(val_loader) as val_epoch:
             model.eval()
@@ -209,17 +210,21 @@ def train():
 
                 val_epoch.set_postfix({'val_loss': mean_val_loss})
 
-            logger.log_trial_result(None, None, {'val/loss': mean_val_loss})
+            run['val/loss'].log(mean_val_loss)
 
         if not best_loss or mean_val_loss < best_loss:
             torch.save(model.state_dict(), 'assessor_model.pt')
-            logger.log_trial_result(None, None, {'val/loss': mean_val_loss})
-            #logger.upload('model', 'assessor_model.pt')
+            run['model'].upload('assessor_model.pt')
             best_loss = mean_val_loss
 
 
 if __name__ == '__main__':
-    logger = NeptuneLogger({})
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("train_path", default='/home/emanuel/data/iou_samples/train')
+    parser.add_argument("val_path", default='/home/emanuel/data/assessor_data2/val')
+    args = parser.parse_args()
 
-    train()
+    run = neptune.init(project='emanuelm/assessor')
+    train(args.train_path, args.val_path)
 
