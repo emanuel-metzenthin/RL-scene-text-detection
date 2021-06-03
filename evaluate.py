@@ -55,6 +55,8 @@ def evaluate(agent, env):
 
             for bbox in env.episode_pred_bboxes:
                 bbox = list(map(int, bbox))
+                if bbox[0] < 0 and bbox[2] < 0 or bbox[1] < 0 and bbox[3] < 0:
+                    continue
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}')  # ICDAR 2015
 
