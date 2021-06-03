@@ -47,4 +47,4 @@ log_dir: /Users/Emanuel/ray_results
 
 restore: null
 
-custom_model: false
+custom_model: true

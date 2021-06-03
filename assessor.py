@@ -161,7 +161,7 @@ def train(train_path, val_path):
 
     best_loss = None
 
-    for epoch in range(300):
+    for epoch in range(500):
         val_losses = []
         train_losses = []
         pred_mins = []
