@@ -153,7 +153,7 @@ def train(train_path, val_path):
 
     train_data = AssessorDataset(train_path)
     val_data = AssessorDataset(val_path, split="val")
-    train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
+    train_loader = DataLoader(train_data, batch_size=64, shuffle=False)
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
