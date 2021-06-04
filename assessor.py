@@ -157,11 +157,12 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
-    optimizer = RAdam(model.parameters(), lr=1e-4)
+    optimizer = Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
     for epoch in range(500):
+
         val_losses = []
         train_losses = []
         pred_mins = []
