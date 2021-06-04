@@ -25,10 +25,10 @@ class Dataset(Dataset):
         return image, gt
 
     def transform(self, image):
-        augm = Compose([
-            GaussianBlur(5),
-            ColorJitter(hue=0.2, saturation=0.2, contrast=0.25),
-        ])
+        # augm = Compose([
+        #     GaussianBlur(5),
+        #     ColorJitter(hue=0.2, saturation=0.2, contrast=0.25),
+        # ])
 
         resize = Compose([
             Resize((224, 224)),
@@ -36,13 +36,13 @@ class Dataset(Dataset):
             # Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
 
-        if self.split == "train":
-            transforms = Compose([
-                augm,
-                resize
-            ])
-        else:
-            transforms = resize
+        # if self.split == "train":
+        #     transforms = Compose([
+        #         # augm,
+        #         resize
+        #     ])
+        # else:
+        transforms = resize
 
         return transforms(image)
 
