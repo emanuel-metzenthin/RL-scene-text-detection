@@ -5,11 +5,10 @@ from os import environ
 from typing import Optional, Type
 
 import torch
-from ray.rllib.agents.dqn import SimpleQTFPolicy, SimpleQTorchPolicy, SimpleQTrainer
+from ray.rllib.agents.dqn import SimpleQTrainer
 from ray.rllib.utils.typing import TrainerConfigDict
 
 from NormalizeFilter import NormalizeFilter
-from callbacks import EvaluationCallbacks
 from env_factory import EnvFactory
 import hydra
 import ray
@@ -37,8 +36,6 @@ def main(cfg):
         "num_gpus": 1 if torch.cuda.is_available() else 0,
         "buffer_size": cfg.env.replay_buffer.size,
         "train_batch_size": cfg.training.batch_size,
-        #"train_batch_size": tune.grid_search([32, 64, 128]),
-        #"prioritized_replay": True,
         "model": {
             "dim": 224,
             "conv_filters": [
@@ -56,10 +53,15 @@ def main(cfg):
             }),
         "exploration_config": {
             "type": "EpsilonGreedy",
-            "initial_epsilon": cfg.env.epsilon.start,
-            "final_epsilon": cfg.env.epsilon.end,
+            "initial_epsilon": 0, # cfg.env.epsilon.start,
+            "final_epsilon": 0, #cfg.env.epsilon.end,
             "epsilon_timesteps": cfg.env.epsilon.decay_steps * cfg.training.envs_per_worker,
         },
+        "n_step": 3,
+        "num_atoms": 51,
+        "v_min": -3,
+        "v_max": 70,
+        "noisy": True,
         "lr": 1e-4,  # try different lrs
         "gamma": cfg.training.loss.gamma,
         "num_workers": 0,
