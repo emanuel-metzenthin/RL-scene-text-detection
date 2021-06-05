@@ -53,8 +53,8 @@ def main(cfg):
             }),
         "exploration_config": {
             "type": "EpsilonGreedy",
-            "initial_epsilon": 0, # cfg.env.epsilon.start,
-            "final_epsilon": 0, #cfg.env.epsilon.end,
+            "initial_epsilon": cfg.env.epsilon.start,
+            "final_epsilon": cfg.env.epsilon.end,
             "epsilon_timesteps": cfg.env.epsilon.decay_steps * cfg.training.envs_per_worker,
         },
         "n_step": 3,
@@ -81,14 +81,14 @@ def main(cfg):
     }
 
     stop = {
-        "episode_reward_mean": 70,
+        "training_iterations": 3000,
     }
 
     if cfg.custom_model:
         config["model"] = {
             "custom_model": "imagedqn",
             "custom_model_config": {
-                "dueling": False
+                "dueling": True
             }
         }
     callbacks = []
