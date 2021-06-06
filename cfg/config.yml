@@ -27,7 +27,7 @@ training:
   sync_rate: 100
   update_interval: 1
 
-  envs_per_worker: 10
+  envs_per_worker: 1
 
   loss:
     gamma: 0.95
