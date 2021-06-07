@@ -8,6 +8,7 @@ import ray
 import json
 import re
 import torch
+from ray.rllib.agents.dqn import SimpleQTrainer
 import uuid
 from ray.rllib.agents.dqn.dqn import DQNTrainer, DEFAULT_CONFIG as DQN_CONFIG
 from ray.rllib.models import ModelCatalog
@@ -24,7 +25,6 @@ from logger import NeptuneLogger
 
 def evaluate(agent, env):
     num_images = len(env.image_paths)
-    num_images = 2
     cwd = os.environ['WORKING_DIR']
     dir_name_13 = f'{cwd}/results_ic13_{uuid.uuid4()[:8]}'
     dir_name_15 = f'{cwd}/results_ic15_{uuid.uuid4()[:8]}'
@@ -126,7 +126,7 @@ if __name__ == '__main__':
         "model": {
             "custom_model": "imagedqn",
             "custom_model_config": {
-                "dueling": True
+                "dueling": False
             }
         },
         "num_gpus_per_worker": 1,
@@ -135,6 +135,6 @@ if __name__ == '__main__':
         "framework": "torch",
     }
 
-    agent = DQNTrainer(config=config)
+    agent = SimpleQTrainer(config=config)
     agent.restore(args.checkpoint_path)
     evaluate(agent, test_env)
