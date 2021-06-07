@@ -10,9 +10,10 @@ from torchvision.transforms import Compose, Resize, ToTensor, Normalize, Gaussia
 
 
 class Dataset(Dataset):
-    def __init__(self, path: Text, split: Text = 'train'):
+    def __init__(self, path: Text, split: Text = 'train', img_size=(224, 224)):
         self.path = path
         self.split = split
+        self.img_size = img_size
         self._load_images_and_gt()
 
     def __getitem__(self, index) -> T_co:
@@ -31,7 +32,7 @@ class Dataset(Dataset):
         # ])
 
         resize = Compose([
-            Resize((224, 224)),
+            Resize(self.img_size),
             ToTensor(),
             # Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])

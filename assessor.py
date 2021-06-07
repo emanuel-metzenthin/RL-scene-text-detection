@@ -151,9 +151,9 @@ def train(train_path, val_path):
     model.to(device)
     #model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset(train_path)
-    val_data = AssessorDataset(val_path, split="val")
-    train_loader = DataLoader(train_data, batch_size=64, shuffle=False)
+    train_data = AssessorDataset(train_path, img_size=(64, 200))
+    val_data = AssessorDataset(val_path, split="val", img_size=(64, 200))
+    train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
