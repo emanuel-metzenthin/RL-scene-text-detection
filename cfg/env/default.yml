@@ -12,6 +12,8 @@ epsilon:
   end: 0.1
   decay_steps: 100000
 
+curiosity: false
+
 max_reward: 200
 
 full_playout: false
