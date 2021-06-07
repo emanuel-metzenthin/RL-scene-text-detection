@@ -9,6 +9,7 @@ import json
 import re
 import torch
 from ray.rllib.agents.dqn import SimpleQTrainer
+import uuid
 from ray.rllib.agents.dqn.dqn import DQNTrainer, DEFAULT_CONFIG as DQN_CONFIG
 from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
@@ -25,25 +26,22 @@ from logger import NeptuneLogger
 def evaluate(agent, env):
     num_images = len(env.image_paths)
     cwd = os.environ['WORKING_DIR']
+    dir_name_13 = f'{cwd}/results_ic13_{uuid.uuid4()[:8]}'
+    dir_name_15 = f'{cwd}/results_ic15_{uuid.uuid4()[:8]}'
 
     with tqdm(range(num_images)) as timages:
         _DUMMY_AGENT_ID = "agent0"
 
-        if os.path.exists(f'{cwd}/results_ic13'):
-            shutil.rmtree(f'{cwd}/results_ic13/')
-        if os.path.exists(f'{cwd}/results_ic15'):
-            shutil.rmtree(f'{cwd}/results_ic15/')
+        os.makedirs(dir_name_13)
+        os.makedirs(dir_name_15)
 
-        os.makedirs(f'{cwd}/results_ic13')
-        os.makedirs(f'{cwd}/results_ic15')
-
-        zipf_ic13 = zipfile.ZipFile(f'{cwd}/results_ic13/res.zip', 'w', zipfile.ZIP_DEFLATED)
-        zipf_ic15 = zipfile.ZipFile(f'{cwd}/results_ic15/res.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf_ic13 = zipfile.ZipFile(f'{dir_name_13}/res.zip', 'w', zipfile.ZIP_DEFLATED)
+        zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
 
         avg_ious = []
         for image_idx in timages:
-            test_file_ic13 = open(f'{cwd}/results_ic13/res_img_{image_idx}.txt', 'w+')
-            test_file_ic15 = open(f'{cwd}/results_ic15/res_img_{image_idx}.txt', 'w+')
+            test_file_ic13 = open(f'{dir_name_13}/res_img_{image_idx}.txt', 'w+')
+            test_file_ic15 = open(f'{dir_name_15}/res_img_{image_idx}.txt', 'w+')
 
             obs = {_DUMMY_AGENT_ID: env.reset(image_index=image_idx)}
             done = False
@@ -67,8 +65,8 @@ def evaluate(agent, env):
             test_file_ic13.close()
             test_file_ic15.close()
 
-            zipf_ic13.write(f'{cwd}/results_ic13/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
-            zipf_ic15.write(f'{cwd}/results_ic15/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
+            zipf_ic13.write(f'{dir_name_13}/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
+            zipf_ic15.write(f'{dir_name_15}/res_img_{image_idx}.txt', arcname=f'res_img_{image_idx}.txt')
 
         zipf_ic13.close()
         zipf_ic15.close()
@@ -104,6 +102,9 @@ def evaluate(agent, env):
         print(f"IC13 results:\nprecision: {ic13_prec}, recall: {ic13_rec}, f1: {ic13_f1}")
         print(f"IC15 results:\nprecision: {ic15_prec}, recall: {ic15_rec}, f1: {ic15_f1}")
         print(f"Average IoU: {np.mean(avg_ious)}")
+
+        shutil.rmtree(dir_name_13)
+        shutil.rmtree(dir_name_15)
 
         return results
 
