@@ -149,7 +149,7 @@ def train(train_path, val_path):
     model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
-    # model.load_state_dict(torch.load('assessor_model.pt'))
+    #model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset(train_path)
     val_data = AssessorDataset(val_path, split="val")
@@ -157,7 +157,7 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4)
+    optimizer = RAdam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
