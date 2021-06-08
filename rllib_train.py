@@ -57,11 +57,11 @@ def main(cfg):
             "final_epsilon": cfg.env.epsilon.end,
             "epsilon_timesteps": cfg.env.epsilon.decay_steps * cfg.training.envs_per_worker,
         },
-        "n_step": 3,
-        "num_atoms": 51,
-        "v_min": -3,
-        "v_max": 70,
-        "noisy": True,
+        #"n_step": 3,
+        #"num_atoms": 51,
+        #"v_min": -3,
+        #"v_max": 70,
+        #"noisy": True,
         "lr": 1e-4,  # try different lrs
         "gamma": cfg.training.loss.gamma,
         "num_workers": 0,
@@ -81,7 +81,7 @@ def main(cfg):
     }
 
     stop = {
-        "training_iterations": 3000,
+        "training_iteration": 3000,
     }
 
     if cfg.custom_model:
