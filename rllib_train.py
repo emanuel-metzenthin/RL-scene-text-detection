@@ -77,7 +77,7 @@ def main(cfg):
         "batch_mode": "complete_episodes",
         "log_sys_usage": False,
         "custom_eval_function": custom_eval_fn,
-        "evaluation_interval": 300
+        "evaluation_interval": 300 if cfg.dataset == 'simple' else None
     }
 
     stop = {
