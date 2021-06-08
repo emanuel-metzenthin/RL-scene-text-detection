@@ -91,6 +91,30 @@ def main(cfg):
                 "dueling": True
             }
         }
+
+    if cfg.env.curiosity:
+        config["exploration_config"] = {
+            "type": "Curiosity",  # <- Use the Curiosity module for exploring.
+            "eta": 1.0,  # Weight for intrinsic rewards before being added to extrinsic ones.
+            "lr": 0.001,  # Learning rate of the curiosity (ICM) module.
+            "feature_dim": 288,  # Dimensionality of the generated feature vectors.
+            # Setup of the feature net (used to encode observations into feature (latent) vectors).
+            "feature_net_config": {
+                "fcnet_hiddens": [],
+                "fcnet_activation": "relu",
+            },
+            "inverse_net_hiddens": [256],  # Hidden layers of the "inverse" model.
+            "inverse_net_activation": "relu",  # Activation of the "inverse" model.
+            "forward_net_hiddens": [256],  # Hidden layers of the "forward" model.
+            "forward_net_activation": "relu",  # Activation of the "forward" model.
+            "beta": 0.2,  # Weight for the "forward" loss (beta) over the "inverse" loss (1.0 - beta).
+            # Specify, which exploration sub-type to use (usually, the algo's "default"
+            # exploration, e.g. EpsilonGreedy for DQN, StochasticSampling for PG/SAC).
+            "sub_exploration": {
+                "type": "StochasticSampling",
+            }
+        }
+
     callbacks = []
     if not cfg.neptune.offline:
         logger = NeptuneLogger(cfg)
