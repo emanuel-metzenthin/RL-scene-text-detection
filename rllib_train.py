@@ -25,7 +25,7 @@ from logger import NeptuneLogger
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg):
     def custom_eval_fn(trainer, eval_workers):
-        eval_env = EnvFactory.create_eval_env(cfg.dataset, cfg.eval_data_path)
+        eval_env = EnvFactory.create_eval_env(cfg.dataset, cfg.eval_data_path, cfg.eval_gt_file)
         return evaluate(trainer, eval_env)
 
     environ['WORKING_DIR'] = os.getcwd()
@@ -77,7 +77,7 @@ def main(cfg):
         "batch_mode": "complete_episodes",
         "log_sys_usage": False,
         "custom_eval_function": custom_eval_fn,
-        "evaluation_interval": 300 if cfg.dataset == 'simple' else None
+        "evaluation_interval": 300
     }
 
     stop = {

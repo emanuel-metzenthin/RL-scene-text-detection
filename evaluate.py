@@ -23,7 +23,7 @@ from env_factory import EnvFactory
 from logger import NeptuneLogger
 
 
-def evaluate(agent, env):
+def evaluate(agent, env, gt_file='simple_gt.zip'):
     num_images = len(env.image_paths)
     cwd = os.environ['WORKING_DIR']
     id = str(uuid.uuid4())[:8]
@@ -73,7 +73,7 @@ def evaluate(agent, env):
         zipf_ic15.close()
 
         stdout_ic13 = subprocess.run(['python', f'{cwd}/ICDAR13_eval_script/script.py',
-                                      f'-g={cwd}/ICDAR13_eval_script/simple_gt.zip', f'-s={dir_name_13}/res.zip'],
+                                      f'-g={cwd}/ICDAR13_eval_script/{gt_file}', f'-s={dir_name_13}/res.zip'],
                                      stdout=subprocess.PIPE).stdout
         results_ic13 = re.search('\{(.*)\}', str(stdout_ic13)).group(0)
         results_ic13 = json.loads(results_ic13)
@@ -82,7 +82,7 @@ def evaluate(agent, env):
         ic13_f1 = results_ic13['hmean']
 
         stdout_ic15 = subprocess.run(['python', f'{cwd}/ICDAR15_eval_script/script.py',
-                                      f'-g={cwd}/ICDAR15_eval_script/simple_gt.zip', f'-s={dir_name_15}/res.zip'],
+                                      f'-g={cwd}/ICDAR15_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
                                      stdout=subprocess.PIPE).stdout
         results_ic15 = re.search('\{(.*)\}', str(stdout_ic15)).group(0)
         results_ic15 = json.loads(results_ic15)

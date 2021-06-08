@@ -41,6 +41,8 @@ data_path: /Users/Emanuel/Documents/Studium/Master/Masterarbeit/data/600_3_signs
 
 eval_data_path: null
 
+eval_gt_file: simple_gt.zip
+
 assessor_data_path: null
 
 log_dir: /Users/Emanuel/ray_results
