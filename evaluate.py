@@ -26,8 +26,9 @@ from logger import NeptuneLogger
 def evaluate(agent, env):
     num_images = len(env.image_paths)
     cwd = os.environ['WORKING_DIR']
-    dir_name_13 = f'{cwd}/results_ic13_{str(uuid.uuid4())[:8]}'
-    dir_name_15 = f'{cwd}/results_ic15_{str(uuid.uuid4())[:8]}'
+    id = str(uuid.uuid4())[:8]
+    dir_name_13 = f'{cwd}/results_ic13_{id}'
+    dir_name_15 = f'{cwd}/results_ic15_{id}'
 
     with tqdm(range(num_images)) as timages:
         _DUMMY_AGENT_ID = "agent0"
