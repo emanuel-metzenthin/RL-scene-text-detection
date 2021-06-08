@@ -153,11 +153,11 @@ def train(train_path, val_path):
 
     train_data = AssessorDataset(train_path, img_size=(64, 200))
     val_data = AssessorDataset(val_path, split="val", img_size=(64, 200))
-    train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=64)
+    train_loader = DataLoader(train_data, batch_size=128, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4)
+    optimizer = Adam(model.parameters(), lr=1e-5)
 
     best_loss = None
 
@@ -193,6 +193,10 @@ def train(train_path, val_path):
             run['train/pred_min'].log(np.min(pred_mins))
             run['train/pred_max'].log(np.max(pred_maxs))
             run['train/pred_var'].log(np.mean(pred_vars))
+
+            del input
+            del labels
+            torch.cuda.empty_cache()
 
         with tqdm(val_loader) as val_epoch:
             model.eval()
