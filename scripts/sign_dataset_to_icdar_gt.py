@@ -21,7 +21,7 @@ for i, dict in enumerate(gt):
 
     for bb in bb_list:
         if args.type == 'ic13':
-            box = f"{','.join(bb)},\n"
+            box = f"{','.join(map(str, bb))},\n"
         else:
             box = f"{bb[0]},{bb[1]},{bb[2]},{bb[1]},{bb[2]},{bb[3]},{bb[0]},{bb[3]},\n"
         test_file.write(box)
