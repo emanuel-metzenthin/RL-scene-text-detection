@@ -25,8 +25,8 @@ from logger import NeptuneLogger
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg):
     def custom_eval_fn(trainer, eval_workers):
-        eval_env = EnvFactory.create_eval_env(cfg.dataset, cfg.eval_data_path, cfg.eval_gt_file)
-        return evaluate(trainer, eval_env)
+        eval_env = EnvFactory.create_eval_env(cfg.dataset, cfg.eval_data_path)
+        return evaluate(trainer, eval_env, cfg.eval_gt_file)
 
     environ['WORKING_DIR'] = os.getcwd()
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
