@@ -4,6 +4,7 @@ from random import randint
 import neptune.new as neptune
 import torch.nn as nn
 import torchvision.models as models
+from neptune.new.types import File
 from torch import sigmoid
 import torch
 from torch.optim import Adam, SGD
@@ -214,7 +215,7 @@ def train(train_path, val_path):
 
                 if i in log_batch_ids:
                     img_id = random.sample(range(len(pred)), 1)
-                    run[f'val/example_img_{pred[img_id]}'].upload(asarray(ToPILImage()(input[img_id])))
+                    run[f'val/example_img_{pred[img_id]}'].upload(File.as_image(ToPILImage()(input[img_id].squeeze())))
                 val_loss = criterion(pred, labels)
 
                 val_losses.append(val_loss.item())
