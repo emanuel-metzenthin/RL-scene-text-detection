@@ -1,3 +1,6 @@
+import random
+from random import randint
+
 import neptune.new as neptune
 import torch.nn as nn
 import torchvision.models as models
@@ -5,12 +8,14 @@ from torch import sigmoid
 import torch
 from torch.optim import Adam, SGD
 from torch.utils.data import Dataset, DataLoader
+from torchvision.transforms import ToPILImage
 from tqdm import tqdm
 import numpy as np
 from torch import sigmoid
 from dataset.assessor_dataset import AssessorDataset
 from logger import NeptuneLogger
 from radam import RAdam
+from numpy import asarray
 
 
 class ResBlock1(nn.Module):
@@ -157,7 +162,7 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-5)
+    optimizer = Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
@@ -200,10 +205,16 @@ def train(train_path, val_path):
 
         with tqdm(val_loader) as val_epoch:
             model.eval()
-            for input, labels in val_epoch:
+            log_batch_ids = random.sample(range(len(val_epoch)), 5)
+
+            for i, (input, labels) in enumerate(val_epoch):
                 input = input.to(device)
                 labels = labels.to(device)
                 pred = model(input)
+
+                if i in log_batch_ids:
+                    img_id = random.sample(range(len(pred)), 1)
+                    run[f'val/example_img_{pred[img_id]}'].upload(asarray(ToPILImage()(input[img_id])))
                 val_loss = criterion(pred, labels)
 
                 val_losses.append(val_loss.item())
