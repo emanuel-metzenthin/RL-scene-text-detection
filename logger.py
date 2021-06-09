@@ -3,6 +3,7 @@ from typing import Dict
 
 import neptune.new as neptune
 import numpy as np
+from neptune.new.internal.operation import AssignBool
 from ray import tune
 from ray.tune.utils import merge_dicts
 
@@ -71,6 +72,8 @@ class NeptuneLogger(tune.logger.LoggerCallback):
             res_ = self.dict_multiple_get(result, indices)
             prefix = '/'.join([str(idx) for idx in indices])
             for key, value in res_.items():
+                if isinstance(value, AssignBool):
+                    continue
                 prefixed_key = '/'.join([prefix, key])
                 if isinstance(value, float) or isinstance(value, int):
                     self.run[prefixed_key].log(value)
@@ -99,6 +102,8 @@ class NeptuneLogger(tune.logger.LoggerCallback):
             res_ = self.dict_multiple_get(result, indices)
             prefix = '/'.join([str(idx) for idx in indices])
             for key, value in res_.items():
+                if isinstance(value, AssignBool):
+                    continue
                 prefixed_key = '/'.join([prefix, key])
                 if isinstance(value, float) or isinstance(value, int):
                     self.run[prefixed_key].log(value)
