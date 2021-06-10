@@ -164,7 +164,7 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = Adam(model.parameters(), lr=1e-4)
+    optimizer = Adam(model.parameters(), lr=1e-4, weight_decay=0.1)
 
     best_loss = None
 
@@ -244,7 +244,7 @@ def plot_example_images(images, ious):
         fig.add_subplot(2, 3, i)
         plt.imshow(img)
         plt.axis('off')
-        plt.title(str(iou))
+        plt.title(str(round(iou[0],2)))
 
     run[f'val/example_imgs'].upload(fig)
 
