@@ -102,6 +102,15 @@ def main(cfg):
             "feature_net_config": {
                 "fcnet_hiddens": [],
                 "fcnet_activation": "relu",
+                "dim": 224,
+                "conv_filters": [
+                    [64, (1, 1), 1],
+                    [32, (9, 9), 1],
+                    [32, (8, 8), 4],
+                    [16, (9, 9), 4],
+                    [16, (7, 7), 5],
+                    [8, (2, 2), 2],
+                ]
             },
             "inverse_net_hiddens": [256],  # Hidden layers of the "inverse" model.
             "inverse_net_activation": "relu",  # Activation of the "inverse" model.
