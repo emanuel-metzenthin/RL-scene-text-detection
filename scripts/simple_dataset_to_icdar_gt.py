@@ -8,7 +8,7 @@ parser.add_argument("data_path")
 parser.add_argument("--type", default="ic13")
 args = parser.parse_args()
 
-bboxes = np.load(os.path.join(args.data_path, "bounding_boxes.npy"))
+bboxes = np.load(os.path.join(args.data_path, "bounding_boxes.npy"), allow_pickle=True)
 os.mkdir("./simple_gt")
 zipf = zipfile.ZipFile(f'./simple_gt/simple_gt_{args.type}.zip', 'w', zipfile.ZIP_DEFLATED)
 

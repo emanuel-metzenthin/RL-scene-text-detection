@@ -12,7 +12,7 @@ from dataset.simple_dataset import SimpleDataset
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, data_path, split: Text = 'validation'):
+    def load_dataset(dataset, data_path, split: Text = 'train'):
         if dataset == "icdar2013":
             return ICDARDataset(path=data_path, split=split)
         elif dataset == "sign":
@@ -50,7 +50,7 @@ class EnvFactory:
 
     @staticmethod
     def create_eval_env(name, path):
-        dataset = EnvFactory.load_dataset(name, path)
+        dataset = EnvFactory.load_dataset(name, path, "validation")
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
