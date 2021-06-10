@@ -14,6 +14,7 @@ from tqdm import tqdm
 import numpy as np
 from torch import sigmoid
 from dataset.assessor_dataset import AssessorDataset
+import matplotlib.pyplot as plt
 from logger import NeptuneLogger
 from radam import RAdam
 from numpy import asarray
@@ -207,6 +208,8 @@ def train(train_path, val_path):
         with tqdm(val_loader) as val_epoch:
             model.eval()
             log_batch_ids = random.sample(range(len(val_epoch)), 5)
+            exp_imgs = []
+            exp_ious = []
 
             for i, (input, labels) in enumerate(val_epoch):
                 input = input.to(device)
@@ -215,7 +218,9 @@ def train(train_path, val_path):
 
                 if i in log_batch_ids:
                     img_id = random.sample(range(len(pred)), 1)
-                    run[f'val/example_img_{pred[img_id]}'].upload(File.as_image(ToPILImage()(input[img_id].squeeze())))
+                    exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
+                    exp_ious.append([pred[img_id].item()])
+
                 val_loss = criterion(pred, labels)
 
                 val_losses.append(val_loss.item())
@@ -226,9 +231,22 @@ def train(train_path, val_path):
             run['val/loss'].log(mean_val_loss)
 
         if not best_loss or mean_val_loss < best_loss:
+            plot_example_images(exp_imgs, exp_ious)
             torch.save(model.state_dict(), 'assessor_model.pt')
             run['model'].upload('assessor_model.pt')
             best_loss = mean_val_loss
+
+
+def plot_example_images(images, ious):
+    fig = plt.figure()
+
+    for i, (img, iou) in enumerate(zip(images, ious), start=1):
+        fig.add_subplot(2, 3, i)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.title(str(iou))
+
+    run[f'val/example_imgs'].upload(fig)
 
 
 if __name__ == '__main__':
