@@ -35,8 +35,9 @@ class ImageDQN(nn.Module):
 
         backbone_model = getattr(models, backbone)(pretrained=True)
         self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
-        for param in self.feature_extractor.parameters():
-            param.requires_grad = False
+        for child in list(self.feature_extractor.children())[:-2]:
+            for param in child.parameters():
+                param.requires_grad = False
 
         self.dqn = nn.Sequential(
             nn.Linear(backbone_model.fc.in_features + num_history * num_actions, 1024),
