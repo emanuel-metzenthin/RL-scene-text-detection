@@ -26,14 +26,16 @@ class ResBlock1(nn.Module):
         self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
         self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
-        self.group_norm = nn.GroupNorm(32, ch)
+        self.g1 = nn.GroupNorm(32, ch)
+        self.g2 = nn.GroupNorm(32, ch)
+        self.g3 = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         residual = x
-        h1 = self.group_norm(self.conv1(x))
-        h2 = self.group_norm(self.conv2(self.relu(h1)))
-        h3 = self.group_norm(self.conv3(residual))
+        h1 = self.g1(self.conv1(x))
+        h2 = self.g2(self.conv2(self.relu(h1)))
+        h3 = self.g3(self.conv3(residual))
         h4 = h2 + h3
 
         return h4
@@ -64,13 +66,14 @@ class ResBlock3(nn.Module):
         self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
-        self.group_norm = nn.GroupNorm(32, ch)
+        self.g1 = nn.GroupNorm(32, ch)
+        self.g2 = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         residual = x
-        h1 = self.group_norm(self.conv1(self.relu(x)))
-        h2 = self.group_norm(self.conv2(self.relu(h1)))
+        h1 = self.g1(self.conv1(self.relu(x)))
+        h2 = self.g2(self.conv2(self.relu(h1)))
         h3 = h2 + residual  # how not to use this conv? but still add h2 and residual
         # h4 = h2 + h3
 
@@ -151,6 +154,8 @@ class AssessorModel(nn.Module):
     def evaluate_one_epoch(self):
         pass
 
+# def optimize(trial):
+#     lr =
 
 def train(train_path, val_path):
     model = AssessorModel()
