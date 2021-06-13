@@ -8,3 +8,4 @@ line-profiler-pycharm
 ray[rllib]
 Polygon3
 uuid
+matplotlib
