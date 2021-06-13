@@ -27,9 +27,9 @@ class ResBlock1(nn.Module):
         self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
         self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
-        self.g1 = nn.GroupNorm(32, ch, affine=False)
-        self.g2 = nn.GroupNorm(32, ch, affine=False)
-        self.g3 = nn.GroupNorm(32, ch, affine=False)
+        self.g1 = nn.GroupNorm(32, ch)
+        self.g2 = nn.GroupNorm(32, ch)
+        self.g3 = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -67,8 +67,8 @@ class ResBlock3(nn.Module):
         self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
-        self.g1 = nn.GroupNorm(32, ch, affine=False)
-        self.g2 = nn.GroupNorm(32, ch, affine=False)
+        self.g1 = nn.GroupNorm(32, ch)
+        self.g2 = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
 
     def forward(self, x):
