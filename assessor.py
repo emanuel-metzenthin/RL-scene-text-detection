@@ -27,9 +27,9 @@ class ResBlock1(nn.Module):
         self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
         self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(4, 4), padding=1, stride=2, bias=False)
-        self.g1 = nn.GroupNorm(32, ch)
-        self.g2 = nn.GroupNorm(32, ch)
-        self.g3 = nn.GroupNorm(32, ch)
+        self.g1 = nn.GroupNorm(32, ch, affine=False)
+        self.g2 = nn.GroupNorm(32, ch, affine=False)
+        self.g3 = nn.GroupNorm(32, ch, affine=False)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -67,8 +67,8 @@ class ResBlock3(nn.Module):
         self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
-        self.g1 = nn.GroupNorm(32, ch)
-        self.g2 = nn.GroupNorm(32, ch)
+        self.g1 = nn.GroupNorm(32, ch, affine=False)
+        self.g2 = nn.GroupNorm(32, ch, affine=False)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -159,8 +159,8 @@ class AssessorModel(nn.Module):
 #     lr =
 
 def train(train_path, val_path):
-    model = resnet18()
-    model.fc = nn.Linear(512, 1)
+    model = AssessorModel()
+    # model.fc = nn.Linear(512, 1)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     #model.load_state_dict(torch.load('assessor_model.pt'))
@@ -183,8 +183,8 @@ def train(train_path, val_path):
         pred_maxs = []
         pred_vars = []
 
-        model.train()
         with tqdm(train_loader) as train_epoch:
+            model.train()
             for input, labels in train_epoch:
                 input = input.to(device)
                 labels = labels.to(device)
@@ -213,35 +213,36 @@ def train(train_path, val_path):
             torch.cuda.empty_cache()
 
         with tqdm(val_loader) as val_epoch:
-            model.eval()
-            log_batch_ids = random.sample(range(len(val_epoch)), 5)
-            exp_imgs = []
-            exp_ious = []
+            with torch.no_grad():
+                model.eval()
+                log_batch_ids = random.sample(range(len(val_epoch)), 5)
+                exp_imgs = []
+                exp_ious = []
 
-            for i, (input, labels) in enumerate(val_epoch):
-                input = input.to(device)
-                labels = labels.to(device)
-                pred = model(input)
+                for i, (input, labels) in enumerate(val_epoch):
+                    input = input.to(device)
+                    labels = labels.to(device)
+                    pred = model(input)
 
-                if i in log_batch_ids:
-                    img_id = random.sample(range(len(pred)), 1)
-                    exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
-                    exp_ious.append([pred[img_id].item()])
+                    if i in log_batch_ids:
+                        img_id = random.sample(range(len(pred)), 1)
+                        exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
+                        exp_ious.append([pred[img_id].item()])
 
-                val_loss = criterion(pred, labels)
+                    val_loss = criterion(pred, labels)
 
-                val_losses.append(val_loss.item())
-                mean_val_loss = np.mean(val_losses)
+                    val_losses.append(val_loss.item())
+                    mean_val_loss = np.mean(val_losses)
 
-                val_epoch.set_postfix({'val_loss': mean_val_loss})
+                    val_epoch.set_postfix({'val_loss': mean_val_loss})
 
-            run['val/loss'].log(mean_val_loss)
+                run['val/loss'].log(mean_val_loss)
 
-        if not best_loss or mean_val_loss < best_loss:
-            plot_example_images(exp_imgs, exp_ious)
-            torch.save(model.state_dict(), 'assessor_model.pt')
-            run['model'].upload('assessor_model.pt')
-            best_loss = mean_val_loss
+            if not best_loss or mean_val_loss < best_loss:
+                plot_example_images(exp_imgs, exp_ious)
+                torch.save(model.state_dict(), 'assessor_model.pt')
+                run['model'].upload('assessor_model.pt')
+                best_loss = mean_val_loss
 
 
 def plot_example_images(images, ious):
