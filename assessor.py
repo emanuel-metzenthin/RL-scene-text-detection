@@ -76,7 +76,7 @@ class ResBlock3(nn.Module):
         residual = x
         h1 = self.g1(self.conv1(self.relu(x)))
         h2 = self.g2(self.conv2(self.relu(h1)))
-        h3 = h2 + residual  # how not to use this conv? but still add h2 and residual
+        h3 = h2 + residual
         # h4 = h2 + h3
 
         return h3
@@ -103,8 +103,6 @@ class AssessorModel(nn.Module):
         # self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
         #
         # self.linear = nn.Linear(backbone_model.fc.in_features, 1)
-
-        self.add_coord = AddCoord()
         self.resnet = nn.Sequential(
             ResBlock1(3, 64),
             nn.MaxPool2d(2),
@@ -115,7 +113,7 @@ class AssessorModel(nn.Module):
             ResBlock3(256, 256),
             nn.AdaptiveAvgPool2d(4),
             nn.Flatten(),
-            nn.Linear(4096, 1),
+            nn.Linear(4096, 1, bias=False),
             #nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
