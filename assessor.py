@@ -67,7 +67,6 @@ class ResBlock3(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.conv2 = nn.Conv2d(ch, ch, kernel_size=(3, 3), padding=1, bias=False)
-        self.conv3 = nn.Conv2d(ch_in, ch, kernel_size=(3, 3), padding=1, bias=False)
         self.g1 = nn.GroupNorm(32, ch)
         self.g2 = nn.GroupNorm(32, ch)
         self.relu = nn.ReLU()
@@ -158,6 +157,7 @@ class AssessorModel(nn.Module):
 #     lr =
 
 def train(train_path, val_path):
+    torch.manual_seed(40503)
     model = AssessorModel()
     # model.fc = nn.Linear(512, 1)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
