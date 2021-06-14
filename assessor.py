@@ -110,9 +110,9 @@ class AssessorModel(nn.Module):
             ResBlock1(128, 256),
             nn.MaxPool2d(2),
             ResBlock3(256, 256),
-            nn.AdaptiveAvgPool2d(4),
+            nn.AvgPool2d((1, 3)),
             nn.Flatten(),
-            nn.Linear(4096, 1, bias=False),
+            nn.Linear(256, 1, bias=False),
             #nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
