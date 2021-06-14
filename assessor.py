@@ -7,7 +7,7 @@ import torchvision.models as models
 from neptune.new.types import File
 from torch import sigmoid
 import torch
-from torch.optim import Adam, SGD
+import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import ToPILImage
 from tqdm import tqdm
@@ -168,7 +168,7 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = RAdam(model.parameters(), lr=1e-4)
+    optimizer = optim.Adadelta(model.parameters())
 
     best_loss = None
 
