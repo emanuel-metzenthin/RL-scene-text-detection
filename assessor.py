@@ -19,7 +19,7 @@ from logger import NeptuneLogger
 from radam import RAdam
 from numpy import asarray
 from torchvision.models import resnet18
-
+import plotly.express as px
 
 class ResBlock1(nn.Module):
     def __init__(self, ch_in, ch):
@@ -168,7 +168,7 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adadelta(model.parameters())
+    optimizer = optim.Adam(model.parameters())
 
     best_loss = None
 
@@ -200,6 +200,7 @@ def train(train_path, val_path):
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
 
+            run['train/iou_distribution'].upload(px.histogram(labels).to_image())
             run['train/loss'].log(np.mean(train_losses))
             run['train/pred_min'].log(np.min(pred_mins))
             run['train/pred_max'].log(np.max(pred_maxs))
