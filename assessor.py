@@ -133,7 +133,7 @@ class AssessorModel(nn.Module):
     @staticmethod
     def init_weights(m):
         if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
-            torch.nn.init.xavier_normal_(m.weight)
+            torch.nn.init.normal_(m.weight, std=0.02)
 
     def train_one_step(self):
         self.train()
@@ -165,7 +165,7 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-4)
+    optimizer = RAdam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
