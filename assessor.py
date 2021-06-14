@@ -133,7 +133,7 @@ class AssessorModel(nn.Module):
     @staticmethod
     def init_weights(m):
         if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
-            torch.nn.init.normal_(m.weight, std=0.02)
+            torch.nn.init.xavier_normal_(m.weight)
 
     def train_one_step(self):
         self.train()
@@ -152,15 +152,12 @@ class AssessorModel(nn.Module):
     def evaluate_one_epoch(self):
         pass
 
-# def optimize(trial):
-#     lr =
-
 def train(train_path, val_path):
     model = AssessorModel()
     # model.fc = nn.Linear(512, 1)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
-    #model.load_state_dict(torch.load('assessor_model.pt'))
+    # model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset(train_path, img_size=(64, 200))
     val_data = AssessorDataset(val_path, split="val", img_size=(64, 200))
@@ -168,7 +165,7 @@ def train(train_path, val_path):
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-6)
+    optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
