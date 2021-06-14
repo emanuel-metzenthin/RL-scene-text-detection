@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from logger import NeptuneLogger
 from radam import RAdam
 from numpy import asarray
-from torchvision.models import resnet18
+from torchvision.models import resnet18, resnet50
 import plotly.express as px
 
 class ResBlock1(nn.Module):
@@ -153,8 +153,8 @@ class AssessorModel(nn.Module):
         pass
 
 def train(train_path, val_path):
-    model = resnet18(pretrained=True)
-    model.fc = nn.Linear(512, 1, bias=False)
+    model = resnet50(pretrained=True)
+    model.fc = nn.Linear(2048, 1, bias=False)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
