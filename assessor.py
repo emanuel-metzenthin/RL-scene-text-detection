@@ -103,11 +103,11 @@ class AssessorModel(nn.Module):
         # self.linear = nn.Linear(backbone_model.fc.in_features, 1)
         self.resnet = nn.Sequential(
             ResBlock1(3, 64),
-            nn.MaxPool2d(2),
+            nn.MaxPool2d(2, 2),
             ResBlock1(64, 128),
-            nn.MaxPool2d(2),
+            nn.MaxPool2d(2, 2),
             ResBlock1(128, 256),
-            nn.MaxPool2d(2),
+            nn.MaxPool2d(2, 2),
             ResBlock3(256, 256),
             nn.AvgPool2d((1, 3)),
             nn.Flatten(),
