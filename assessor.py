@@ -18,7 +18,6 @@ import matplotlib.pyplot as plt
 from logger import NeptuneLogger
 from radam import RAdam
 from numpy import asarray
-import optuna
 from torchvision.models import resnet18
 
 
