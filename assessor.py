@@ -116,7 +116,7 @@ class AssessorModel(nn.Module):
         )
         self.resnet.apply(self.init_weights)
 
-        self.optimizer = Adam(self.parameters(), lr=1e-4)
+        self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
         self.criterion = nn.MSELoss()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
