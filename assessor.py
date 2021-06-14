@@ -153,8 +153,8 @@ class AssessorModel(nn.Module):
         pass
 
 def train(train_path, val_path):
-    model = AssessorModel()
-    # model.fc = nn.Linear(512, 1)
+    model = resnet18(pretrained=True)
+    model.fc = nn.Linear(512, 1, bias=False)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
@@ -184,7 +184,7 @@ def train(train_path, val_path):
                 labels = labels.to(device)
                 optimizer.zero_grad()
                 pred = model(input)
-                mse_loss = criterion(pred.float(), labels.float())
+                mse_loss = criterion(pred, labels)
                 loss = mse_loss
 
                 mse_loss.backward()
