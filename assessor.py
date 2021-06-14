@@ -156,8 +156,8 @@ class AssessorModel(nn.Module):
 #     lr =
 
 def train(train_path, val_path):
-    model = resnet18()
-    model.fc = nn.Linear(512, 1, bias=False)
+    model = AssessorModel()
+    # model.fc = nn.Linear(512, 1)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     #model.load_state_dict(torch.load('assessor_model.pt'))
