@@ -64,7 +64,8 @@ class ImageDQN(nn.Module):
         images, histories = X
 
         if images.shape[1] != 3:
-            if self.framestacking:
+            print(images.shape)
+            if self.framestacking and len(images.shape) == 5:
                 images = images.permute([0, 1, 4, 2, 3])
             else:
                 images = images.permute([0, 3, 1, 2])
