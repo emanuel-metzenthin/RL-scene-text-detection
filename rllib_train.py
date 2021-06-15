@@ -88,7 +88,8 @@ def main(cfg):
         config["model"] = {
             "custom_model": "imagedqn",
             "custom_model_config": {
-                "dueling": True
+                "dueling": False,
+                "framestacking": cfg.framestacking
             }
         }
 
@@ -129,7 +130,7 @@ def main(cfg):
         logger = NeptuneLogger(cfg)
         callbacks += (logger,)
 
-    tune.run(DQNTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=callbacks)
+    tune.run(SimpleQTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=callbacks)
 
     ray.shutdown()
 

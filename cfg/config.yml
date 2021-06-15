@@ -50,3 +50,5 @@ log_dir: /Users/Emanuel/ray_results
 restore: null
 
 custom_model: true
+
+framestacking: false
