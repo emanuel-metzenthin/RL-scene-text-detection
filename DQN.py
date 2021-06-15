@@ -64,13 +64,12 @@ class ImageDQN(nn.Module):
         images, histories = X
 
         if images.shape[1] != 3:
-            print(images.shape)
             if self.framestacking and len(images.shape) == 5:
                 images = images.permute([0, 1, 4, 2, 3])
             else:
                 images = images.permute([0, 3, 1, 2])
 
-        if self.framestacking:
+        if self.framestacking and len(images.shape) == 5:
             histories = torch.reshape(histories[:, 0], (-1, self.num_actions * self.num_history))
             features = [self.feature_extractor(imgs).reshape(-1, self.fs_linear.in_features) for imgs in images]
             features = [self.fs_linear(feat) for feat in features]
