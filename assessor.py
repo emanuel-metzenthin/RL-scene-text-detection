@@ -153,15 +153,16 @@ class AssessorModel(nn.Module):
         pass
 
 def train(train_path, val_path):
-    model = resnet50(pretrained=True)
-    model.fc = nn.Linear(2048, 1, bias=False)
+    # model = resnet50(pretrained=True)
+    # model.fc = nn.Linear(2048, 1, bias=False)
+    model = AssessorModel()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
     train_data = AssessorDataset(train_path, img_size=(64, 200))
     val_data = AssessorDataset(val_path, split="val", img_size=(64, 200))
-    train_loader = DataLoader(train_data, batch_size=128, shuffle=True)
+    train_loader = DataLoader(train_data, batch_size=1, shuffle=False)
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
@@ -208,37 +209,37 @@ def train(train_path, val_path):
             del labels
             torch.cuda.empty_cache()
 
-        with tqdm(val_loader) as val_epoch:
-            with torch.no_grad():
-                model.eval()
-                log_batch_ids = random.sample(range(len(val_epoch)), 5)
-                exp_imgs = []
-                exp_ious = []
-
-                for i, (input, labels) in enumerate(val_epoch):
-                    input = input.to(device)
-                    labels = labels.to(device)
-                    pred = model(input)
-
-                    if i in log_batch_ids:
-                        img_id = random.sample(range(len(pred)), 1)
-                        exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
-                        exp_ious.append([pred[img_id].item()])
-
-                    val_loss = criterion(pred, labels)
-
-                    val_losses.append(val_loss.item())
-                    mean_val_loss = np.mean(val_losses)
-
-                    val_epoch.set_postfix({'val_loss': mean_val_loss})
-
-                run['val/loss'].log(mean_val_loss)
-
-            if not best_loss or mean_val_loss < best_loss:
-                plot_example_images(exp_imgs, exp_ious)
-                torch.save(model.state_dict(), 'assessor_model.pt')
-                run['model'].upload('assessor_model.pt')
-                best_loss = mean_val_loss
+        # with tqdm(val_loader) as val_epoch:
+        #     with torch.no_grad():
+        #         model.eval()
+        #         log_batch_ids = random.sample(range(len(val_epoch)), 5)
+        #         exp_imgs = []
+        #         exp_ious = []
+        #
+        #         for i, (input, labels) in enumerate(val_epoch):
+        #             input = input.to(device)
+        #             labels = labels.to(device)
+        #             pred = model(input)
+        #
+        #             if i in log_batch_ids:
+        #                 img_id = random.sample(range(len(pred)), 1)
+        #                 exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
+        #                 exp_ious.append([pred[img_id].item()])
+        #
+        #             val_loss = criterion(pred, labels)
+        #
+        #             val_losses.append(val_loss.item())
+        #             mean_val_loss = np.mean(val_losses)
+        #
+        #             val_epoch.set_postfix({'val_loss': mean_val_loss})
+        #
+        #         run['val/loss'].log(mean_val_loss)
+        #
+        #     if not best_loss or mean_val_loss < best_loss:
+        #         plot_example_images(exp_imgs, exp_ious)
+        #         torch.save(model.state_dict(), 'assessor_model.pt')
+        #         run['model'].upload('assessor_model.pt')
+        #         best_loss = mean_val_loss
 
 
 def plot_example_images(images, ious):
