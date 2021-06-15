@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 from logger import NeptuneLogger
 from radam import RAdam
 from numpy import asarray
-from torchvision.models import resnet18, resnet50
-import plotly.express as px
+from torchvision.models import resnet18
+# import plotly.express as px
 
 class ResBlock1(nn.Module):
     def __init__(self, ch_in, ch):
