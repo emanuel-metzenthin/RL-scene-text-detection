@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co
-from torchvision.transforms import Compose, Resize, ToTensor, Grayscale, Normalize, GaussianBlur, ColorJitter
+from torchvision.transforms import Compose, Resize, ToTensor, RandomHorizontalFlip, RandomVerticalFlip, Grayscale, Normalize, GaussianBlur, ColorJitter
 
 
 class Dataset(Dataset):
@@ -26,24 +26,25 @@ class Dataset(Dataset):
         return image, gt
 
     def transform(self, image):
-        # augm = Compose([
-        #     GaussianBlur(5),
-        #     ColorJitter(hue=0.2, saturation=0.2, contrast=0.25),
-        # ])
+        augm = Compose([
+            # GaussianBlur(5),
+            # ColorJitter(hue=0.2, saturation=0.2, contrast=0.25),
+            RandomHorizontalFlip(),
+            RandomVerticalFlip()
+        ])
 
         resize = Compose([
             Resize(self.img_size),
-            Grayscale(num_output_channels=3),
             ToTensor(),
         ])
 
-        # if self.split == "train":
-        #     transforms = Compose([
-        #         # augm,
-        #         resize
-        #     ])
-        # else:
-        transforms = resize
+        if self.split == "train":
+            transforms = Compose([
+                augm,
+                resize
+            ])
+        else:
+            transforms = resize
 
         return transforms(image)
 
