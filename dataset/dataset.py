@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize, GaussianBlur, ColorJitter
+from torchvision.transforms import Compose, Resize, ToTensor, Grayscale, Normalize, GaussianBlur, ColorJitter
 
 
 class Dataset(Dataset):
@@ -33,8 +33,8 @@ class Dataset(Dataset):
 
         resize = Compose([
             Resize(self.img_size),
+            Grayscale(num_output_channels=3),
             ToTensor(),
-            # Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
 
         # if self.split == "train":
