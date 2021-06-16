@@ -215,13 +215,13 @@ def train(train_path, val_path, trial, optimizer, model):
                 train_losses.append(loss.item())
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
 
-            if run:
-                # run['train/iou_distribution'].upload(px.histogram(labels.cpu()))
-                run['train/grad_mean'].log(torch.mean(list(model.parameters())[-1].grad))
-                run['train/loss'].log(np.mean(train_losses))
-                run['train/pred_min'].log(np.min(pred_mins))
-                run['train/pred_max'].log(np.max(pred_maxs))
-                run['train/pred_var'].log(np.mean(pred_vars))
+            # if run:
+            #     # run['train/iou_distribution'].upload(px.histogram(labels.cpu()))
+            #     run['train/grad_mean'].log(torch.mean(list(model.parameters())[-1].grad))
+            #     run['train/loss'].log(np.mean(train_losses))
+            #     run['train/pred_min'].log(np.min(pred_mins))
+            #     run['train/pred_max'].log(np.max(pred_maxs))
+            #     run['train/pred_var'].log(np.mean(pred_vars))
 
             del input
             del labels
@@ -250,8 +250,8 @@ def train(train_path, val_path, trial, optimizer, model):
                     mean_val_loss = np.mean(val_losses)
 
                     val_epoch.set_postfix({'val_loss': mean_val_loss})
-                if run:
-                    run['val/loss'].log(mean_val_loss)
+                # if run:
+                #     run['val/loss'].log(mean_val_loss)
 
                 trial.report(best_loss, epoch)
                 if trial.should_prune():
