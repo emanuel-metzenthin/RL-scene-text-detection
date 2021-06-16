@@ -253,6 +253,9 @@ def train(train_path, val_path, trial, optimizer, model):
                 # if run:
                 #     run['val/loss'].log(mean_val_loss)
 
+                if not best_loss or mean_val_loss < best_loss:
+                    best_loss = mean_val_loss
+
                 trial.report(best_loss, epoch)
                 if trial.should_prune():
                     raise optuna.exceptions.TrialPruned()
