@@ -2,6 +2,7 @@ import random
 from random import randint
 
 import neptune.new as neptune
+import optuna
 import torch.nn as nn
 import torchvision.models as models
 from neptune.new.types import File
@@ -75,7 +76,6 @@ class ResBlock3(nn.Module):
         h1 = self.g1(self.conv1(self.relu(x)))
         h2 = self.g2(self.conv2(self.relu(h1)))
         h3 = h2 + residual
-        # h4 = h2 + h3
 
         return h3
 
@@ -95,23 +95,23 @@ class AddCoord(nn.Module):
 
 
 class AssessorModel(nn.Module):
-    def __init__(self, train_dataloader=None):
+    def __init__(self, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256):
         super().__init__()
         # backbone_model = models.resnet18(pretrained=False)
         # self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
         #
         # self.linear = nn.Linear(backbone_model.fc.in_features, 1)
         self.resnet = nn.Sequential(
-            ResBlock1(3, 64),
+            ResBlock1(3, hidden_1),
             nn.MaxPool2d(2, 2),
-            ResBlock1(64, 128),
+            ResBlock1(hidden_1, hidden_2),
             nn.MaxPool2d(2, 2),
-            ResBlock1(128, 256),
+            ResBlock1(hidden_2, hidden_3),
             nn.MaxPool2d(2, 2),
-            ResBlock3(256, 256),
+            ResBlock3(hidden_3, hidden_3),
             nn.AvgPool2d((1, 3)),
             nn.Flatten(),
-            nn.Linear(256, 1, bias=False),
+            nn.Linear(hidden_3, 1, bias=False),
             #nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
@@ -152,21 +152,38 @@ class AssessorModel(nn.Module):
     def evaluate_one_epoch(self):
         pass
 
-def train(train_path, val_path):
-    # model = resnet50(pretrained=True)
-    # model.fc = nn.Linear(2048, 1, bias=False)
-    model = AssessorModel()
+
+def define_model(trial):
+    model = AssessorModel(hidden_1=trial.suggest_categorical("resblock1_hidden", [32, 64, 128, 256]),
+                          hidden_2=trial.suggest_categorical("resblock2_hidden", [32, 64, 128, 256]),
+                          hidden_3=trial.suggest_categorical("resblock3_hidden", [32, 64, 128, 256]))
+    return model
+
+
+def objective(trial):
+    model = define_model(trial)
+    optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "RAdam", "SGD"])
+    lr = trial.suggest_uniform("lr", 1e-5, 1e-3)
+
+    if optimizer_name == "RAdam":
+        optimizer = RAdam(model.parameters(), lr=lr)
+    else:
+        optimizer = getattr(optim, optimizer_name)(model.parameters(), lr=lr)
+
+    train(train_path, val_path, trial, optimizer, model)
+
+
+def train(train_path, val_path, trial, optimizer, model):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset(train_path, img_size=(64, 200))
-    val_data = AssessorDataset(val_path, split="val", img_size=(64, 200))
-    train_loader = DataLoader(train_data, batch_size=1, shuffle=False)
+    train_data = AssessorDataset(train_path)
+    val_data = AssessorDataset(val_path, split="val")
+    train_loader = DataLoader(train_data, batch_size=128, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
-    optimizer = RAdam(model.parameters(), lr=1e-4)
 
     best_loss = None
 
@@ -233,14 +250,21 @@ def train(train_path, val_path):
                     mean_val_loss = np.mean(val_losses)
 
                     val_epoch.set_postfix({'val_loss': mean_val_loss})
+                if run:
+                    run['val/loss'].log(mean_val_loss)
 
-                run['val/loss'].log(mean_val_loss)
+                trial.report(best_loss, epoch)
+                if trial.should_prune():
+                    raise optuna.exceptions.TrialPruned()
 
-            if not best_loss or mean_val_loss < best_loss:
-                plot_example_images(exp_imgs, exp_ious)
-                torch.save(model.state_dict(), 'assessor_model.pt')
-                run['model'].upload('assessor_model.pt')
-                best_loss = mean_val_loss
+        return best_loss
+
+            # if not best_loss or mean_val_loss < best_loss:
+            #     plot_example_images(exp_imgs, exp_ious)
+            #     torch.save(model.state_dict(), 'assessor_model.pt')
+            #     if run:
+            #         run['model'].upload('assessor_model.pt')
+            #     best_loss = mean_val_loss
 
 
 def plot_example_images(images, ious):
@@ -263,6 +287,26 @@ if __name__ == '__main__':
     parser.add_argument("val_path", default='/home/emanuel/data/assessor_data2/val')
     args = parser.parse_args()
 
-    run = neptune.init(project='emanuelm/assessor')
-    train(args.train_path, args.val_path)
+    # run = neptune.init(project='emanuelm/assessor')
+    train_path, val_path = args.train_path, args.val_path
+    # train(train_path, val_path)
 
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=100)
+
+    pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
+    complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
+
+    print("Study statistics: ")
+    print("  Number of finished trials: ", len(study.trials))
+    print("  Number of pruned trials: ", len(pruned_trials))
+    print("  Number of complete trials: ", len(complete_trials))
+
+    print("Best trial:")
+    trial = study.best_trial
+
+    print("  Value: ", trial.value)
+
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))
