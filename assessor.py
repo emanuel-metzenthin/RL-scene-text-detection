@@ -154,9 +154,9 @@ class AssessorModel(nn.Module):
 
 
 def define_model(trial):
-    model = AssessorModel(hidden_1=trial.suggest_categorical("resblock1_hidden", [32, 64, 128, 256]),
-                          hidden_2=trial.suggest_categorical("resblock2_hidden", [32, 64, 128, 256]),
-                          hidden_3=trial.suggest_categorical("resblock3_hidden", [32, 64, 128, 256]))
+    model = AssessorModel(hidden_1=trial.suggest_categorical("resblock1_hidden", [32, 64, 128]),
+                          hidden_2=trial.suggest_categorical("resblock2_hidden", [64, 128]),
+                          hidden_3=trial.suggest_categorical("resblock3_hidden", [128, 256]))
     return model
 
 
@@ -170,7 +170,7 @@ def objective(trial):
     else:
         optimizer = getattr(optim, optimizer_name)(model.parameters(), lr=lr)
 
-    train(train_path, val_path, trial, optimizer, model)
+    return train(train_path, val_path, trial, optimizer, model)
 
 
 def train(train_path, val_path, trial, optimizer, model):
@@ -180,8 +180,8 @@ def train(train_path, val_path, trial, optimizer, model):
 
     train_data = AssessorDataset(train_path)
     val_data = AssessorDataset(val_path, split="val")
-    train_loader = DataLoader(train_data, batch_size=128, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=128)
+    train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=64)
 
     criterion = nn.MSELoss()
 
@@ -255,6 +255,8 @@ def train(train_path, val_path, trial, optimizer, model):
 
                 if not best_loss or mean_val_loss < best_loss:
                     best_loss = mean_val_loss
+                    print(best_loss)
+                    print(epoch)
 
                 trial.report(best_loss, epoch)
                 if trial.should_prune():
@@ -295,7 +297,7 @@ if __name__ == '__main__':
     # train(train_path, val_path)
 
     study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=10, gc_after_trial=True)
 
     pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
     complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
