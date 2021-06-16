@@ -187,7 +187,7 @@ def train(train_path, val_path, trial, optimizer, model):
 
     best_loss = None
 
-    for epoch in range(500):
+    for epoch in range(300):
 
         val_losses = []
         train_losses = []
@@ -262,7 +262,7 @@ def train(train_path, val_path, trial, optimizer, model):
                 if trial.should_prune():
                     raise optuna.exceptions.TrialPruned()
 
-        return best_loss
+    return best_loss
 
             # if not best_loss or mean_val_loss < best_loss:
             #     plot_example_images(exp_imgs, exp_ious)
