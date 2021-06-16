@@ -109,7 +109,7 @@ class AssessorModel(nn.Module):
             ResBlock1(hidden_2, hidden_3),
             nn.MaxPool2d(2, 2),
             ResBlock3(hidden_3, hidden_3),
-            nn.AvgPool2d((1, 3)),
+            nn.AvgPool2d(3),
             nn.Flatten(),
             nn.Linear(hidden_3, 1, bias=False),
             #nn.Sigmoid()
