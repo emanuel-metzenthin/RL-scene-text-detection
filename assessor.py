@@ -297,7 +297,7 @@ if __name__ == '__main__':
     # train(train_path, val_path)
 
     study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=10, gc_after_trial=True)
+    study.optimize(objective, n_trials=100, gc_after_trial=True)
 
     pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
     complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
