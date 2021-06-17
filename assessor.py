@@ -258,9 +258,9 @@ def train(train_path, val_path, trial, optimizer, model):
                     print(best_loss)
                     print(epoch)
 
-                trial.report(best_loss, epoch)
-                if trial.should_prune():
-                    raise optuna.exceptions.TrialPruned()
+                # trial.report(best_loss, epoch)
+                # if trial.should_prune():
+                #     raise optuna.exceptions.TrialPruned()
 
     return best_loss
 
@@ -294,24 +294,26 @@ if __name__ == '__main__':
 
     # run = neptune.init(project='emanuelm/assessor')
     train_path, val_path = args.train_path, args.val_path
-    # train(train_path, val_path)
+    model = AssessorModel()
+    optimizer = RAdam(model.parameters(), lr=1e-4)
+    train(train_path, val_path)
 
-    study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=100, gc_after_trial=True)
-
-    pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
-    complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
-
-    print("Study statistics: ")
-    print("  Number of finished trials: ", len(study.trials))
-    print("  Number of pruned trials: ", len(pruned_trials))
-    print("  Number of complete trials: ", len(complete_trials))
-
-    print("Best trial:")
-    trial = study.best_trial
-
-    print("  Value: ", trial.value)
-
-    print("  Params: ")
-    for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
+    # study = optuna.create_study(direction="minimize")
+    # study.optimize(objective, n_trials=100)
+    #
+    # pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
+    # complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
+    #
+    # print("Study statistics: ")
+    # print("  Number of finished trials: ", len(study.trials))
+    # print("  Number of pruned trials: ", len(pruned_trials))
+    # print("  Number of complete trials: ", len(complete_trials))
+    #
+    # print("Best trial:")
+    # trial = study.best_trial
+    #
+    # print("  Value: ", trial.value)
+    #
+    # print("  Params: ")
+    # for key, value in trial.params.items():
+    #     print("    {}: {}".format(key, value))
