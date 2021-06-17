@@ -180,7 +180,7 @@ def train(train_path, val_path, trial, optimizer, model):
 
     train_data = AssessorDataset(train_path)
     val_data = AssessorDataset(val_path, split="val")
-    train_loader = DataLoader(train_data, batch_size=128, shuffle=True)
+    train_loader = DataLoader(train_data, batch_size=128)
     val_loader = DataLoader(val_data, batch_size=128)
 
     criterion = nn.MSELoss()
@@ -256,9 +256,9 @@ def train(train_path, val_path, trial, optimizer, model):
                 if not best_loss or mean_val_loss < best_loss:
                     best_loss = mean_val_loss
 
-                # trial.report(best_loss, epoch)
-                # if trial.should_prune():
-                #     raise optuna.exceptions.TrialPruned()
+                trial.report(best_loss, epoch)
+                if trial.should_prune():
+                    raise optuna.exceptions.TrialPruned()
 
     return best_loss
 
@@ -291,27 +291,27 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # run = neptune.init(project='emanuelm/assessor')
-    train_path, val_path = args.train_path, args.val_path
-    model = AssessorModel()
-    optimizer = RAdam(model.parameters(), lr=1e-4)
-    train(train_path, val_path)
+    # train_path, val_path = args.train_path, args.val_path
+    # model = AssessorModel()
+    # optimizer = RAdam(model.parameters(), lr=1e-4)
+    # train(train_path, val_path)
 
-    # study = optuna.create_study(direction="minimize")
-    # study.optimize(objective, n_trials=100)
-    #
-    # pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
-    # complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
-    #
-    # print("Study statistics: ")
-    # print("  Number of finished trials: ", len(study.trials))
-    # print("  Number of pruned trials: ", len(pruned_trials))
-    # print("  Number of complete trials: ", len(complete_trials))
-    #
-    # print("Best trial:")
-    # trial = study.best_trial
-    #
-    # print("  Value: ", trial.value)
-    #
-    # print("  Params: ")
-    # for key, value in trial.params.items():
-    #     print("    {}: {}".format(key, value))
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=100)
+
+    pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
+    complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
+
+    print("Study statistics: ")
+    print("  Number of finished trials: ", len(study.trials))
+    print("  Number of pruned trials: ", len(pruned_trials))
+    print("  Number of complete trials: ", len(complete_trials))
+
+    print("Best trial:")
+    trial = study.best_trial
+
+    print("  Value: ", trial.value)
+
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))
