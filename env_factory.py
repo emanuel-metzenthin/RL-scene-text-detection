@@ -54,7 +54,7 @@ class EnvFactory:
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
-            playout_episode=False,
+            playout_episode=True,
             premasking=True,
             max_steps_per_image=200,
             bbox_scaling=0,
