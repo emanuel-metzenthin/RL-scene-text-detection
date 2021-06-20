@@ -10,7 +10,7 @@ import sys
 import os
 import codecs
 import importlib
-from StringIO import StringIO
+from io import StringIO
 
 
 def print_help():
@@ -310,7 +310,7 @@ def main_evaluation(p, default_evaluation_params_fn, validate_data_fn, evaluate_
         evalData = evaluate_method_fn(p['g'], p['s'], evalParams)
         resDict.update(evalData)
 
-    except Exception, e:
+    except Exception as e:
         resDict['Message'] = str(e)
         resDict['calculated'] = False
 
@@ -336,11 +336,11 @@ def main_evaluation(p, default_evaluation_params_fn, validate_data_fn, evaluate_
 
     if 'o' in p:
         if per_sample == True:
-            for k, v in evalData['per_sample'].iteritems():
+            for k, v in evalData['per_sample'].items():
                 outZip.writestr(k + '.json', json.dumps(v))
 
             if 'output_items' in evalData.keys():
-                for k, v in evalData['output_items'].iteritems():
+                for k, v in evalData['output_items'].items():
                     outZip.writestr(k, v)
 
         outZip.close()
@@ -362,10 +362,8 @@ def main_validation(default_evaluation_params_fn, validate_data_fn):
             evalParams.update(p['p'] if isinstance(p['p'], dict) else json.loads(p['p'][1:-1]))
 
         validate_data_fn(p['g'], p['s'], evalParams)
-        print
-        'SUCCESS'
+        print('SUCCESS')
         sys.exit(0)
     except Exception as e:
-        print
-        str(e)
+        print(str(e))
         sys.exit(101)
