@@ -58,7 +58,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                 if bbox[0] < 0 and bbox[2] < 0 or bbox[1] < 0 and bbox[3] < 0:
                     continue
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
-                test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}')  # ICDAR 2015
+                test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
 
             if env.episode_trigger_ious:
                 avg_ious.append(np.mean(env.episode_trigger_ious))
@@ -115,6 +115,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint_path", type=str)
     parser.add_argument("data_path", type=str)
+    parser.add_argument("gt_file", type=str)
     args = parser.parse_args()
 
     ray.init()
@@ -138,4 +139,4 @@ if __name__ == '__main__':
 
     agent = SimpleQTrainer(config=config)
     agent.restore(args.checkpoint_path)
-    evaluate(agent, test_env)
+    evaluate(agent, test_env, args.gt_file)
