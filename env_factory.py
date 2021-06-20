@@ -1,5 +1,6 @@
 from typing import Text
 
+import torch
 from text_localization_environment import TextLocEnv
 from torch.utils.data import DataLoader
 
@@ -28,8 +29,14 @@ class EnvFactory:
         assessor_model = None
 
         if assessor:
-            assessor_data = AssessorDataset(cfg.assessor_data_path)
-            assessor_model = AssessorModel(DataLoader(assessor_data, batch_size=64, shuffle=True))
+            if cfg.assessor_data_path:
+                assessor_data = AssessorDataset(cfg.assessor_data_path)
+                assessor_model = AssessorModel(DataLoader(assessor_data, batch_size=64, shuffle=False))
+            else:
+                assessor_model = AssessorModel()
+
+            if cfg.assessor_model_checkpoint:
+                assessor_model.load_state_dict(torch.load(cfg.assessor_model_checkpoint))
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
