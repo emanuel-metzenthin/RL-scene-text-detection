@@ -90,6 +90,15 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         ic15_rec = results_ic15['recall']
         ic15_f1 = results_ic15['hmean']
 
+        stdout_tiou = subprocess.run(['python', f'{cwd}/TIoU_eval_script/script.py',
+                                      f'-g={cwd}/TIoU_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
+                                     stdout=subprocess.PIPE).stdout
+        results_tiou = re.search('\{(.*)\}', str(stdout_tiou)).group(0)
+        results_tiou = json.loads(results_tiou)
+        tiou_prec = results_tiou['precision']
+        tiou_rec = results_tiou['recall']
+        tiou_f1 = results_tiou['hmean']
+
         results = {
             'ic13_precision': ic13_prec,
             'ic13_recall': ic13_rec,
@@ -97,11 +106,15 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
             'ic15_precision': ic15_prec,
             'ic15_recall': ic15_rec,
             'ic15_f1_score': ic15_f1,
+            'tiou_precision': tiou_prec,
+            'tiou_recall': tiou_rec,
+            'tiou_f1_score': tiou_f1,
             'avg_iou': np.mean(avg_ious)
         }
 
         print(f"IC13 results:\nprecision: {ic13_prec}, recall: {ic13_rec}, f1: {ic13_f1}")
         print(f"IC15 results:\nprecision: {ic15_prec}, recall: {ic15_rec}, f1: {ic15_f1}")
+        print(f"TIoU results:\nprecision: {tiou_prec}, recall: {tiou_rec}, f1: {tiou_f1}")
         print(f"Average IoU: {np.mean(avg_ious)}")
 
         shutil.rmtree(dir_name_13)
