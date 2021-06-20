@@ -30,7 +30,7 @@ def main(cfg):
 
     environ['WORKING_DIR'] = os.getcwd()
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
-    register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg.data_path, cfg))
+    register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg.data_path, cfg, cfg.assessor_model is not None))
     config = {
         "env": "textloc",
         "num_gpus": 1 if torch.cuda.is_available() else 0,
