@@ -45,6 +45,8 @@ eval_gt_file: simple_gt.zip
 
 assessor_data_path: null
 
+assessor_model_checkpoint: null
+
 log_dir: /Users/Emanuel/ray_results
 
 restore: null
