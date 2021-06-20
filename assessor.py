@@ -298,7 +298,7 @@ if __name__ == '__main__':
     run = neptune.init(project='emanuelm/assessor')
     train_path, val_path = args.train_path, args.val_path
     model = AssessorModel()
-    optimizer = RAdam(model.parameters(), lr=3e-4)
+    optimizer = optim.Adam(model.parameters(), lr=3e-4)
     train(train_path, val_path)
 
     # study = optuna.create_study(direction="minimize")
