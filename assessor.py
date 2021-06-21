@@ -95,7 +95,7 @@ class AddCoord(nn.Module):
 
 
 class AssessorModel(nn.Module):
-    def __init__(self, train_dataloader=None, hidden_1=64, hidden_2=64, hidden_3=256):
+    def __init__(self, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=128):
         super().__init__()
         # backbone_model = models.resnet18(pretrained=False)
         # self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
