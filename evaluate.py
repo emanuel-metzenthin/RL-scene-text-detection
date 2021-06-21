@@ -91,7 +91,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         ic15_f1 = results_ic15['hmean']
 
         stdout_tiou = subprocess.run(['python', f'{cwd}/TIoU_eval_script/script.py',
-                                      f'-g={cwd}/TIoU_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
+                                      f'-g={cwd}/ICDAR15_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
                                      stdout=subprocess.PIPE).stdout
         results_tiou = re.search('\{(.*)\}', str(stdout_tiou)).group(0)
         results_tiou = json.loads(results_tiou)
