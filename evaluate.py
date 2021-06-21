@@ -25,6 +25,7 @@ from logger import NeptuneLogger
 
 def evaluate(agent, env, gt_file='simple_gt.zip'):
     num_images = len(env.image_paths)
+    num_images = 100
     cwd = os.environ['WORKING_DIR']
     id = str(uuid.uuid4())[:8]
     dir_name_13 = f'{cwd}/results_ic13_{id}'
@@ -93,10 +94,10 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         stdout_tiou = subprocess.run(['python', f'{cwd}/TIoU_eval_script/script.py',
                                       f'-g={cwd}/ICDAR15_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
                                      stdout=subprocess.PIPE).stdout
-        results_tiou = re.search('tiouRecall: (.*) tiouPrecision: (.*) tiouHmean: (.*)\n', str(stdout_tiou))
-        tiou_prec = results_tiou.group(1)
-        tiou_rec = results_tiou.group(2)
-        tiou_f1 = results_tiou.group(3)
+        print(stdout_tiou)
+        tiou_prec = re.search('tiouPrecision: (\d\.\d{1,3})', str(stdout_tiou)).group(1)
+        tiou_rec = re.search('tiouRecall: (\d\.\d{1,3})', str(stdout_tiou)).group(1)
+        tiou_f1 = re.search('tiouHmean: (\d\.\d{1,3})', str(stdout_tiou)).group(1)
 
         results = {
             'ic13_precision': ic13_prec,
