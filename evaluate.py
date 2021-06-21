@@ -25,7 +25,6 @@ from logger import NeptuneLogger
 
 def evaluate(agent, env, gt_file='simple_gt.zip'):
     num_images = len(env.image_paths)
-    num_images = 100
     cwd = os.environ['WORKING_DIR']
     id = str(uuid.uuid4())[:8]
     dir_name_13 = f'{cwd}/results_ic13_{id}'
