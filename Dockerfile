@@ -1,4 +1,4 @@
-FROM rayproject/ray:nightly-py38-gpu
+FROM rayproject/ray:1.3.0-py38-gpu
 
 USER root
 

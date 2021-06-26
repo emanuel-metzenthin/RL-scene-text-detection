@@ -147,9 +147,9 @@ class AssessorModel(nn.Module):
 
 
 def define_model(trial):
-    model = AssessorModel(hidden_1=trial.suggest_categorical("resblock1_hidden", [32, 64, 128, 256]),
-                          hidden_2=trial.suggest_categorical("resblock2_hidden", [32, 64, 128, 256]),
-                          hidden_3=trial.suggest_categorical("resblock3_hidden", [32, 64, 128, 256]))
+    model = AssessorModel(hidden_1=trial.suggest_categorical("resblock1_hidden", [32, 64, 128]),
+                          hidden_2=trial.suggest_categorical("resblock2_hidden", [64, 128]),
+                          hidden_3=trial.suggest_categorical("resblock3_hidden", [128, 256]))
     return model
 
 

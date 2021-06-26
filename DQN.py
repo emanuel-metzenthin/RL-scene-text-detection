@@ -39,7 +39,7 @@ class ImageDQN(nn.Module):
             raise Exception(f'{backbone} not supported.')
         backbone_model = getattr(models, backbone)(pretrained=True)
         self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
-        for child in list(self.feature_extractor.children())[:-2]:
+        for child in list(self.feature_extractor.children())[:-3]:
             for param in child.parameters():
                 param.requires_grad = False
         self.feature_extractor_output_size = backbone_model.fc.in_features
