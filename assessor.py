@@ -95,12 +95,8 @@ class AddCoord(nn.Module):
 
 
 class AssessorModel(nn.Module):
-    def __init__(self, train_dataloader=None, hidden_1=64, hidden_2=64, hidden_3=256):
+    def __init__(self, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256):
         super().__init__()
-        # backbone_model = models.resnet18(pretrained=False)
-        # self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
-        #
-        # self.linear = nn.Linear(backbone_model.fc.in_features, 1)
         self.resnet = nn.Sequential(
             ResBlock1(3, hidden_1),
             nn.MaxPool2d(2, 2),
@@ -121,11 +117,8 @@ class AssessorModel(nn.Module):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         self.train_dataloader = train_dataloader
-        # self.val_dataloader = val_dataloader
 
     def forward(self, X):
-        # feat = self.feature_extractor(X)
-        # return sigmoid(self.linear(feat.squeeze()))
         out = self.resnet(X)
 
         return out
@@ -216,7 +209,6 @@ def train(train_path, val_path, trial, optimizer, model):
                 train_epoch.set_postfix({'loss': np.mean(train_losses)})
 
             if run:
-                # run['train/iou_distribution'].upload(px.histogram(labels.cpu()))
                 run['train/grad_mean'].log(torch.mean(list(model.parameters())[-1].grad))
                 run['train/loss'].log(np.mean(train_losses))
                 run['train/pred_min'].log(np.min(pred_mins))
@@ -259,18 +251,12 @@ def train(train_path, val_path, trial, optimizer, model):
                         run['model'].upload('assessor_model.pt')
                     best_loss = mean_val_loss
 
-                trial.report(best_loss, epoch)
-                if trial.should_prune():
-                    raise optuna.exceptions.TrialPruned()
+                if trial:
+                    trial.report(best_loss, epoch)
+                    if trial.should_prune():
+                        raise optuna.exceptions.TrialPruned()
 
     return best_loss
-
-            # if not best_loss or mean_val_loss < best_loss:
-            #     plot_example_images(exp_imgs, exp_ious)
-            #     torch.save(model.state_dict(), 'assessor_model.pt')
-            #     if run:
-            #         run['model'].upload('assessor_model.pt')
-            #     best_loss = mean_val_loss
 
 
 def plot_example_images(images, ious):
@@ -291,33 +277,36 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("train_path", default='/home/emanuel/data/iou_samples/train')
     parser.add_argument("val_path", default='/home/emanuel/data/assessor_data2/val')
+    parser.add_argument("param_search", default=False)
     args = parser.parse_args()
 
     torch.manual_seed(42)
 
-    # run = neptune.init(project='emanuelm/assessor')
-    run = None
+    run = neptune.init(project='emanuelm/assessor')
+    # run = None
     train_path, val_path = args.train_path, args.val_path
-    # model = AssessorModel()
-    # optimizer = optim.Adam(model.parameters(), lr=3e-4)
-    # train(train_path, val_path)
 
-    study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=100)
+    if not args.param_search:
+        model = AssessorModel()
+        optimizer = optim.Adam(model.parameters(), lr=1e-4)
+        train(train_path, val_path, None, optimizer, model)
+    else:
+        study = optuna.create_study(direction="minimize")
+        study.optimize(objective, n_trials=100)
 
-    pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
-    complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
+        pruned_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.PRUNED]
+        complete_trials = [t for t in study.trials if t.state == optuna.structs.TrialState.COMPLETE]
 
-    print("Study statistics: ")
-    print("  Number of finished trials: ", len(study.trials))
-    print("  Number of pruned trials: ", len(pruned_trials))
-    print("  Number of complete trials: ", len(complete_trials))
+        print("Study statistics: ")
+        print("  Number of finished trials: ", len(study.trials))
+        print("  Number of pruned trials: ", len(pruned_trials))
+        print("  Number of complete trials: ", len(complete_trials))
 
-    print("Best trial:")
-    trial = study.best_trial
+        print("Best trial:")
+        trial = study.best_trial
 
-    print("  Value: ", trial.value)
+        print("  Value: ", trial.value)
 
-    print("  Params: ")
-    for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
+        print("  Params: ")
+        for key, value in trial.params.items():
+            print("    {}: {}".format(key, value))
