@@ -98,7 +98,7 @@ class AssessorModel(nn.Module):
     def __init__(self, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256):
         super().__init__()
         self.resnet = nn.Sequential(
-            ResBlock1(3, hidden_1),
+            ResBlock1(4, hidden_1),
             nn.MaxPool2d(2, 2),
             ResBlock1(hidden_1, hidden_2),
             nn.MaxPool2d(2, 2),
@@ -277,7 +277,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("train_path", default='/home/emanuel/data/iou_samples/train')
     parser.add_argument("val_path", default='/home/emanuel/data/assessor_data2/val')
-    parser.add_argument("param_search", default=False)
+    parser.add_argument("--param_search", action='store_true', required=False)
     args = parser.parse_args()
 
     torch.manual_seed(42)
