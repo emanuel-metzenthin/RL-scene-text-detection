@@ -15,10 +15,10 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
         TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
                               model_config, name)
         nn.Module.__init__(self)
-        dueling = kwargs["dueling"]
-        framestacking = kwargs["framestacking"] if "framestacking" in kwargs else False
+        dueling = model_config["custom_model_config"]["dueling"]
+        framestacking = model_config["custom_model_config"]["framestacking"]
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = ImageDQN(dueling=dueling, num_actions=action_space.n, framestacking=framestacking).to(device)
+        self.model = ImageDQN(backbone="resnet18", dueling=dueling, num_actions=action_space.n, framestacking=framestacking).to(device)
 
         if framestacking:
             self.view_requirements['obs'] = ViewRequirement(shift="-3:0", space=obs_space)
@@ -39,9 +39,9 @@ class ImageDQN(nn.Module):
             raise Exception(f'{backbone} not supported.')
         backbone_model = getattr(models, backbone)(pretrained=True)
         self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
-        for child in list(self.feature_extractor.children())[:-3]:
-            for param in child.parameters():
-                param.requires_grad = False
+        #for child in list(self.feature_extractor.children())[:-3]:
+        #    for param in child.parameters():
+        #        param.requires_grad = False
         self.feature_extractor_output_size = backbone_model.fc.in_features
 
         self.framestacking = framestacking
