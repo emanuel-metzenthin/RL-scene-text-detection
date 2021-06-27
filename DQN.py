@@ -46,7 +46,7 @@ class ImageDQN(nn.Module):
 
         self.framestacking = framestacking
         if self.framestacking:
-            self.fs_linear = nn.Linear(self.feature_extractor_output_size, 512)
+            self.fs_linear = nn.Linear(4 * self.feature_extractor_output_size, self.feature_extractor_output_size)
 
         self.dqn = nn.Sequential(
             nn.Linear(self.feature_extractor_output_size + num_history * num_actions, 1024),
@@ -72,8 +72,7 @@ class ImageDQN(nn.Module):
         if self.framestacking and len(images.shape) == 5:
             histories = torch.reshape(histories[:, 0], (-1, self.num_actions * self.num_history))
             features = [self.feature_extractor(imgs).reshape(-1, self.fs_linear.in_features) for imgs in images]
-            features = [self.fs_linear(feat) for feat in features]
-            features = torch.stack(features).reshape(-1, self.feature_extractor_output_size)
+            features = self.fs_linear(torch.stack(features).squeeze(1))
         else:
             histories = torch.reshape(histories, (-1, self.num_actions * self.num_history))
             features = self.feature_extractor(images).reshape(-1, self.dqn[0].in_features - self.num_actions * self.num_history)
