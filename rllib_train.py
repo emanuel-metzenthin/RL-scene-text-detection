@@ -25,12 +25,12 @@ from logger import NeptuneLogger
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg):
     def custom_eval_fn(trainer, eval_workers):
-        eval_env = EnvFactory.create_eval_env(cfg.dataset, cfg.eval_data_path)
+        eval_env = EnvFactory.create_eval_env(cfg.dataset, cfg.eval_data_path, cfg.framestacking_mode)
         return evaluate(trainer, eval_env, cfg.eval_gt_file)
 
     environ['WORKING_DIR'] = os.getcwd()
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
-    register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg.data_path, cfg, cfg.assessor_model_checkpoint is not None))
+    register_env("textloc", lambda config: EnvFactory.create_env(cfg.dataset, cfg.data_path, cfg, cfg.assessor_model_checkpoint is not None, cfg.framestacking_mode))
     config = {
         "env": "textloc",
         "num_gpus": 1 if torch.cuda.is_available() else 0,
@@ -89,7 +89,7 @@ def main(cfg):
             "custom_model": "imagedqn",
             "custom_model_config": {
                 "dueling": False,
-                "framestacking": cfg.framestacking
+                "framestacking_mode": cfg.framestacking_mode,
             }
         }
 

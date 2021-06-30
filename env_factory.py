@@ -24,7 +24,7 @@ class EnvFactory:
             raise Exception(f"Dataset name {dataset} not supported.")
 
     @staticmethod
-    def create_env(name, path, cfg, assessor=False):
+    def create_env(name, path, cfg, assessor=False, framestacking_mode=False):
         dataset = EnvFactory.load_dataset(name, path)
         assessor_model = None
 
@@ -48,7 +48,8 @@ class EnvFactory:
             ior_marker_type='cross',
             has_termination_action=cfg.env.termination,
             has_intermediate_reward=cfg.env.intermediate_reward,
-            assessor_model=assessor_model
+            assessor_model=assessor_model,
+            grayscale=framestacking_mode == 'grayscale'
         )
 
         env.seed(cfg.env.random_seed)
@@ -56,19 +57,20 @@ class EnvFactory:
         return env
 
     @staticmethod
-    def create_eval_env(name, path):
+    def create_eval_env(name, path, framestacking_mode):
         dataset = EnvFactory.load_dataset(name, path, "validation")
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
-            playout_episode=True,
+            playout_episode=False,
             premasking=True,
             max_steps_per_image=200,
             bbox_scaling=0,
             bbox_transformer='base',
             ior_marker_type='cross',
             has_termination_action=False,
-            mode='test'
+            mode='test',
+            grayscale=framestacking_mode == 'grayscale'
         )
 
         return env

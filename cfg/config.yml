@@ -53,4 +53,4 @@ restore: null
 
 custom_model: true
 
-framestacking: false
+framestacking_mode: null
