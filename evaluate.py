@@ -94,9 +94,9 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                                       f'-g={cwd}/ICDAR15_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
                                      stdout=subprocess.PIPE).stdout
         print(stdout_tiou)
-        tiou_prec = re.search('tiouPrecision: (\d\.\d{1,3})', str(stdout_tiou)).group(1)
-        tiou_rec = re.search('tiouRecall: (\d\.\d{1,3})', str(stdout_tiou)).group(1)
-        tiou_f1 = re.search('tiouHmean: (\d\.\d{1,3})', str(stdout_tiou)).group(1)
+        tiou_prec = re.search('tiouPrecision: (\d\.?\d{0,3})', str(stdout_tiou)).group(1)
+        tiou_rec = re.search('tiouRecall: (\d\.?\d{0,3})', str(stdout_tiou)).group(1)
+        tiou_f1 = re.search('tiouHmean: (\d\.?\d{0,3})', str(stdout_tiou)).group(1)
 
         results = {
             'ic13_precision': ic13_prec,
