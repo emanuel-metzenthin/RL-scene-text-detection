@@ -1,0 +1,8 @@
+# @package _group_
+dataset: simple
+
+path: /data/simple_2_texts_3_words
+
+eval_path: /data/simple_2_texts_3_words/val
+
+eval_gt_file: simple_2_texts_3_words_gt.zip

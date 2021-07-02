@@ -29,14 +29,14 @@ class EnvFactory:
         assessor_model = None
 
         if assessor:
-            if cfg.assessor_data_path:
-                assessor_data = AssessorDataset(cfg.assessor_data_path)
+            if cfg.assessor.data_path:
+                assessor_data = AssessorDataset(cfg.assessor.data_path)
                 assessor_model = AssessorModel(DataLoader(assessor_data, batch_size=64, shuffle=False))
             else:
                 assessor_model = AssessorModel()
 
-            if cfg.assessor_model_checkpoint:
-                assessor_model.load_state_dict(torch.load(cfg.assessor_model_checkpoint))
+            if cfg.assessor.checkpoint:
+                assessor_model.load_state_dict(torch.load(cfg.assessor.checkpoint, map_location="cpu"))
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
@@ -47,7 +47,7 @@ class EnvFactory:
             bbox_transformer='base',
             ior_marker_type='cross',
             has_termination_action=cfg.env.termination,
-            has_intermediate_reward=cfg.env.intermediate_reward,
+            has_intermediate_reward=cfg.reward.intermediate_reward,
             assessor_model=assessor_model,
             grayscale=framestacking_mode == 'grayscale'
         )
@@ -57,12 +57,12 @@ class EnvFactory:
         return env
 
     @staticmethod
-    def create_eval_env(name, path, framestacking_mode):
+    def create_eval_env(name, path, framestacking_mode, playout=False):
         dataset = EnvFactory.load_dataset(name, path, "validation")
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
-            playout_episode=False,
+            playout_episode=playout,
             premasking=True,
             max_steps_per_image=200,
             bbox_scaling=0,

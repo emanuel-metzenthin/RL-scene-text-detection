@@ -131,7 +131,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env("simple", args.data_path)
+    test_env = EnvFactory.create_eval_env("simple", args.data_path, framestacking_mode="grayscale")
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
@@ -140,7 +140,8 @@ if __name__ == '__main__':
         "model": {
             "custom_model": "imagedqn",
             "custom_model_config": {
-                "dueling": False
+                "dueling": False,
+                "framestacking_mode": "grayscale"
             }
         },
         "num_gpus_per_worker": 1,
