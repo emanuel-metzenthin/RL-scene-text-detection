@@ -17,8 +17,9 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
         nn.Module.__init__(self)
         dueling = kwargs["dueling"]
         framestacking_mode = kwargs["framestacking_mode"] if "framestacking_mode" in kwargs else False
+        backbone = kwargs["backbone"] if "backbone" in kwargs else "resnet18"
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = ImageDQN(backbone="resnet18", dueling=dueling, num_actions=action_space.n, framestacking_mode=framestacking_mode).to(device)
+        self.model = ImageDQN(backbone=backbone, dueling=dueling, num_actions=action_space.n, framestacking_mode=framestacking_mode).to(device)
 
         if framestacking_mode:
             self.view_requirements['obs'] = ViewRequirement(shift="-3:0", space=obs_space)

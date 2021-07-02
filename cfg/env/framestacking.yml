@@ -11,6 +11,6 @@ premasking: true
 
 termination: false
 
-framestacking_mode: null
+framestacking_mode: grayscale
 
 eval_full_playout: false
