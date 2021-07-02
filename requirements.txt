@@ -9,3 +9,4 @@ ray[rllib]
 Polygon3
 uuid
 matplotlib
+optuna

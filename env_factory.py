@@ -57,7 +57,7 @@ class EnvFactory:
         return env
 
     @staticmethod
-    def create_eval_env(name, path, framestacking_mode):
+    def create_eval_env(name, path, framestacking_mode=None):
         dataset = EnvFactory.load_dataset(name, path, "validation")
 
         env = TextLocEnv(
