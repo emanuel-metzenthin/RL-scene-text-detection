@@ -24,7 +24,7 @@ class EnvFactory:
             raise Exception(f"Dataset name {dataset} not supported.")
 
     @staticmethod
-    def create_env(name, path, cfg, assessor=False, framestacking_mode=False):
+    def create_env(name, path, cfg, assessor=False, framestacking_mode=False, use_cut_area=False):
         dataset = EnvFactory.load_dataset(name, path)
         assessor_model = None
 
@@ -49,7 +49,8 @@ class EnvFactory:
             has_termination_action=cfg.env.termination,
             has_intermediate_reward=cfg.reward.intermediate_reward,
             assessor_model=assessor_model,
-            grayscale=framestacking_mode == 'grayscale'
+            grayscale=framestacking_mode == 'grayscale',
+            use_cut_area=use_cut_area
         )
 
         env.seed(cfg.env.random_seed)
