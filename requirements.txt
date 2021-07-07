@@ -1,4 +1,4 @@
--e git+https://github.com/emanuel-metzenthin/text-localization-environment.git@master#egg=text_localization_environment
+-e ./text-localization-environment
 typing-extensions==3.7.4.3
 pytorch-lightning
 torchvision

@@ -1,9 +1,8 @@
 from typing import Text
 
 import torch
-from text_localization_environment import TextLocEnv
 from torch.utils.data import DataLoader
-
+from text_localization_environment import TextLocEnv
 from assessor import AssessorModel
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.assessor_dataset import AssessorDataset
