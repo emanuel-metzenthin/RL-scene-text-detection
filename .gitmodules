@@ -1,0 +1,3 @@
+[submodule "text-localization-environment"]
+	path = text-localization-environment
+	url = git@github.com:emanuel-metzenthin/text-localization-environment.git
