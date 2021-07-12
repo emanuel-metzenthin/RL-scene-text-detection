@@ -1,9 +1,8 @@
 from typing import Text
 
 import torch
-from text_localization_environment import TextLocEnv
 from torch.utils.data import DataLoader
-
+from text_localization_environment import TextLocEnv
 from assessor import AssessorModel
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.assessor_dataset import AssessorDataset
@@ -43,7 +42,7 @@ class EnvFactory:
             playout_episode=cfg.env.full_playout,
             premasking=cfg.env.premasking,
             max_steps_per_image=cfg.env.steps_per_image,
-            bbox_scaling=0,
+            bbox_scaling=cfg.env.bbox_scaling,
             bbox_transformer='base',
             ior_marker_type='cross',
             has_termination_action=cfg.env.termination,

@@ -48,7 +48,7 @@ class ImageDQN(nn.Module):
         self.framestacking_mode = framestacking_mode
         self.grayscale = grayscale
         if self.framestacking_mode == 'color':
-            self.fs_linear = nn.Linear(4 * self.feature_extractor_output_size, self.feature_extractor_output_size)
+            self.feature_extractor[0] = nn.Conv2d(12, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         elif self.framestacking_mode == 'grayscale':
             self.feature_extractor[0] = nn.Conv2d(4, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
 
@@ -70,20 +70,18 @@ class ImageDQN(nn.Module):
         if len(images.shape) == 4:
             images = images.permute([0, 3, 1, 2])
 
-            if self.framestacking_mode == 'grayscale':
+            if self.framestacking_mode:
                 images = torch.repeat_interleave(images, 4, dim=1)
         else:
             images = images.permute([0, 1, 4, 2, 3])
             histories = torch.reshape(histories[:, -1], (-1, self.num_actions * self.num_history))
             if self.framestacking_mode == 'grayscale':
-                images = images.squeeze(2)  # grayscale imgs have 1 channel, resulting in [bs, hs, 1, img]
+                images = images.squeeze(2)  # grayscale imgs have 1 channel, resulting in [bs, history, 1, img]
+            elif self.framestacking_mode == 'color':
+                images = torch.reshape(images, (-1, 12, 224, 224))
 
-        if self.framestacking_mode == 'color' and len(images.shape) == 5:
-            features = [self.feature_extractor(imgs).reshape(-1, self.fs_linear.in_features) for imgs in images]
-            features = self.fs_linear(torch.stack(features).squeeze(1))
-        else:
-            histories = torch.reshape(histories, (-1, self.num_actions * self.num_history))
-            features = self.feature_extractor(images).reshape(-1, self.dqn[0].in_features - self.num_actions * self.num_history)
+        histories = torch.reshape(histories, (-1, self.num_actions * self.num_history))
+        features = self.feature_extractor(images).reshape(-1, self.dqn[0].in_features - self.num_actions * self.num_history)
 
         states = torch.cat((features, histories), dim=1)
 
