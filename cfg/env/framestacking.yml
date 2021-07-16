@@ -15,4 +15,6 @@ framestacking_mode: grayscale
 
 eval_full_playout: false
 
-bbox_scaling: 0
+bbox_scaling_width: 0
+
+bbox_scaling_height: 0
