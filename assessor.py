@@ -180,7 +180,7 @@ def train(train_path, val_path, trial, optimizer, model):
 
     best_loss = None
 
-    for epoch in range(300):
+    for epoch in range(500):
 
         val_losses = []
         train_losses = []
