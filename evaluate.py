@@ -48,7 +48,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
             done = False
 
             while not done:
-                action = agent.compute_action(obs[_DUMMY_AGENT_ID])
+                action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
@@ -93,7 +93,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         stdout_tiou = subprocess.run(['python', f'{cwd}/TIoU_eval_script/script.py',
                                       f'-g={cwd}/ICDAR15_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
                                      stdout=subprocess.PIPE).stdout
-        print(stdout_tiou)
         tiou_prec = re.search('tiouPrecision: (\d\.?\d{0,3})', str(stdout_tiou)).group(1)
         tiou_rec = re.search('tiouRecall: (\d\.?\d{0,3})', str(stdout_tiou)).group(1)
         tiou_f1 = re.search('tiouHmean: (\d\.?\d{0,3})', str(stdout_tiou)).group(1)
@@ -105,9 +104,9 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
             'ic15_precision': ic15_prec,
             'ic15_recall': ic15_rec,
             'ic15_f1_score': ic15_f1,
-            'tiou_precision': tiou_prec,
-            'tiou_recall': tiou_rec,
-            'tiou_f1_score': tiou_f1,
+            'tiou_precision': float(tiou_prec),
+            'tiou_recall': float(tiou_rec),
+            'tiou_f1_score': float(tiou_f1),
             'avg_iou': np.mean(avg_ious)
         }
 
@@ -131,7 +130,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env("simple", args.data_path, framestacking_mode="grayscale")
+    test_env = EnvFactory.create_eval_env("sign", args.data_path, framestacking_mode="grayscale")
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
