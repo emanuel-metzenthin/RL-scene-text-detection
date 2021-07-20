@@ -222,7 +222,7 @@ def train(train_path, val_path, trial, optimizer, model):
         with tqdm(val_loader) as val_epoch:
             with torch.no_grad():
                 model.eval()
-                log_batch_ids = random.sample(range(len(val_epoch)), 5)
+                log_batch_ids = random.sample(range(len(val_epoch)), 10)
                 exp_imgs = []
                 exp_ious = []
 
@@ -246,6 +246,7 @@ def train(train_path, val_path, trial, optimizer, model):
                     run['val/loss'].log(mean_val_loss)
 
                 if not best_loss or mean_val_loss < best_loss:
+                    plot_example_images(exp_imgs, exp_ious)
                     torch.save(model.state_dict(), 'assessor_model.pt')
                     if run:
                         run['model'].upload('assessor_model.pt')
