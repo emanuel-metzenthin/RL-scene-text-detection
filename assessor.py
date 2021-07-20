@@ -246,6 +246,7 @@ def train(train_path, val_path, trial, optimizer, model):
                     run['val/loss'].log(mean_val_loss)
 
                 if not best_loss or mean_val_loss < best_loss:
+                    plot_example_images(exp_imgs, exp_ious)
                     torch.save(model.state_dict(), 'assessor_model.pt')
                     if run:
                         run['model'].upload('assessor_model.pt')
