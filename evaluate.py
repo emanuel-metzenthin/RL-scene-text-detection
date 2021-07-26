@@ -48,7 +48,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
             done = False
 
             while not done:
-                action = agent.compute_action(obs[_DUMMY_AGENT_ID])
+                action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
@@ -128,10 +128,13 @@ if __name__ == '__main__':
     parser.add_argument("checkpoint_path", type=str)
     parser.add_argument("data_path", type=str)
     parser.add_argument("gt_file", type=str)
+    parser.add_argument("--dataset", type=str, default="simple")
+    parser.add_argument("--framestacking", type=str, default=None)
+    parser.add_argument("--playout", action='store_true', default=False)
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env("simple", args.data_path, framestacking_mode="grayscale")
+    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, framestacking_mode=args.framestacking, playout=args.playout)
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
@@ -141,7 +144,7 @@ if __name__ == '__main__':
             "custom_model": "imagedqn",
             "custom_model_config": {
                 "dueling": False,
-                "framestacking_mode": "grayscale"
+                "framestacking_mode": args.framestacking
             }
         },
         "num_gpus_per_worker": 1,
