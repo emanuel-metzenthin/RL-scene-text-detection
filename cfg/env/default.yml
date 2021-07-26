@@ -13,8 +13,6 @@ termination: false
 
 framestacking_mode: null
 
-eval_full_playout: false
-
 bbox_scaling_width: 0
 
 bbox_scaling_height: 0

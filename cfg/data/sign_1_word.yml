@@ -6,3 +6,5 @@ path: /data/600_1_signs_1_words
 eval_path: /data/600_1_signs_1_words
 
 eval_gt_file: sign_1_text_1_word_gt.zip
+
+eval_full_playout: false

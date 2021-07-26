@@ -6,3 +6,5 @@ path: /data/simple_1_text_1_word
 eval_path: /data/simple_1_text_1_word/val
 
 eval_gt_file: simple_gt.zip
+
+eval_full_playout: false
