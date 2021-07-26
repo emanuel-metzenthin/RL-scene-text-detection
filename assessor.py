@@ -180,7 +180,7 @@ def train(train_path, val_path, trial, optimizer, model):
 
     best_loss = None
 
-    for epoch in range(500):
+    for epoch in range(300):
 
         val_losses = []
         train_losses = []
@@ -222,7 +222,7 @@ def train(train_path, val_path, trial, optimizer, model):
         with tqdm(val_loader) as val_epoch:
             with torch.no_grad():
                 model.eval()
-                log_batch_ids = random.sample(range(len(val_epoch)), 10)
+                log_batch_ids = random.sample(range(len(val_epoch)), 5)
                 exp_imgs = []
                 exp_ious = []
 
