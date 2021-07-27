@@ -1,20 +1,24 @@
 import json
 import argparse
 import numpy as np
+import ijson
 
 parser = argparse.ArgumentParser()
 parser.add_argument("json_file")
 args = parser.parse_args()
 
 gt_file = open(args.json_file, 'r')
-gt_json = json.loads(gt_file.read())
+gt_json = ijson.items(gt_file)
 gt_file.close()
 
-gt_json = np.random.shuffle(gt_json)
-num_train = 0.95 * len(gt_json)
+train_gt = []
+val_gt = []
 
-train_gt = gt_json[:num_train]
-val_gt = gt_json[num_train:]
+for obj in gt_json:
+    if np.random.rand() < 0.8:
+        train_gt.append(obj)
+    else:
+        val_gt.append(obj)
 
 val_file = open("val_gt.json", "w+")
 train_file = open("train_gt.json", "w+")
