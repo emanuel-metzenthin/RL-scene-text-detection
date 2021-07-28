@@ -10,9 +10,12 @@ import pandas as pd
 
 
 class AssessorDataset(Dataset):
+    def __init__(self, alpha):
+        self.alpha = alpha
+
     def __getitem__(self, index) -> T_co:
         image = Image.open(self.images[index])
-        image = image.convert('RGBA')
+        image = image.convert('RGBA') if self.alpha else image.convert('RGB')
         image = self.transform(image)
 
         gt = self.gt[index]

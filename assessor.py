@@ -95,10 +95,11 @@ class AddCoord(nn.Module):
 
 
 class AssessorModel(nn.Module):
-    def __init__(self, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256):
+    def __init__(self, alpha=True, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256):
         super().__init__()
+        input_channels = 4 if alpha else 3
         self.resnet = nn.Sequential(
-            ResBlock1(4, hidden_1),
+            ResBlock1(input_channels, hidden_1),
             nn.MaxPool2d(2, 2),
             ResBlock1(hidden_1, hidden_2),
             nn.MaxPool2d(2, 2),
@@ -108,7 +109,7 @@ class AssessorModel(nn.Module):
             nn.AvgPool2d(3),
             nn.Flatten(),
             nn.Linear(hidden_3, 1, bias=False),
-            #nn.Sigmoid()
+            # nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
 
@@ -166,13 +167,13 @@ def objective(trial):
     train(train_path, val_path, trial, optimizer, model)
 
 
-def train(train_path, val_path, trial, optimizer, model):
+def train(train_path, val_path, trial, optimizer, model, alpha):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset(train_path)
-    val_data = AssessorDataset(val_path, split="val")
+    train_data = AssessorDataset(train_path, alpha)
+    val_data = AssessorDataset(val_path, alpha, split="val")
     train_loader = DataLoader(train_data, batch_size=128)
     val_loader = DataLoader(val_data, batch_size=128)
 
@@ -180,7 +181,7 @@ def train(train_path, val_path, trial, optimizer, model):
 
     best_loss = None
 
-    for epoch in range(300):
+    for epoch in range(500):
 
         val_losses = []
         train_losses = []
@@ -279,6 +280,7 @@ if __name__ == '__main__':
     parser.add_argument("train_path", default='/home/emanuel/data/iou_samples/train')
     parser.add_argument("val_path", default='/home/emanuel/data/assessor_data2/val')
     parser.add_argument("--param_search", action='store_true', required=False)
+    parser.add_argument("--no_alpha", action='store_true')
     args = parser.parse_args()
 
     torch.manual_seed(42)
@@ -288,9 +290,9 @@ if __name__ == '__main__':
     train_path, val_path = args.train_path, args.val_path
 
     if not args.param_search:
-        model = AssessorModel()
+        model = AssessorModel(not args.no_args)
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
-        train(train_path, val_path, None, optimizer, model)
+        train(train_path, val_path, None, optimizer, model, args.no_alpha)
     else:
         study = optuna.create_study(direction="minimize")
         study.optimize(objective, n_trials=100)
