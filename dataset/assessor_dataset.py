@@ -10,7 +10,6 @@ import pandas as pd
 
 
 class AssessorDataset(Dataset):
-
     def __init__(self, path: Text, alpha=False, split: Text = 'train'):
         super().__init__(path=path, split=split)
         self.alpha = alpha
