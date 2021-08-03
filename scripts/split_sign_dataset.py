@@ -8,8 +8,7 @@ parser.add_argument("json_file")
 args = parser.parse_args()
 
 gt_file = open(args.json_file, 'r')
-gt_json = ijson.items(gt_file)
-gt_file.close()
+gt_json = ijson.items(gt_file, 'item')
 
 train_gt = []
 val_gt = []
@@ -19,6 +18,7 @@ for obj in gt_json:
         train_gt.append(obj)
     else:
         val_gt.append(obj)
+gt_file.close()
 
 val_file = open("val_gt.json", "w+")
 train_file = open("train_gt.json", "w+")

@@ -10,7 +10,8 @@ import pandas as pd
 
 
 class AssessorDataset(Dataset):
-    def __init__(self, alpha):
+    def __init__(self, path, alpha, split='train'):
+        super().__init__(path, split)
         self.alpha = alpha
 
     def __getitem__(self, index) -> T_co:

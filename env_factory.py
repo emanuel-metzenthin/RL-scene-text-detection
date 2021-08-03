@@ -26,6 +26,7 @@ class EnvFactory:
     def create_env(name, path, cfg, assessor=False, framestacking_mode=False, use_cut_area=False):
         dataset = EnvFactory.load_dataset(name, path)
         assessor_model = None
+        assessor_data = None
 
         if assessor:
             if cfg.assessor.data_path:
