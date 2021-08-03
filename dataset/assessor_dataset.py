@@ -1,6 +1,6 @@
 import json
 import os
-from typing import T_co
+from typing import T_co, Text
 
 import numpy as np
 from PIL import Image
@@ -10,7 +10,9 @@ import pandas as pd
 
 
 class AssessorDataset(Dataset):
-    def __init__(self, alpha):
+
+    def __init__(self, path: Text, alpha=False, split: Text = 'train'):
+        super().__init__(path=path, split=split)
         self.alpha = alpha
 
     def __getitem__(self, index) -> T_co:
@@ -32,3 +34,5 @@ class AssessorDataset(Dataset):
 
         for file in img_files:
             self.images.append(os.path.join(self.path, file.replace('\n', '')))
+
+        return self.images, self.gt

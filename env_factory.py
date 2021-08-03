@@ -28,10 +28,10 @@ class EnvFactory:
         assessor_data = None
 
         if cfg.assessor.data_path:
-            assessor_data = AssessorDataset(cfg.assessor.data_path)
-            assessor_model = AssessorModel(DataLoader(assessor_data, batch_size=64, shuffle=False))
+            assessor_data = AssessorDataset(cfg.assessor.data_path, alpha=False)
+            assessor_model = AssessorModel(train_dataloader=DataLoader(assessor_data, batch_size=64, shuffle=False), alpha=False)
         else:
-            assessor_model = AssessorModel()
+            assessor_model = AssessorModel(alpha=False)
 
         if cfg.assessor.checkpoint:
             assessor_model.load_state_dict(torch.load(cfg.assessor.checkpoint, map_location="cpu"))
