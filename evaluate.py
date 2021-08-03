@@ -8,6 +8,7 @@ import ray
 import json
 import re
 import torch
+from PIL import Image
 from ray.rllib.agents.dqn import SimpleQTrainer
 import uuid
 from ray.rllib.agents.dqn.dqn import DQNTrainer, DEFAULT_CONFIG as DQN_CONFIG
@@ -35,6 +36,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
         os.makedirs(dir_name_13)
         os.makedirs(dir_name_15)
+        os.makedirs("./wrong_examples")
 
         zipf_ic13 = zipfile.ZipFile(f'{dir_name_13}/res.zip', 'w', zipfile.ZIP_DEFLATED)
         zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
@@ -49,6 +51,8 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
             while not done:
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
+                if env.is_trigger(action) and env.iou < 0.5:
+                    Image.fromarray(env.render(mode='rgb_array')).save(f"./wrong_examples/{image_idx}.png")
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
