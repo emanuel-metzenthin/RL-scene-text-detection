@@ -23,19 +23,18 @@ class EnvFactory:
             raise Exception(f"Dataset name {dataset} not supported.")
 
     @staticmethod
-    def create_env(name, path, cfg, assessor=False, framestacking_mode=False, use_cut_area=False):
+    def create_env(name, path, cfg, framestacking_mode=False, use_cut_area=False):
         dataset = EnvFactory.load_dataset(name, path)
-        assessor_model = None
+        assessor_data = None
 
-        if assessor:
-            if cfg.assessor.data_path:
-                assessor_data = AssessorDataset(cfg.assessor.data_path)
-                assessor_model = AssessorModel(DataLoader(assessor_data, batch_size=64, shuffle=False))
-            else:
-                assessor_model = AssessorModel()
+        if cfg.assessor.data_path:
+            assessor_data = AssessorDataset(cfg.assessor.data_path)
+            assessor_model = AssessorModel(DataLoader(assessor_data, batch_size=64, shuffle=False))
+        else:
+            assessor_model = AssessorModel()
 
-            if cfg.assessor.checkpoint:
-                assessor_model.load_state_dict(torch.load(cfg.assessor.checkpoint, map_location="cpu"))
+        if cfg.assessor.checkpoint:
+            assessor_model.load_state_dict(torch.load(cfg.assessor.checkpoint, map_location="cpu"))
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
