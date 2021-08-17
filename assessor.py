@@ -116,7 +116,7 @@ class AssessorModel(nn.Module):
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
         self.criterion = nn.MSELoss()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+        self.to(self.device)
         self.train_dataloader = train_dataloader
 
     def forward(self, X):
@@ -141,7 +141,7 @@ class AssessorModel(nn.Module):
         mse_loss.backward()
         self.optimizer.step()
 
-        print(f"Assessor loss: {mse_loss}")
+        # print(f"Assessor loss: {mse_loss}")
 
     def evaluate_one_epoch(self):
         pass
@@ -280,7 +280,7 @@ if __name__ == '__main__':
     parser.add_argument("train_path", default='/home/emanuel/data/iou_samples/train')
     parser.add_argument("val_path", default='/home/emanuel/data/assessor_data2/val')
     parser.add_argument("--param_search", action='store_true', required=False)
-    parser.add_argument("--no_alpha", action='store_true')
+    parser.add_argument("--no_alpha", action='store_true', required=False)
     args = parser.parse_args()
 
     torch.manual_seed(42)
@@ -290,9 +290,9 @@ if __name__ == '__main__':
     train_path, val_path = args.train_path, args.val_path
 
     if not args.param_search:
-        model = AssessorModel(not args.no_args)
+        model = AssessorModel(not args.no_alpha)
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
-        train(train_path, val_path, None, optimizer, model, args.no_alpha)
+        train(train_path, val_path, None, optimizer, model, not args.no_alpha)
     else:
         study = optuna.create_study(direction="minimize")
         study.optimize(objective, n_trials=100)
