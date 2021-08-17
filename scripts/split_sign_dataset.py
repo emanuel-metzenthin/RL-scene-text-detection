@@ -14,14 +14,14 @@ train_gt = []
 val_gt = []
 
 for obj in gt_json:
-    if np.random.rand() < 0.8:
+    if np.random.rand() < 0.95:
         train_gt.append(obj)
     else:
         val_gt.append(obj)
 gt_file.close()
 
-val_file = open("val_gt.json", "w+")
-train_file = open("train_gt.json", "w+")
+val_file = open("validation.json", "w+")
+train_file = open("train.json", "w+")
 
 train_file.write(json.dumps(train_gt))
 val_file.write(json.dumps(val_gt))
