@@ -26,14 +26,15 @@ class EnvFactory:
     def create_env(name, path, cfg, framestacking_mode=False, use_cut_area=False):
         dataset = EnvFactory.load_dataset(name, path)
         assessor_data = None
+        assessor_model = None
 
         if cfg.assessor.data_path:
             assessor_data = AssessorDataset(cfg.assessor.data_path, alpha=False)
             assessor_model = AssessorModel(train_dataloader=DataLoader(assessor_data, batch_size=64, shuffle=False), alpha=False)
-        else:
-            assessor_model = AssessorModel(alpha=False)
 
         if cfg.assessor.checkpoint:
+            if assessor_model is None:
+                assessor_model = AssessorModel(alpha=False)
             assessor_model.load_state_dict(torch.load(cfg.assessor.checkpoint, map_location="cpu"))
 
         env = TextLocEnv(
