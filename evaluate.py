@@ -36,7 +36,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
         os.makedirs(dir_name_13)
         os.makedirs(dir_name_15)
-        os.makedirs("./wrong_examples")
 
         zipf_ic13 = zipfile.ZipFile(f'{dir_name_13}/res.zip', 'w', zipfile.ZIP_DEFLATED)
         zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
@@ -51,8 +50,8 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
             while not done:
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
-                if env.is_trigger(action) and env.iou < 0.5:
-                    Image.fromarray(env.render(mode='rgb_array')).save(f"./wrong_examples/{image_idx}.png")
+                #if env.is_trigger(action) and env.iou < 0.3:
+                #    Image.fromarray(env.render(mode='rgb_array')).save(f"./wrong_examples/{image_idx}.png")
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
@@ -79,6 +78,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         stdout_ic13 = subprocess.run(['python', f'{cwd}/ICDAR13_eval_script/script.py',
                                       f'-g={cwd}/ICDAR13_eval_script/{gt_file}', f'-s={dir_name_13}/res.zip'],
                                      stdout=subprocess.PIPE).stdout
+        print(stdout_ic13)
         results_ic13 = re.search('\{(.*)\}', str(stdout_ic13)).group(0)
         results_ic13 = json.loads(results_ic13)
         ic13_prec = results_ic13['precision']
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     parser.add_argument("--framestacking", type=str, default=None)
     parser.add_argument("--playout", type=bool, default=False)
     args = parser.parse_args()
-    print(args.playout)
+    
     ray.init()
     test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, framestacking_mode=args.framestacking, playout=args.playout)
     register_env("textloc", lambda config: test_env)
