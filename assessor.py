@@ -118,6 +118,7 @@ class AssessorModel(nn.Module):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.to(self.device)
         self.train_dataloader = train_dataloader
+        self.train_iter = iter(train_dataloader)
 
     def forward(self, X):
         out = self.resnet(X)
@@ -132,7 +133,12 @@ class AssessorModel(nn.Module):
     def train_one_step(self):
         self.train()
 
-        input, labels = next(iter(self.train_dataloader))
+        try:
+            input, labels = next(self.train_iter)
+        except StopIteration:
+            self.train_iter = iter(self.train_dataloader)
+            input, labels = next(self.train_iter)
+
         input = input.to(self.device)
         labels = labels.to(self.device)
         self.optimizer.zero_grad()
