@@ -137,7 +137,7 @@ if __name__ == '__main__':
     parser.add_argument("--framestacking", type=str, default=None)
     parser.add_argument("--playout", type=bool, default=False)
     args = parser.parse_args()
-    print(args.playout)
+
     ray.init()
     test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, framestacking_mode=args.framestacking, playout=args.playout)
     register_env("textloc", lambda config: test_env)
