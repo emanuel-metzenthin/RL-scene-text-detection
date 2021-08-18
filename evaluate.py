@@ -52,9 +52,10 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
             while not done:
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
-                if env.is_trigger(action) and box_count % 30 == 0:
-                    Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/{env.iou}.png")
+                if env.is_trigger(action):
                     box_count += 1
+                    if box_count % 30 == 0:
+                        Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/{env.iou}.png")
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
