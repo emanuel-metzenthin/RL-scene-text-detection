@@ -1,0 +1,10 @@
+# @package _group_
+dataset: sign
+
+path: /app
+
+eval_path: /app
+
+eval_gt_file: synth_text_gt.zip
+
+eval_full_playout: true
