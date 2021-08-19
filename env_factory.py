@@ -12,19 +12,19 @@ from dataset.simple_dataset import SimpleDataset
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, data_path, split: Text = 'train'):
+    def load_dataset(dataset, data_path, json_path, split: Text = 'train'):
         if dataset == "icdar2013":
             return ICDARDataset(path=data_path, split=split)
         elif dataset == "sign":
-            return SignDataset(path=data_path, split=split)
+            return SignDataset(path=data_path, json_path=json_path, split=split)
         elif dataset == "simple":
             return SimpleDataset(path=data_path)
         else:
             raise Exception(f"Dataset name {dataset} not supported.")
 
     @staticmethod
-    def create_env(name, path, cfg, framestacking_mode=False, use_cut_area=False):
-        dataset = EnvFactory.load_dataset(name, path)
+    def create_env(name, path, json_path, cfg, framestacking_mode=False, use_cut_area=False):
+        dataset = EnvFactory.load_dataset(name, path, json_path)
         assessor_data = None
         assessor_model = None
 
@@ -59,8 +59,8 @@ class EnvFactory:
         return env
 
     @staticmethod
-    def create_eval_env(name, path, framestacking_mode, playout=False):
-        dataset = EnvFactory.load_dataset(name, path, "validation")
+    def create_eval_env(name, path, json_path, framestacking_mode, playout=False):
+        dataset = EnvFactory.load_dataset(name, path, json_path, "validation")
 
         env = TextLocEnv(
             dataset.images, dataset.gt,

@@ -3,6 +3,8 @@ dataset: simple
 
 path: /data/simple_1_text_1_word
 
+json_path: null
+
 eval_path: /data/simple_1_text_1_word/val
 
 eval_gt_file: simple_gt.zip

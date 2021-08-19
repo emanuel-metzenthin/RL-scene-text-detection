@@ -1,9 +1,11 @@
 # @package _group_
 dataset: sign
 
-path: /app
+path: /data/synthtext
 
-eval_path: /app
+json_path: /app
+
+eval_path: /data/synthtext
 
 eval_gt_file: synth_text_gt.zip
 

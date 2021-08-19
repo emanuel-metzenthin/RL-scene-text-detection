@@ -21,8 +21,12 @@ class Dataset(Dataset):
         def __repr__(self):
             return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
-    def __init__(self, path: Text, split: Text = 'train', img_size=(224, 224)):
+    def __init__(self, path: Text, json_path: Text, split: Text = 'train', img_size=(224, 224)):
         self.path = path
+        if json_path is None:
+            self.json_path = path
+        else:
+            self.json_path = json_path
         self.split = split
         self.img_size = img_size
         self._load_images_and_gt()
