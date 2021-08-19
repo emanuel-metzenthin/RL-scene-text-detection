@@ -118,7 +118,8 @@ class AssessorModel(nn.Module):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.to(self.device)
         self.train_dataloader = train_dataloader
-        self.train_iter = iter(train_dataloader)
+        if self.train_dataloader:
+            self.train_iter = iter(train_dataloader)
 
     def forward(self, X):
         out = self.resnet(X)
