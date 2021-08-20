@@ -8,7 +8,7 @@ import ray
 import json
 import re
 import torch
-from PIL import Image
+from PIL import Image, ImageDraw
 from ray.rllib.agents.dqn import SimpleQTrainer
 import uuid
 from ray.rllib.agents.dqn.dqn import DQNTrainer, DEFAULT_CONFIG as DQN_CONFIG
@@ -48,19 +48,28 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
             obs = {_DUMMY_AGENT_ID: env.reset(image_index=image_idx)}
             done = False
-            
+            episode_image = env.episode_image.copy()
+            image_draw = ImageDraw.Draw(episode_image)
+
             while not done:
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
             
+            for bbox in env.episode_true_bboxes:
+                image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
+
             for bbox in env.episode_pred_bboxes:
+                image_draw.rectangle(bbox.tolist(), outline=(255, 0, 0), width=3)
+
                 bbox = list(map(int, bbox))
                 if bbox[0] < 0 and bbox[2] < 0 or bbox[1] < 0 and bbox[3] < 0:
                     continue
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
+            if image_idx % 20 == 0:
+                episode_image.save(f"./examples/{image_idx}.png")
 
             if env.episode_trigger_ious:
                 avg_ious.append(np.mean(env.episode_trigger_ious))
@@ -120,6 +129,8 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         shutil.rmtree(dir_name_13)
         shutil.rmtree(dir_name_15)
 
+
+
         return results
 
 
@@ -132,10 +143,11 @@ if __name__ == '__main__':
     parser.add_argument("--dataset", type=str, default="simple")
     parser.add_argument("--framestacking", type=str, default=None)
     parser.add_argument("--playout", type=bool, default=False)
+    parser.add_argument("--json_path", type=str, default=None)
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, None, framestacking_mode=args.framestacking, playout=args.playout)
+    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, args.json_path, framestacking_mode=args.framestacking, playout=args.playout)
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
