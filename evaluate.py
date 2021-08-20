@@ -42,24 +42,19 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
 
         avg_ious = []
-        box_count = 0
         for image_idx in timages:
             test_file_ic13 = open(f'{dir_name_13}/res_img_{image_idx}.txt', 'w+')
             test_file_ic15 = open(f'{dir_name_15}/res_img_{image_idx}.txt', 'w+')
 
             obs = {_DUMMY_AGENT_ID: env.reset(image_index=image_idx)}
             done = False
-
+            
             while not done:
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
-                if env.is_trigger(action):
-                    box_count += 1
-                    if box_count % 30 == 0:
-                        Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/{env.iou}.png")
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
-
+            
             for bbox in env.episode_pred_bboxes:
                 bbox = list(map(int, bbox))
                 if bbox[0] < 0 and bbox[2] < 0 or bbox[1] < 0 and bbox[3] < 0:
@@ -140,7 +135,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, framestacking_mode=args.framestacking, playout=args.playout)
+    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, None, framestacking_mode=args.framestacking, playout=args.playout)
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
