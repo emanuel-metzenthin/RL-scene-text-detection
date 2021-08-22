@@ -9,6 +9,8 @@ full_playout: false
 
 premasking: true
 
+premasking_decay: null
+
 termination: false
 
 framestacking_mode: null
