@@ -11,7 +11,7 @@ import pandas as pd
 
 class AssessorDataset(Dataset):
     def __init__(self, path: Text, alpha=False, split: Text = 'train'):
-        super().__init__(path=path, json_path=path, split=split)
+        super().__init__(path=path, json_path=None, split=split)
         self.alpha = alpha
 
     def __getitem__(self, index) -> T_co:

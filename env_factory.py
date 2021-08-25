@@ -18,7 +18,7 @@ class EnvFactory:
         elif dataset == "sign":
             return SignDataset(path=data_path, json_path=json_path, split=split)
         elif dataset == "simple":
-            return SimpleDataset(path=data_path, json_path=json_path)
+            return SimpleDataset(path=data_path, json_path=None)
         else:
             raise Exception(f"Dataset name {dataset} not supported.")
 
@@ -41,6 +41,7 @@ class EnvFactory:
             dataset.images, dataset.gt,
             playout_episode=cfg.env.full_playout,
             premasking=cfg.env.premasking,
+            premasking_decay=cfg.env.premasking_decay,
             max_steps_per_image=cfg.env.steps_per_image,
             bbox_scaling_w=cfg.env.bbox_scaling_width,
             bbox_scaling_h=cfg.env.bbox_scaling_height,
