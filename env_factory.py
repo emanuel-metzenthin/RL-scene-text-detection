@@ -18,7 +18,7 @@ class EnvFactory:
         elif dataset == "sign":
             return SignDataset(path=data_path, json_path=json_path, split=split)
         elif dataset == "simple":
-            return SimpleDataset(path=data_path)
+            return SimpleDataset(path=data_path, json_path=json_path)
         else:
             raise Exception(f"Dataset name {dataset} not supported.")
 

@@ -57,8 +57,8 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
             
-            for bbox in env.episode_true_bboxes:
-                image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
+            #for bbox in env.episode_true_bboxes:
+            #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
 
             for bbox in env.episode_pred_bboxes:
                 image_draw.rectangle(bbox.tolist(), outline=(255, 0, 0), width=3)
