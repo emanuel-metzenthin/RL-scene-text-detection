@@ -14,7 +14,7 @@ class EnvFactory:
     @staticmethod
     def load_dataset(dataset, data_path, json_path, split: Text = 'train'):
         if dataset == "icdar2013":
-            return ICDARDataset(path=data_path, split=split)
+            return ICDARDataset(path=data_path, json_path=None, split=split)
         elif dataset == "sign":
             return SignDataset(path=data_path, json_path=json_path, split=split)
         elif dataset == "simple":
