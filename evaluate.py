@@ -56,13 +56,17 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
-                env.render()
+                # env.render()
+            
                 if image_idx % 20 == 0:
                     step_count += 1
                     if not os.path.isdir(f"./examples/trajectories/{image_idx}"):
                         os.makedirs(f"./examples/trajectories/{image_idx}")
                     Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/trajectories/{image_idx}/{step_count}.png")
-
+            
+            #for bbox in env.episode_true_bboxes:
+            #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
+            
             for bbox in env.episode_pred_bboxes:
                 image_draw.rectangle(bbox.tolist(), outline=(255, 0, 0), width=3)
 
@@ -71,7 +75,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                     continue
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
-
             if image_idx % 20 == 0:
                 episode_image.save(f"./examples/{image_idx}.png")
                 episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
@@ -148,10 +151,11 @@ if __name__ == '__main__':
     parser.add_argument("--dataset", type=str, default="simple")
     parser.add_argument("--framestacking", type=str, default=None)
     parser.add_argument("--playout", type=bool, default=False)
+    parser.add_argument("--json_path", type=str, default=None)
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, None, framestacking_mode=args.framestacking, playout=args.playout)
+    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, args.json_path, framestacking_mode=args.framestacking, playout=args.playout)
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
