@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from dataset.dataset import Dataset
 
 
@@ -15,7 +16,16 @@ class ICDARDataset(Dataset):
             gt = []
 
             for line in file.readlines():
-                sep = ', ' if ', ' in line else ' '
+                if line.isspace():
+                    continue
+                line = re.sub('".*?"', '', line)
+
+                if ', ' in line:
+                    sep = ', '
+                elif ',' in line:
+                    sep= ','
+                else: 
+                    sep = ' '
                 x1, y1, x2, y2 = line.split(sep)[:4]
                 gt.append((float(x1), float(y1), float(x2), float(y2)))
 
