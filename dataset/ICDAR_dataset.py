@@ -8,7 +8,7 @@ class ICDARDataset(Dataset):
     def _load_images_and_gt(self):
         folder = os.path.join(self.path, self.split + '_images')
         file_names = [i for i in os.listdir(folder) if i.lower().endswith('.jpg')]
-        file_names.sort(key=lambda x: x.split('_')[1])
+        file_names.sort(key=lambda x: int(x.split('_')[1]))
         self.images = [os.path.join(folder, i) for i in file_names]
         self.gt = []
 
@@ -24,7 +24,7 @@ class ICDARDataset(Dataset):
                 if ', ' in line:
                     sep = ', '
                 elif ',' in line:
-                    sep= ','
+                    sep = ','
                 else: 
                     sep = ' '
                 x1, y1, x2, y2 = line.split(sep)[:4]
