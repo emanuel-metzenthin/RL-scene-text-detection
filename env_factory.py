@@ -42,6 +42,7 @@ class EnvFactory:
             playout_episode=cfg.env.full_playout,
             premasking=cfg.env.premasking,
             premasking_decay=cfg.env.premasking_decay,
+            explore_force_trigger=cfg.training.explore_force_trigger,
             max_steps_per_image=cfg.env.steps_per_image,
             bbox_scaling_w=cfg.env.bbox_scaling_width,
             bbox_scaling_h=cfg.env.bbox_scaling_height,

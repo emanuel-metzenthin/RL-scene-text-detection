@@ -30,6 +30,7 @@ training:
     end: 0.1
     decay_steps: 300000
   replay_buffer_size: 20000
+  explore_force_trigger: false
 
 assessor:
   data_path: null
