@@ -5,8 +5,16 @@ path: /data/combined_dataset
 
 json_path: null
 
-eval_path: /data/ICDAR2013
+eval_path:
+  - /data/ICDAR2011
+  - /data/ICDAR2013
+  - /data/ICDAR2013+2015/test/ICDAR2015
+  - /data/ICDAR2017
 
-eval_gt_file: icdar13_gt.zip
+eval_gt_file:
+  - icdar11_gt.zip
+  - icdar13_gt.zip
+  - icdar15_gt.zip
+  - icdar17_gt.zip
 
 eval_full_playout: true
