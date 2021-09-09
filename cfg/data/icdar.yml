@@ -1,7 +1,7 @@
 # @package _group_
-dataset: sign
+dataset: icdar2013
 
-path: /data/ICDAR2013+2015
+path: /data/ICDAR2013
 
 json_path: null
 

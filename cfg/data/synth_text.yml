@@ -7,6 +7,6 @@ json_path: /app
 
 eval_path: /data/synthtext
 
-eval_gt_file: synth_text_gt.zip
+eval_gt_file: synth_text_gt_small.zip
 
 eval_full_playout: true
