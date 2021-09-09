@@ -72,7 +72,7 @@ def main(cfg):
     }
 
     stop = {
-        "training_iteration": 3000,
+        "training_iteration": 5000,
     }
 
     callbacks = []
