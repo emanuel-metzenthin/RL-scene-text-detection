@@ -17,14 +17,14 @@ from ray.tune import register_env
 from ray.tune.utils import merge_dicts
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
-
+import plotly.express as px
 from DQN import RLLibImageDQN
 from NormalizeFilter import NormalizeFilter
 from env_factory import EnvFactory
 from logger import NeptuneLogger
 
 
-def evaluate(agent, env, gt_file='simple_gt.zip'):
+def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
     num_images = len(env.image_paths)
     cwd = os.environ['WORKING_DIR']
     id = str(uuid.uuid4())[:8]
@@ -42,7 +42,10 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
 
         avg_ious = []
+        num_actions = []
+
         for image_idx in timages:
+            step_count = 0
             test_file_ic13 = open(f'{dir_name_13}/res_img_{image_idx}.txt', 'w+')
             test_file_ic15 = open(f'{dir_name_15}/res_img_{image_idx}.txt', 'w+')
 
@@ -50,23 +53,26 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
             done = False
             episode_image = env.episode_image.copy()
             image_draw = ImageDraw.Draw(episode_image)
-            step_count = 0
 
             while not done:
+                step_count += 1
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
-            
-                #if image_idx % 20 == 0:
-                #    step_count += 1
-                #    if not os.path.isdir(f"./examples/trajectories/{image_idx}"):
-                #        os.makedirs(f"./examples/trajectories/{image_idx}")
-                #    Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/trajectories/{image_idx}/{step_count}.png")
-            
+
+                if env.is_trigger(action):
+                    num_actions.append(step_count)
+
+                # if image_idx % 20 == 0:
+                #     pass
+                    # if not os.path.isdir(f"./examples/trajectories/{image_idx}"):
+                    #     os.makedirs(f"./examples/trajectories/{image_idx}")
+                    # Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/trajectories/{image_idx}/{step_count}.png")
+
             # for bbox in env.episode_true_bboxes:
-            #     image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
-            
+            #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
+
             for bbox in env.episode_pred_bboxes:
                 image_draw.rectangle(bbox.tolist(), outline=(255, 0, 0), width=3)
 
@@ -75,7 +81,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                     continue
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
-            
+
             if image_idx % 30 == 0:
                 episode_image.save(f"./examples/{image_idx}.png")
                 # episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
@@ -91,6 +97,9 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
         zipf_ic13.close()
         zipf_ic15.close()
+
+        px.histogram(avg_ious).write_image("./iou_histogram.png")
+        px.histogram(num_actions).write_image("./action_histogram.png")
 
         stdout_ic13 = subprocess.run(['python', f'{cwd}/ICDAR13_eval_script/script.py',
                                       f'-g={cwd}/ICDAR13_eval_script/{gt_file}', f'-s={dir_name_13}/res.zip'],
@@ -138,8 +147,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
         shutil.rmtree(dir_name_13)
         shutil.rmtree(dir_name_15)
 
-
-
         return results
 
 
@@ -177,4 +184,5 @@ if __name__ == '__main__':
 
     agent = SimpleQTrainer(config=config)
     agent.restore(args.checkpoint_path)
-    evaluate(agent, test_env, args.gt_file)
+    evaluate(agent, test_env, args.gt_file, plot_histograms=True)
+
