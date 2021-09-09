@@ -2,6 +2,7 @@ import os
 from os import environ
 
 import hydra
+import omegaconf
 import ray
 import torch
 from ray import tune
@@ -21,8 +22,20 @@ from logger import NeptuneLogger
 @hydra.main(config_path="cfg", config_name="config.yml")
 def main(cfg):
     def custom_eval_fn(trainer, eval_workers):
-        eval_env = EnvFactory.create_eval_env(cfg.data.dataset, cfg.data.eval_path, cfg.data.json_path, cfg.env.framestacking_mode, cfg.data.eval_full_playout)
-        return evaluate(trainer, eval_env, cfg.data.eval_gt_file)
+        if type(cfg.data.eval_path) == omegaconf.listconfig.ListConfig:
+            result = {}
+            for i, path in enumerate(cfg.data.eval_path):
+                gt_file = cfg.data.eval_gt_file[i]
+                eval_env = EnvFactory.create_eval_env(cfg.data.dataset, path, None, cfg.env.framestacking_mode, cfg.data.eval_full_playout)
+                new_result = evaluate(trainer, eval_env, cfg.data.eval_gt_file)
+                renamed_result = {f"{gt_file.split('_')[0]}_{k}": v for k, v in new_result}
+                result = {**result, **renamed_result}
+
+            return result
+        else:
+            eval_env = EnvFactory.create_eval_env(cfg.data.dataset, cfg.data.eval_path, cfg.data.json_path, cfg.env.framestacking_mode, cfg.data.eval_full_playout)
+
+            return evaluate(trainer, eval_env, cfg.data.eval_gt_file)
 
     environ['WORKING_DIR'] = os.getcwd()
     ModelCatalog.register_custom_model("image_dqn", RLLibImageDQN)
