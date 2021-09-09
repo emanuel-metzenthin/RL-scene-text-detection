@@ -36,7 +36,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
 
         os.makedirs(dir_name_13)
         os.makedirs(dir_name_15)
-        os.makedirs("./examples/trajectories", exist_ok=True)
+        os.makedirs("./examples", exist_ok=True)
 
         zipf_ic13 = zipfile.ZipFile(f'{dir_name_13}/res.zip', 'w', zipfile.ZIP_DEFLATED)
         zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
@@ -58,14 +58,14 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
             
-                if image_idx % 20 == 0:
-                    step_count += 1
-                    if not os.path.isdir(f"./examples/trajectories/{image_idx}"):
-                        os.makedirs(f"./examples/trajectories/{image_idx}")
-                    Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/trajectories/{image_idx}/{step_count}.png")
+                #if image_idx % 20 == 0:
+                #    step_count += 1
+                #    if not os.path.isdir(f"./examples/trajectories/{image_idx}"):
+                #        os.makedirs(f"./examples/trajectories/{image_idx}")
+                #    Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/trajectories/{image_idx}/{step_count}.png")
             
-            #for bbox in env.episode_true_bboxes:
-            #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
+            # for bbox in env.episode_true_bboxes:
+            #     image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
             
             for bbox in env.episode_pred_bboxes:
                 image_draw.rectangle(bbox.tolist(), outline=(255, 0, 0), width=3)
@@ -75,9 +75,10 @@ def evaluate(agent, env, gt_file='simple_gt.zip'):
                     continue
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
-            if image_idx % 20 == 0:
+            
+            if image_idx % 30 == 0:
                 episode_image.save(f"./examples/{image_idx}.png")
-                episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
+                # episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
 
             if env.episode_trigger_ious:
                 avg_ious.append(np.mean(env.episode_trigger_ious))

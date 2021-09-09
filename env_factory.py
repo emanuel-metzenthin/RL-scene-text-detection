@@ -29,8 +29,8 @@ class EnvFactory:
         assessor_model = None
 
         if cfg.assessor.data_path:
-            assessor_data = AssessorDataset(cfg.assessor.data_path, alpha=False)
-            assessor_model = AssessorModel(train_dataloader=DataLoader(assessor_data, batch_size=64, shuffle=False), alpha=False)
+            assessor_data = AssessorDataset(cfg.assessor.data_path, alpha=True)
+            assessor_model = AssessorModel(train_dataloader=DataLoader(assessor_data, batch_size=64, shuffle=False), alpha=True)
 
         if cfg.assessor.checkpoint:
             if assessor_model is None:
