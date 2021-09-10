@@ -98,8 +98,11 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         zipf_ic13.close()
         zipf_ic15.close()
 
-        px.histogram(avg_ious).write_image("./iou_histogram.png")
-        px.histogram(num_actions).write_image("./action_histogram.png")
+        if plot_histograms:
+            histogram_labels = {"count": "detections", "value": "IoU of detection"}
+            px.histogram(avg_ious, nbins=40, labels=histogram_labels).write_image("./iou_histogram.png")
+            histogram_labels = {"count": "detections", "value": "number of actions"}
+            px.histogram(num_actions, nbins=40, labels=histogram_labels).write_image("./action_histogram.png")
 
         stdout_ic13 = subprocess.run(['python', f'{cwd}/ICDAR13_eval_script/script.py',
                                       f'-g={cwd}/ICDAR13_eval_script/{gt_file}', f'-s={dir_name_13}/res.zip'],
@@ -143,6 +146,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         print(f"IC15 results:\nprecision: {ic15_prec}, recall: {ic15_rec}, f1: {ic15_f1}")
         print(f"TIoU results:\nprecision: {tiou_prec}, recall: {tiou_rec}, f1: {tiou_f1}")
         print(f"Average IoU: {np.mean(avg_ious)}")
+        print(f"Number of actions: avg {np.mean(num_actions)}, median {np.median(num_actions)}, 10% quantile {np.quantile(num_actions)}")
 
         shutil.rmtree(dir_name_13)
         shutil.rmtree(dir_name_15)
