@@ -1,3 +1,4 @@
+# Prevent hydra from taking over working dir
 hydra:
   run:
     dir: .
@@ -8,27 +9,35 @@ hydra/hydra_logging: disabled
 
 defaults:
   - env: default.yml
+  - data: simple_1_word.yml
+  - reward: base.yml
 
 neptune:
   offline: false
-  key: "secret"
   run_name: "experiment"
   run_id: null
 
 training:
-  batch_size: 16
+  random_seed: 20302
+  batch_size: 32
   lr: 0.0001
-  epochs: 80
-  backbone: "resnet50"
-  checkpoint: null
-
-  sync_rate: 100
-  update_interval: 1
-
+  backbone: resnet18
+  envs_per_worker: 1
   loss:
     gamma: 0.95
+  epsilon:
+    start: 1
+    end: 0.1
+    decay_steps: 300000
+  replay_buffer_size: 20000
+  explore_force_trigger: false
 
-valdation:
-  every: 500
+assessor:
+  data_path: null
+  checkpoint: null
 
-dataset: sign
+log_dir: /Users/Emanuel/ray_results
+
+restore: null
+
+compress_observations: true

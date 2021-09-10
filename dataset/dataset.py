@@ -6,13 +6,29 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+from torchvision.transforms import Compose, Resize, ToTensor, RandomHorizontalFlip, RandomApply, Grayscale, Normalize, GaussianBlur, ColorJitter
 
 
 class Dataset(Dataset):
-    def __init__(self, path: Text, split: Text = 'train'):
+    class AddGaussianNoise(object):
+        def __init__(self, mean=0., std=1.):
+            self.std = std
+            self.mean = mean
+
+        def __call__(self, tensor):
+            return tensor + torch.randn(tensor.size()) * self.std + self.mean
+
+        def __repr__(self):
+            return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
+
+    def __init__(self, path: Text, json_path: Text, split: Text = 'train', img_size=(224, 224)):
         self.path = path
+        if json_path is None:
+            self.json_path = path
+        else:
+            self.json_path = json_path
         self.split = split
+        self.img_size = img_size
         self._load_images_and_gt()
 
     def __getitem__(self, index) -> T_co:
@@ -24,13 +40,26 @@ class Dataset(Dataset):
 
         return image, gt
 
-    @staticmethod
-    def transform(image):
-        transforms = Compose([
-            Resize((224, 224)),
-            ToTensor(),
-            Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    def transform(self, image):
+        augm = Compose([
+            GaussianBlur(5),
+            RandomApply([self.AddGaussianNoise(0, 0.1)], p=0.5),
+            # ColorJitter(hue=0.2, saturation=0.2, contrast=0.25),
+            RandomHorizontalFlip(),
         ])
+
+        resize = Compose([
+            Resize(self.img_size),
+            ToTensor(),
+        ])
+
+        if self.split == "train":
+            transforms = Compose([
+                resize,
+                augm
+            ])
+        else:
+            transforms = resize
 
         return transforms(image)
 

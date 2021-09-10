@@ -1,0 +1,12 @@
+# @package _group_
+dataset: sign
+
+path: /data/600_3_signs_3_words
+
+json_path: null
+
+eval_path: /data/600_3_signs_3_words
+
+eval_gt_file: sign_3_texts_3_words_gt.zip
+
+eval_full_playout: true

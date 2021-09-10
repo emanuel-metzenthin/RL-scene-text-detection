@@ -1,11 +1,19 @@
 import os
 import shutil
+import argparse
 
-os.mkdir("./new")
+parser = argparse.ArgumentParser()
+parser.add_argument("path")
+args = parser.parse_args()
 
-for fn in os.listdir("."):
-  if not fn.endswith("txt"):
-      continue
-  num = os.path.splitext(os.path.basename(fn))[0].split("_")[-1]
+ADD = 1000
 
-  shutil.move(fn, f"./new/gt_img_{int(num)-1}.txt")
+for fn in os.listdir(args.path):
+  name, ext = os.path.splitext(os.path.basename(fn))
+  splits = name.split("_")
+  prefix = splits[:-1]
+  num = int(splits[-1])
+
+  new_file = f"{'_'.join(prefix)}_{num + ADD}.{ext}"
+
+  shutil.move(os.path.join(args.path, fn), os.path.join(args.path, new_file))

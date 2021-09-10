@@ -1,6 +1,12 @@
-text-localization-environment==0.1.0
+-e ./text-localization-environment
 typing-extensions==3.7.4.3
 pytorch-lightning
 torchvision
 neptune-client
 hydra-core
+line-profiler-pycharm
+ray[rllib]
+Polygon3
+uuid
+matplotlib
+optuna

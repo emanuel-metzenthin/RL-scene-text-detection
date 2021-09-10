@@ -1,0 +1,12 @@
+# @package _group_
+dataset: icdar2013
+
+path: /data/ICDAR2013
+
+json_path: null
+
+eval_path: /data/ICDAR2013
+
+eval_gt_file: icdar13_gt.zip
+
+eval_full_playout: true

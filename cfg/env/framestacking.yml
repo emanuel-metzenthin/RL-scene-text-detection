@@ -13,7 +13,9 @@ premasking_decay: null
 
 termination: false
 
-framestacking_mode: null
+framestacking_mode: grayscale
+
+eval_full_playout: false
 
 bbox_scaling_width: 0
 
