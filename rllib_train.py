@@ -27,8 +27,8 @@ def main(cfg):
             for i, path in enumerate(cfg.data.eval_path):
                 gt_file = cfg.data.eval_gt_file[i]
                 eval_env = EnvFactory.create_eval_env(cfg.data.dataset, path, None, cfg.env.framestacking_mode, cfg.data.eval_full_playout)
-                new_result = evaluate(trainer, eval_env, cfg.data.eval_gt_file)
-                renamed_result = {f"{gt_file.split('_')[0]}_{k}": v for k, v in new_result}
+                new_result = evaluate(trainer, eval_env, gt_file)
+                renamed_result = {f"{gt_file.split('_')[0]}_{k}": v for k, v in new_result.items()}
                 result = {**result, **renamed_result}
 
             return result
@@ -81,7 +81,7 @@ def main(cfg):
         "batch_mode": "complete_episodes",
         "log_sys_usage": False,
         "custom_eval_function": custom_eval_fn,
-        "evaluation_interval": 300
+        "evaluation_interval": 1000
     }
 
     stop = {
