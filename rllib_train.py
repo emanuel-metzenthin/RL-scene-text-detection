@@ -81,11 +81,11 @@ def main(cfg):
         "batch_mode": "complete_episodes",
         "log_sys_usage": False,
         "custom_eval_function": custom_eval_fn,
-        "evaluation_interval": 1000
+        "evaluation_interval": cfg.training.eval_iterations
     }
 
     stop = {
-        "training_iteration": 5000,
+        "training_iteration": cfg.training.iterations,
     }
 
     callbacks = []
