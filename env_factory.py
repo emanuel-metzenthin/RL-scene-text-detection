@@ -50,6 +50,7 @@ class EnvFactory:
             ior_marker_type='cross',
             has_termination_action=cfg.env.termination,
             has_intermediate_reward=cfg.reward.intermediate_reward,
+            has_repeat_penalty=cfg.reward.repeat_penalty,
             assessor_model=assessor_model,
             train_assessor=assessor_data is not None,
             grayscale=framestacking_mode == 'grayscale',
