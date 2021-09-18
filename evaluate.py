@@ -83,7 +83,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
 
-            if image_idx % 30 == 0:
+            if image_idx % 20 == 0:
                 episode_image.save(f"./examples/{image_idx}.png")
                 # episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
 
