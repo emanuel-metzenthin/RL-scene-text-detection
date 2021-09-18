@@ -41,7 +41,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         zipf_ic13 = zipfile.ZipFile(f'{dir_name_13}/res.zip', 'w', zipfile.ZIP_DEFLATED)
         zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
 
-        avg_ious = []
+        ious = []
         num_actions = []
 
         for image_idx in timages:
@@ -88,7 +88,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                 # episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
 
             if env.episode_trigger_ious:
-                avg_ious.append(np.mean(env.episode_trigger_ious))
+                ious += env.episode_trigger_ious
 
             test_file_ic13.close()
             test_file_ic15.close()
@@ -99,9 +99,11 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         zipf_ic13.close()
         zipf_ic15.close()
 
+        np.save("./detection_ious.npy", np.array(ious))
+
         if plot_histograms:
             histogram_labels = {"count": "detections", "value": "IoU of detection"}
-            px.histogram(avg_ious, nbins=40, labels=histogram_labels).write_image("./iou_histogram.png")
+            px.histogram(ious, nbins=40, labels=histogram_labels).write_image("./iou_histogram.png")
             histogram_labels = {"count": "detections", "value": "number of actions"}
             px.histogram(num_actions, nbins=40, labels=histogram_labels).write_image("./action_histogram.png")
             print(f"Number of actions: avg {np.mean(num_actions)}, median {np.median(num_actions)}, 10% quantile {np.quantile(num_actions, q=0.1)}")
@@ -141,13 +143,14 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             'tiou_precision': float(tiou_prec),
             'tiou_recall': float(tiou_rec),
             'tiou_f1_score': float(tiou_f1),
-            'avg_iou': np.mean(avg_ious)
+            'avg_iou': np.mean(ious)
         }
 
         print(f"IC13 results:\nprecision: {ic13_prec}, recall: {ic13_rec}, f1: {ic13_f1}")
         print(f"IC15 results:\nprecision: {ic15_prec}, recall: {ic15_rec}, f1: {ic15_f1}")
         print(f"TIoU results:\nprecision: {tiou_prec}, recall: {tiou_rec}, f1: {tiou_f1}")
-        print(f"Average IoU: {np.mean(avg_ious)}")
+        print(f"Average IoU: {np.mean(ious)}")
+        print(f"Number of actions: avg {np.mean(num_actions)}, median {np.median(num_actions)}, 10% quantile {np.quantile(num_actions, q=0.1)}")
 
         shutil.rmtree(dir_name_13)
         shutil.rmtree(dir_name_15)
