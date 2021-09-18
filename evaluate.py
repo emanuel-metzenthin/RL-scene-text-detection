@@ -116,6 +116,9 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         ic13_prec = results_ic13['precision']
         ic13_rec = results_ic13['recall']
         ic13_f1 = results_ic13['hmean']
+        num_OO = results_ic13['num_OO']
+        num_OM = results_ic13['num_OM']
+        num_MO = results_ic13['num_MO']
 
         stdout_ic15 = subprocess.run(['python', f'{cwd}/ICDAR15_eval_script/script.py',
                                       f'-g={cwd}/ICDAR15_eval_script/{gt_file}', f'-s={dir_name_15}/res.zip'],
@@ -151,6 +154,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         print(f"TIoU results:\nprecision: {tiou_prec}, recall: {tiou_rec}, f1: {tiou_f1}")
         print(f"Average IoU: {np.mean(ious)}")
         print(f"Number of actions: avg {np.mean(num_actions)}, median {np.median(num_actions)}, 10% quantile {np.quantile(num_actions, q=0.1)}")
+        print(f"OO: {num_OO}, OM: {num_OM}, MO: {num_MO}")
 
         shutil.rmtree(dir_name_13)
         shutil.rmtree(dir_name_15)

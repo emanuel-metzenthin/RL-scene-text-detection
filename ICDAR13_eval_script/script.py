@@ -152,7 +152,10 @@ def evaluate_method(gtFilePath, submFilePath, evaluationParams):
    
     numGt = 0;
     numDet = 0;
-   
+    numOM = 0
+    numMO = 0
+    numOO = 0
+
     for resFile in gt:
         
         gtFile = rrc_evaluation_funcs.decode_utf8(gt[resFile])
@@ -237,6 +240,7 @@ def evaluate_method(gtFilePath, submFilePath, evaluationParams):
                         if gtRectMat[gtNum] == 0 and detRectMat[detNum] == 0 and gtNum not in gtDontCareRectsNum and detNum not in detDontCareRectsNum :
                             match = one_to_one_match(gtNum, detNum)
                             if match is True :
+                                numOO += 1
                                 rG = gtRects[gtNum]
                                 rD = detRects[detNum]
                                 normDist = center_distance(rG, rD);
@@ -257,6 +261,7 @@ def evaluate_method(gtFilePath, submFilePath, evaluationParams):
                     if gtNum not in gtDontCareRectsNum:
                         match,matchesDet = one_to_many_match(gtNum)
                         if match is True :
+                            numOM += 1
                             gtRectMat[gtNum] = 1
                             recallAccum += evaluationParams['MTYPE_OM_O']
                             precisionAccum += evaluationParams['MTYPE_OM_O']*len(matchesDet)
@@ -271,6 +276,7 @@ def evaluate_method(gtFilePath, submFilePath, evaluationParams):
                     if detNum not in detDontCareRectsNum:
                         match,matchesGt = many_to_one_match(detNum)
                         if match is True :
+                            numMO += 1
                             detRectMat[detNum] = 1
                             recallAccum += evaluationParams['MTYPE_OM_M']*len(matchesGt)
                             precisionAccum += evaluationParams['MTYPE_OM_M']
@@ -315,7 +321,7 @@ def evaluate_method(gtFilePath, submFilePath, evaluationParams):
     methodPrecision = 0 if numDet==0 else methodPrecisionSum/numDet
     methodHmean = 0 if methodRecall + methodPrecision==0 else 2* methodRecall * methodPrecision / (methodRecall + methodPrecision)
     
-    methodMetrics = {'precision':methodPrecision, 'recall':methodRecall,'hmean': methodHmean  }
+    methodMetrics = {'precision':methodPrecision, 'recall':methodRecall,'hmean': methodHmean, 'num_OO': numOO, 'num_OM': numOM, 'num_MO': numMO}
 
     resDict = {'calculated':True,'Message':'','method': methodMetrics,'per_sample': perSampleMetrics}
     
