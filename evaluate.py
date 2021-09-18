@@ -17,7 +17,7 @@ from ray.tune import register_env
 from ray.tune.utils import merge_dicts
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
-import plotly.express as px
+#import plotly.express as px
 from DQN import RLLibImageDQN
 from NormalizeFilter import NormalizeFilter
 from env_factory import EnvFactory
@@ -57,6 +57,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             while not done:
                 step_count += 1
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
+                
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
                 # env.render()
@@ -70,7 +71,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                     #     os.makedirs(f"./examples/trajectories/{image_idx}")
                     # Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/trajectories/{image_idx}/{step_count}.png")
 
-            # for bbox in env.episode_true_bboxes:
+            #for bbox in env.episode_true_bboxes:
             #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
 
             for bbox in env.episode_pred_bboxes:
@@ -103,6 +104,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             px.histogram(avg_ious, nbins=40, labels=histogram_labels).write_image("./iou_histogram.png")
             histogram_labels = {"count": "detections", "value": "number of actions"}
             px.histogram(num_actions, nbins=40, labels=histogram_labels).write_image("./action_histogram.png")
+            print(f"Number of actions: avg {np.mean(num_actions)}, median {np.median(num_actions)}, 10% quantile {np.quantile(num_actions, q=0.1)}")
 
         stdout_ic13 = subprocess.run(['python', f'{cwd}/ICDAR13_eval_script/script.py',
                                       f'-g={cwd}/ICDAR13_eval_script/{gt_file}', f'-s={dir_name_13}/res.zip'],
@@ -146,7 +148,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         print(f"IC15 results:\nprecision: {ic15_prec}, recall: {ic15_rec}, f1: {ic15_f1}")
         print(f"TIoU results:\nprecision: {tiou_prec}, recall: {tiou_rec}, f1: {tiou_f1}")
         print(f"Average IoU: {np.mean(avg_ious)}")
-        print(f"Number of actions: avg {np.mean(num_actions)}, median {np.median(num_actions)}, 10% quantile {np.quantile(num_actions)}")
 
         shutil.rmtree(dir_name_13)
         shutil.rmtree(dir_name_15)
@@ -188,5 +189,5 @@ if __name__ == '__main__':
 
     agent = SimpleQTrainer(config=config)
     agent.restore(args.checkpoint_path)
-    evaluate(agent, test_env, args.gt_file, plot_histograms=True)
+    evaluate(agent, test_env, args.gt_file, plot_histograms=False)
 
