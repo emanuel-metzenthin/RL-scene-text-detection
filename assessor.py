@@ -114,7 +114,8 @@ class AssessorModel(nn.Module):
         self.resnet.apply(self.init_weights)
 
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
-        self.criterion = nn.MSELoss()
+        self.mse = nn.MSELoss()
+        self.bce = nn.BCELoss()
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.to(self.device)
         self.train_dataloader = train_dataloader
@@ -144,8 +145,15 @@ class AssessorModel(nn.Module):
         labels = labels.to(self.device)
         self.optimizer.zero_grad()
         pred = self(input)
-        mse_loss = self.criterion(pred.float(), labels.float())
-        mse_loss.backward()
+
+        if len(pred.shape) == 2 and pred.shape[1] == 2:
+            # cutting_pred = torch.argmax(softmax(pred[:, 1:], 1), axis=1)
+            iou_loss, cut_loss = self.mse(pred[:, 0], labels[:, 0]), self.bce(sigmoid(pred[:, 1]), labels[:, 1])
+            loss = iou_loss + cut_loss
+        else:
+            mse_loss = self.mse(pred, labels)
+            loss = mse_loss
+        loss.backward()
         self.optimizer.step()
 
         # print(f"Assessor loss: {mse_loss}")
