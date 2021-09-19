@@ -6,7 +6,7 @@ import optuna
 import torch.nn as nn
 import torchvision.models as models
 from neptune.new.types import File
-from torch import sigmoid
+from torch import sigmoid, softmax
 import torch
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
@@ -95,7 +95,7 @@ class AddCoord(nn.Module):
 
 
 class AssessorModel(nn.Module):
-    def __init__(self, alpha=True, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256):
+    def __init__(self, alpha=True, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256, output=1):
         super().__init__()
         input_channels = 4 if alpha else 3
         self.resnet = nn.Sequential(
@@ -108,7 +108,7 @@ class AssessorModel(nn.Module):
             ResBlock3(hidden_3, hidden_3),
             nn.AvgPool2d(3),
             nn.Flatten(),
-            nn.Linear(hidden_3, 1, bias=False),
+            nn.Linear(hidden_3, output, bias=False),
             # nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
@@ -174,7 +174,7 @@ def objective(trial):
     train(train_path, val_path, trial, optimizer, model)
 
 
-def train(train_path, val_path, trial, optimizer, model, alpha):
+def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
@@ -184,7 +184,8 @@ def train(train_path, val_path, trial, optimizer, model, alpha):
     train_loader = DataLoader(train_data, batch_size=128)
     val_loader = DataLoader(val_data, batch_size=128)
 
-    criterion = nn.MSELoss()
+    mse = nn.MSELoss()
+    bce = nn.BCELoss()
 
     best_loss = None
 
@@ -202,11 +203,18 @@ def train(train_path, val_path, trial, optimizer, model, alpha):
                 input = input.to(device)
                 labels = labels.to(device)
                 optimizer.zero_grad()
-                pred = model(input)
-                mse_loss = criterion(pred, labels)
-                loss = mse_loss
 
-                mse_loss.backward()
+                if tightness:
+                    pred = model(input)
+                    # cutting_pred = torch.argmax(softmax(pred[:, 1:], 1), axis=1)
+                    iou_loss, cut_loss = mse(pred[:, 0], labels[:, 0]), bce(sigmoid(pred[:, 1]), labels[:, 1])
+                    loss = iou_loss + cut_loss
+                else:
+                    pred = model(input)
+                    mse_loss = mse(pred, labels)
+                    loss = mse_loss
+
+                loss.backward()
                 optimizer.step()
 
                 pred_mins.append(torch.min(pred).detach().cpu())
@@ -244,14 +252,24 @@ def train(train_path, val_path, trial, optimizer, model, alpha):
                         exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
                         exp_ious.append([pred[img_id].item()])
 
-                    val_loss = criterion(pred, labels)
+                    if tightness:
+                        cutting_pred = sigmoid(pred[:, 1]) > 0.5
+                        acc = sum(cutting_pred == labels[:, 1]) / len(labels)
+                        iou_loss, cut_loss = mse(pred[:, 0], labels[:, 0]), bce(sigmoid(pred[:, 1]), labels[:, 1])
+                        val_loss = iou_loss + cut_loss
+                    else:
+                        mse_loss = mse(pred, labels)
+                        val_loss = mse_loss
 
                     val_losses.append(val_loss.item())
                     mean_val_loss = np.mean(val_losses)
 
                     val_epoch.set_postfix({'val_loss': mean_val_loss})
+                    val_epoch.set_postfix({'val_acc': acc})
+
                 if run:
                     run['val/loss'].log(mean_val_loss)
+                    run['val/accuracy'].log(acc)
 
                 if not best_loss or mean_val_loss < best_loss:
                     plot_example_images(exp_imgs, exp_ious)
@@ -288,6 +306,7 @@ if __name__ == '__main__':
     parser.add_argument("val_path", default='/home/emanuel/data/assessor_data2/val')
     parser.add_argument("--param_search", action='store_true', required=False)
     parser.add_argument("--no_alpha", action='store_true', required=False)
+    parser.add_argument("--tightness", action='store_true', required=False)
     args = parser.parse_args()
 
     torch.manual_seed(42)
@@ -297,9 +316,9 @@ if __name__ == '__main__':
     train_path, val_path = args.train_path, args.val_path
 
     if not args.param_search:
-        model = AssessorModel(not args.no_alpha)
+        model = AssessorModel(not args.no_alpha, output=2 if args.tightness else 1)
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
-        train(train_path, val_path, None, optimizer, model, not args.no_alpha)
+        train(train_path, val_path, None, optimizer, model, not args.no_alpha, args.tightness)
     else:
         study = optuna.create_study(direction="minimize")
         study.optimize(objective, n_trials=100)
