@@ -19,11 +19,14 @@ for file_name in os.listdir(args.path):
   test_file = open(f'./ic13_gt/gt_img_{i}.txt', 'w+')
 
   for l in file.readlines():
-    bb = l.split(",")[:8]
-    box = f"{min(bb[0], bb[6])}," + \
-          f"{min(bb[1], bb[7])}," + \
-          f"{max(bb[2], bb[4])}," + \
-          f"{max(bb[3], bb[5])},\n"
+    bb = list(map(int, l.split(",")[:8]))
+    x_values = [bb[x] for x in range(len(bb)) if x % 2 == 0]
+    y_values = [bb[y] for y in range(len(bb)) if y % 2 == 1]
+
+    box = f"{min(x_values)}," + \
+          f"{min(y_values)}," + \
+          f"{max(x_values)}," + \
+          f"{max(y_values)},\n"
 
     test_file.write(box)
 

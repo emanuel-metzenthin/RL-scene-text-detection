@@ -19,6 +19,7 @@ for file_name in os.listdir(args.path):
   for l in file.readlines():
     bb = l.split(",")[:8]
     bb = list(map(int, bb))
+
     box = f"{min(bb[0], bb[6])}," + \
           f"{min(bb[1], bb[3])}," + \
           f"{max(bb[2], bb[4])}," + \
