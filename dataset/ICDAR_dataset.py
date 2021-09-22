@@ -13,7 +13,8 @@ class ICDARDataset(Dataset):
         self.gt = []
 
         for file_name in file_names:
-            file = open(os.path.join(self.path, self.split + '_gt', 'gt_' + file_name.replace('.jpg', '.txt')))
+            img_name, _ = os.path.splitext(file_name)
+            file = open(os.path.join(self.path, self.split + '_gt', 'gt_' + img_name + '.txt'))
             gt = []
 
             for line in file.readlines():
