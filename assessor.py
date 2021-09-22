@@ -253,18 +253,19 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
                 for i, (input, labels) in enumerate(val_epoch):
                     input = input.to(device)
                     labels = labels.to(device)
-                    pred = model(input)
+                    pred = model(input).squeeze()
 
-                    if i in log_batch_ids:
-                        img_id = random.sample(range(len(pred)), 1)
-                        exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
-                        exp_ious.append([pred[img_id].item()])
+                    #if i in log_batch_ids:
+                    #    img_id = random.sample(range(len(pred)), 1)
+                    #    exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
+                    #    exp_ious.append([pred[img_id].item()])
 
                     if tightness:
                         cutting_pred = sigmoid(pred[:, 1]) > 0.5
                         acc = sum(cutting_pred == labels[:, 1]) / len(labels)
                         iou_loss, cut_loss = mse(pred[:, 0], labels[:, 0]), bce(sigmoid(pred[:, 1]), labels[:, 1])
                         val_loss = iou_loss + cut_loss
+                        val_epoch.set_postfix({'val_acc': acc})
                     else:
                         mse_loss = mse(pred, labels)
                         val_loss = mse_loss
@@ -273,14 +274,14 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
                     mean_val_loss = np.mean(val_losses)
 
                     val_epoch.set_postfix({'val_loss': mean_val_loss})
-                    val_epoch.set_postfix({'val_acc': acc})
 
                 if run:
                     run['val/loss'].log(mean_val_loss)
-                    run['val/accuracy'].log(acc)
+                    if tightness:
+                        run['val/accuracy'].log(acc)
 
                 if not best_loss or mean_val_loss < best_loss:
-                    plot_example_images(exp_imgs, exp_ious)
+                    #plot_example_images(exp_imgs, exp_ious)
                     torch.save(model.state_dict(), 'assessor_model.pt')
                     if run:
                         run['model'].upload('assessor_model.pt')
