@@ -61,9 +61,9 @@ class SignIcdarMixDataset(Dataset):
         self.gt = []
 
         imgs, gt = self._load_sign_gt()
-        self.images.append(imgs)
-        self.gt.append(gt)
+        self.images += imgs
+        self.gt += gt
 
         imgs, gt = self._load_icdar_gt()
-        self.images.append(imgs)
-        self.gt.append(gt)
+        self.images += imgs
+        self.gt += gt
