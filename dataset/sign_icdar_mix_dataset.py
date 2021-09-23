@@ -37,7 +37,7 @@ class SignIcdarMixDataset(Dataset):
         for file_name in file_names:
             img_name, _ = os.path.splitext(file_name)
             file = open(os.path.join(self.mix_path, self.split + '_gt', 'gt_' + img_name + '.txt'))
-            gt = []
+            img_gt = []
 
             for line in file.readlines():
                 if line.isspace():
@@ -51,11 +51,12 @@ class SignIcdarMixDataset(Dataset):
                 else:
                     sep = ' '
                 x1, y1, x2, y2 = line.split(sep)[:4]
-                gt.append((float(x1), float(y1), float(x2), float(y2)))
+                img_gt.append((float(x1), float(y1), float(x2), float(y2)))
 
-            gt.append(gt)
+            gt.append(img_gt)
 
         return images, gt
+
     def _load_images_and_gt(self):
         self.images = []
         self.gt = []
