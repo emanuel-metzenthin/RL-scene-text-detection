@@ -9,9 +9,10 @@ from dataset.dataset import Dataset
 class SignIcdarMixDataset(Dataset):
 
     def __init__(self, path: Text, json_path: Text, mix_path, split: Text = 'train', img_size=(224, 224)):
+        self.mix_path = mix_path
+
         super().__init__(path, json_path, split, img_size)
 
-        self.mix_path = mix_path
 
     def _load_sign_gt(self):
         gt_file = open(os.path.join(self.json_path, self.split + '.json'))
