@@ -5,6 +5,8 @@ path: /data/synthtext
 
 json_path: /app
 
+mix_path: null
+
 eval_path: /data/synthtext
 
 eval_gt_file: synth_text_gt_small.zip

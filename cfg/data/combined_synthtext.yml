@@ -1,18 +1,18 @@
 # @package _group_
-dataset: icdar2013
+dataset: sign_icdar_mix
 
-path: /data/combined_dataset
+path: /data/synthtext
 
-json_path: null
+json_path: /app
 
-mix_path: null
+mix_path: /data/combined_dataset
 
-eval_path: 
+eval_path:
   - /data/ICDAR2013
   - /data/ICDAR2015
   - /data/ICDAR2011
 
-eval_gt_file: 
+eval_gt_file:
   - icdar13_gt.zip
   - icdar15_gt.zip
   - icdar11_gt.zip

@@ -7,24 +7,27 @@ from assessor import AssessorModel
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.assessor_dataset import AssessorDataset
 from dataset.sign_dataset import SignDataset
+from dataset.sign_icdar_mix_dataset import SignIcdarMixDataset
 from dataset.simple_dataset import SimpleDataset
 
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, data_path, json_path, split: Text = 'train'):
+    def load_dataset(dataset, data_path, json_path, mix_path=None, split: Text = 'train'):
         if dataset == "icdar2013":
             return ICDARDataset(path=data_path, json_path=None, split=split)
         elif dataset == "sign":
             return SignDataset(path=data_path, json_path=json_path, split=split)
         elif dataset == "simple":
             return SimpleDataset(path=data_path, json_path=None)
+        elif dataset == "sign_icdar_mix":
+            return SignIcdarMixDataset(path=data_path, json_path=json_path, mix_path=mix_path)
         else:
             raise Exception(f"Dataset name {dataset} not supported.")
 
     @staticmethod
-    def create_env(name, path, json_path, cfg, framestacking_mode=False, use_cut_area=False):
-        dataset = EnvFactory.load_dataset(name, path, json_path)
+    def create_env(name, path, json_path, mix_path, cfg, framestacking_mode=False, use_cut_area=False):
+        dataset = EnvFactory.load_dataset(name, path, json_path, mix_path)
         assessor_data = None
         assessor_model = None
 

@@ -39,7 +39,7 @@ def main(cfg):
 
     environ['WORKING_DIR'] = os.getcwd()
     ModelCatalog.register_custom_model("image_dqn", RLLibImageDQN)
-    register_env("text_localization_env", lambda _: EnvFactory.create_env(cfg.data.dataset, cfg.data.path, cfg.data.json_path, cfg, cfg.env.framestacking_mode, cfg.reward.use_cut_area))
+    register_env("text_localization_env", lambda _: EnvFactory.create_env(cfg.data.dataset, cfg.data.path, cfg.data.json_path, cfg.data.mix_path, cfg, cfg.env.framestacking_mode, cfg.reward.use_cut_area))
     config = {
         "env": "text_localization_env",
         "model": {
