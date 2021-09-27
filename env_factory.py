@@ -66,7 +66,7 @@ class EnvFactory:
 
     @staticmethod
     def create_eval_env(name, path, json_path, framestacking_mode, playout=False):
-        dataset = EnvFactory.load_dataset(name, path, json_path, "validation")
+        dataset = EnvFactory.load_dataset(name, path, json_path, split="validation")
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
