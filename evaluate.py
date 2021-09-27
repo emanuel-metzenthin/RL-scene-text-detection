@@ -153,7 +153,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         print(f"IC15 results:\nprecision: {ic15_prec}, recall: {ic15_rec}, f1: {ic15_f1}")
         print(f"TIoU results:\nprecision: {tiou_prec}, recall: {tiou_rec}, f1: {tiou_f1}")
         print(f"Average IoU: {np.mean(ious)}")
-        print(f"Number of actions: avg {np.mean(num_actions)}, median {np.median(num_actions)}, 10% quantile {np.quantile(num_actions, q=0.1)}")
         print(f"OO: {num_OO}, OM: {num_OM}, MO: {num_MO}")
 
         shutil.rmtree(dir_name_13)

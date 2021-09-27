@@ -37,7 +37,7 @@ class EnvFactory:
 
         if cfg.assessor.checkpoint:
             if assessor_model is None:
-                assessor_model = AssessorModel(alpha=False)
+                assessor_model = AssessorModel(alpha=True)
             assessor_model.load_state_dict(torch.load(cfg.assessor.checkpoint, map_location="cpu"))
 
         env = TextLocEnv(
