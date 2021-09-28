@@ -215,7 +215,7 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
                 if tightness:
                     pred = model(input)
                     # cutting_pred = torch.argmax(softmax(pred[:, 1:], 1), axis=1)
-                    iou_loss, cut_loss = mse(pred[:, 0], labels[:, 0]), bce(sigmoid(pred[:, 1]), labels[:, 1])
+                    iou_loss, cut_loss = mse(pred[:, 0], labels[:, 0]), mse(pred[:, 1], labels[:, 1])
                     loss = iou_loss + cut_loss
                 else:
                     pred = model(input)
@@ -262,10 +262,10 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
 
                     if tightness:
                         cutting_pred = sigmoid(pred[:, 1]) > 0.5
-                        acc = sum(cutting_pred == labels[:, 1]) / len(labels)
-                        iou_loss, cut_loss = mse(pred[:, 0], labels[:, 0]), bce(sigmoid(pred[:, 1]), labels[:, 1])
+                        # acc = sum(cutting_pred == labels[:, 1]) / len(labels)
+                        iou_loss, cut_loss = mse(pred[:, 0], labels[:, 0]), mse(pred[:, 1], labels[:, 1])
                         val_loss = iou_loss + cut_loss
-                        val_epoch.set_postfix({'val_acc': acc})
+                        # val_epoch.set_postfix({'val_acc': acc})
                     else:
                         mse_loss = mse(pred, labels)
                         val_loss = mse_loss
@@ -277,8 +277,8 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
 
                 if run:
                     run['val/loss'].log(mean_val_loss)
-                    if tightness:
-                        run['val/accuracy'].log(acc)
+                    # if tightness:
+                    #     run['val/accuracy'].log(acc)
 
                 if not best_loss or mean_val_loss < best_loss:
                     #plot_example_images(exp_imgs, exp_ious)
