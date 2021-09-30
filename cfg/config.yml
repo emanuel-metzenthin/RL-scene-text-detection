@@ -33,6 +33,7 @@ training:
   explore_force_trigger: false
   iterations: 5000
   eval_iterations: 300
+  dueling: false
 
 assessor:
   data_path: null
