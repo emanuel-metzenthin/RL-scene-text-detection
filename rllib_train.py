@@ -7,7 +7,7 @@ import ray
 import torch
 from ray import tune
 from ray.rllib.agents.dqn import SimpleQTrainer
-from ray.rllib.agents.dqn.dqn import DEFAULT_CONFIG as DQN_CONFIG
+from ray.rllib.agents.dqn.dqn import DEFAULT_CONFIG as DQN_CONFIG, DQNTrainer
 from ray.rllib.models import ModelCatalog
 from ray.rllib.utils import merge_dicts
 from ray.tune import register_env
@@ -45,7 +45,7 @@ def main(cfg):
         "model": {
             "custom_model": "image_dqn",
             "custom_model_config": {
-                "dueling": False,
+                "dueling": cfg.training.dueling,
                 "framestacking_mode": cfg.env.framestacking_mode,
                 "backbone": cfg.training.backbone
             }
@@ -93,7 +93,7 @@ def main(cfg):
         logger = NeptuneLogger(cfg)
         callbacks += (logger,)
 
-    tune.run(SimpleQTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=callbacks)
+    tune.run(DQNTrainer if cfg.training.dueling else SimpleQTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=callbacks)
 
     ray.shutdown()
 
