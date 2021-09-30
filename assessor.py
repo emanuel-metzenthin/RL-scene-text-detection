@@ -95,7 +95,7 @@ class AddCoord(nn.Module):
 
 
 class AssessorModel(nn.Module):
-    def __init__(self, alpha=True, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256, output=1):
+    def __init__(self, alpha=True, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256, output=1, dual_image=False):
         super().__init__()
         input_channels = 4 if alpha else 3
         self.resnet = nn.Sequential(
@@ -182,13 +182,13 @@ def objective(trial):
     train(train_path, val_path, trial, optimizer, model)
 
 
-def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
+def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_image):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(device)
     # model.load_state_dict(torch.load('assessor_model.pt'))
 
-    train_data = AssessorDataset(train_path, alpha)
-    val_data = AssessorDataset(val_path, alpha, split="val")
+    train_data = AssessorDataset(train_path, alpha, dual_image=dual_image)
+    val_data = AssessorDataset(val_path, alpha, split="val", dual_image=dual_image)
     train_loader = DataLoader(train_data, batch_size=128)
     val_loader = DataLoader(val_data, batch_size=128)
 
@@ -255,10 +255,10 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness):
                     labels = labels.to(device)
                     pred = model(input).squeeze()
 
-                    #if i in log_batch_ids:
-                    #    img_id = random.sample(range(len(pred)), 1)
-                    #    exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
-                    #    exp_ious.append([pred[img_id].item()])
+                    if i in log_batch_ids:
+                       img_id = random.sample(range(len(pred)), 1)
+                       exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
+                       exp_ious.append([pred[img_id].item()])
 
                     if tightness:
                         cutting_pred = sigmoid(pred[:, 1]) > 0.5
@@ -316,18 +316,19 @@ if __name__ == '__main__':
     parser.add_argument("--param_search", action='store_true', required=False)
     parser.add_argument("--no_alpha", action='store_true', required=False)
     parser.add_argument("--tightness", action='store_true', required=False)
+    parser.add_argument("--dual_image", action='store_true', required=False)
     args = parser.parse_args()
 
     torch.manual_seed(42)
 
-    run = neptune.init(project='emanuelm/assessor')
-    # run = None
+    # run = neptune.init(project='emanuelm/assessor')
+    run = None
     train_path, val_path = args.train_path, args.val_path
 
     if not args.param_search:
-        model = AssessorModel(not args.no_alpha, output=2 if args.tightness else 1)
+        model = AssessorModel(not args.no_alpha, output=2 if args.tightness else 1, dual_image=args.dual_image)
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
-        train(train_path, val_path, None, optimizer, model, not args.no_alpha, args.tightness)
+        train(train_path, val_path, None, optimizer, model, not args.no_alpha, args.tightness, args.dual_image)
     else:
         study = optuna.create_study(direction="minimize")
         study.optimize(objective, n_trials=100)

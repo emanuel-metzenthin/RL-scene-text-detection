@@ -1,37 +1,54 @@
 import json
 import os
 from typing import T_co, Text
-
 import numpy as np
+import torch
 from PIL import Image
-
 from dataset.dataset import Dataset
 import pandas as pd
 
 
 class AssessorDataset(Dataset):
-    def __init__(self, path: Text, alpha=False, split: Text = 'train'):
-        super().__init__(path=path, json_path=None, split=split)
+    def __init__(self, path: Text, alpha=False, dual_image=False, split: Text = 'train'):
         self.alpha = alpha
+        self.dual_image = dual_image
+        super().__init__(path=path, json_path=None, split=split)
 
     def __getitem__(self, index) -> T_co:
         image = Image.open(self.images[index])
-        image = image.convert('RGBA') if self.alpha else image.convert('RGB')
+        if self.dual_image:
+            image = image.convert('LA') if self.alpha else image.convert('L')
+        else:
+            image = image.convert('RGBA') if self.alpha else image.convert('RGB')
         image = self.transform(image)
 
         gt = self.gt[index]
+
+        if self.dual_image:
+            sur_image = Image.open(self.surrounding_images[index])
+            sur_image = sur_image.convert("LA") if self.alpha else sur_image.convert("L")
+            sur_image = self.transform(sur_image)
+
+            image = torch.vstack((image, sur_image))
 
         return image, gt
 
     def _load_images_and_gt(self):
         self.images = []
+        self.surrounding_images = []
         img_files = open(os.path.join(self.path, 'image_locations.txt')).readlines()
+
+        if self.dual_image:
+            img_files = [i.split(",") for i in img_files]
+
         self.gt = np.load(os.path.join(self.path, 'ious.npy'), allow_pickle=True).astype(np.float32)
-        #df = pd.read_csv(os.path.join(self.path, 'images.csv'), header=None, sep='\t')
-        #img_files = df[0]
-        #self.gt = np.array(df[1], dtype=np.float32)
 
         for file in img_files:
-            self.images.append(os.path.join(self.path, file.replace('\n', '')))
+            if self.dual_image:
+                img, sur_img = file
+                self.images.append(os.path.join(self.path, img.replace('\n', '')))
+                self.surrounding_images.append(os.path.join(self.path, sur_img.replace('\n', '')))
+            else:
+                self.images.append(os.path.join(self.path, file.replace('\n', '')))
 
-        return self.images, self.gt
+        return self.images, self.surrounding_images, self.gt
