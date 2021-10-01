@@ -32,12 +32,12 @@ class EnvFactory:
         assessor_model = None
 
         if cfg.assessor.data_path:
-            assessor_data = AssessorDataset(cfg.assessor.data_path, alpha=True)
-            assessor_model = AssessorModel(train_dataloader=DataLoader(assessor_data, batch_size=64, shuffle=False), alpha=True)
+            assessor_data = AssessorDataset(cfg.assessor.data_path, alpha=True, dual_image=cfg.assessor.dual_image)
+            assessor_model = AssessorModel(train_dataloader=DataLoader(assessor_data, batch_size=64, shuffle=False), alpha=True, dual_image=cfg.assessor.dual_image)
 
         if cfg.assessor.checkpoint:
             if assessor_model is None:
-                assessor_model = AssessorModel(alpha=True)
+                assessor_model = AssessorModel(alpha=True, dual_image=cfg.assessor.dual_image)
             assessor_model.load_state_dict(torch.load(cfg.assessor.checkpoint, map_location="cpu"))
 
         env = TextLocEnv(

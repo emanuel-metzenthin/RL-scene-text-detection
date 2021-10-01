@@ -246,7 +246,7 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
         with tqdm(val_loader) as val_epoch:
             with torch.no_grad():
                 model.eval()
-                log_batch_ids = random.sample(range(len(val_epoch)), 5)
+                # log_batch_ids = random.sample(range(len(val_epoch)), 5)
                 exp_imgs = []
                 exp_ious = []
 
