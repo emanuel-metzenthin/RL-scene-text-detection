@@ -255,10 +255,10 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
                     labels = labels.to(device)
                     pred = model(input).squeeze()
 
-                    if i in log_batch_ids:
-                       img_id = random.sample(range(len(pred)), 1)
-                       exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
-                       exp_ious.append([pred[img_id].item()])
+                    # if i in log_batch_ids:
+                    #    img_id = random.sample(range(len(pred)), 1)
+                    #    exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
+                    #    exp_ious.append([pred[img_id].item()])
 
                     if tightness:
                         cutting_pred = sigmoid(pred[:, 1]) > 0.5
@@ -321,8 +321,8 @@ if __name__ == '__main__':
 
     torch.manual_seed(42)
 
-    # run = neptune.init(project='emanuelm/assessor')
-    run = None
+    run = neptune.init(project='emanuelm/assessor')
+    # run = None
     train_path, val_path = args.train_path, args.val_path
 
     if not args.param_search:
