@@ -18,18 +18,16 @@ class AssessorDataset(Dataset):
         image = Image.open(self.images[index])
         if self.dual_image:
             image = image.convert('LA') if self.alpha else image.convert('L')
-        else:
-            image = image.convert('RGBA') if self.alpha else image.convert('RGB')
-        image = self.transform(image)
-
-        gt = self.gt[index]
-
-        if self.dual_image:
             sur_image = Image.open(self.surrounding_images[index])
             sur_image = sur_image.convert("LA") if self.alpha else sur_image.convert("L")
-            sur_image = self.transform(sur_image)
+            image, sur_image = self.transform([image, sur_image])
 
             image = torch.vstack((image, sur_image))
+        else:
+            image = image.convert('RGBA') if self.alpha else image.convert('RGB')
+            image = self.transform(image)
+
+        gt = self.gt[index]
 
         return image, gt
 

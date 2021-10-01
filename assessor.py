@@ -246,7 +246,7 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
         with tqdm(val_loader) as val_epoch:
             with torch.no_grad():
                 model.eval()
-                log_batch_ids = random.sample(range(len(val_epoch)), 5)
+                # log_batch_ids = random.sample(range(len(val_epoch)), 5)
                 exp_imgs = []
                 exp_ious = []
 
@@ -255,10 +255,10 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
                     labels = labels.to(device)
                     pred = model(input).squeeze()
 
-                    if i in log_batch_ids:
-                       img_id = random.sample(range(len(pred)), 1)
-                       exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
-                       exp_ious.append([pred[img_id].item()])
+                    # if i in log_batch_ids:
+                    #    img_id = random.sample(range(len(pred)), 1)
+                    #    exp_imgs.append(ToPILImage()(input[img_id].squeeze()))
+                    #    exp_ious.append([pred[img_id].item()])
 
                     if tightness:
                         cutting_pred = sigmoid(pred[:, 1]) > 0.5

@@ -61,6 +61,9 @@ class Dataset(Dataset):
         else:
             transforms = resize
 
+        if type(image) == list:
+            return [transforms(img) for img in image]
+
         return transforms(image)
 
     def __len__(self):
