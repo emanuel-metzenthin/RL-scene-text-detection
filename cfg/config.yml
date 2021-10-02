@@ -39,6 +39,7 @@ assessor:
   data_path: null
   checkpoint: null
   dual_image: false
+  output: 1
 
 log_dir: /Users/Emanuel/ray_results
 
