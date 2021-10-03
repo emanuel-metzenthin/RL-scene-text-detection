@@ -19,7 +19,7 @@ class AssessorDataset(Dataset):
         if self.dual_image:
             image = image.convert('LA') if self.alpha else image.convert('L')
             sur_image = Image.open(self.surrounding_images[index])
-            sur_image = sur_image.convert("LA") if self.alpha else sur_image.convert("L")
+            sur_image = sur_image.convert("L")
             image, sur_image = self.transform([image, sur_image])
 
             image = torch.vstack((image, sur_image))
