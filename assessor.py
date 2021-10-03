@@ -112,6 +112,7 @@ class AssessorModel(nn.Module):
             # nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
+        self.dual_image = dual_image
 
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
         self.mse = nn.MSELoss()
