@@ -7,6 +7,8 @@ json_path: null
 
 mix_path: null
 
+eval_dataset: null
+
 eval_path: /data/ICDAR2013
 
 eval_gt_file: icdar13_gt.zip

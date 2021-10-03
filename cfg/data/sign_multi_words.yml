@@ -7,6 +7,8 @@ json_path: null
 
 mix_path: null
 
+eval_dataset: null
+
 eval_path: /data/600_3_signs_3_words
 
 eval_gt_file: sign_3_texts_3_words_gt.zip
