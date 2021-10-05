@@ -220,7 +220,7 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
                     loss = iou_loss + cut_loss
                 else:
                     pred = model(input)
-                    mse_loss = mse(pred, labels)
+                    mse_loss = bce(pred, labels)
                     loss = mse_loss
 
                 loss.backward()
@@ -268,8 +268,10 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
                         val_loss = iou_loss + cut_loss
                         # val_epoch.set_postfix({'val_acc': acc})
                     else:
-                        mse_loss = mse(pred, labels)
+                        mse_loss = bce(pred, labels)
                         val_loss = mse_loss
+                        class_pred = sigmoid(pred) > 0.5
+                        acc = sum(class_pred == labels) / len(labels)
 
                     val_losses.append(val_loss.item())
                     mean_val_loss = np.mean(val_losses)
@@ -279,7 +281,7 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
                 if run:
                     run['val/loss'].log(mean_val_loss)
                     # if tightness:
-                    #     run['val/accuracy'].log(acc)
+                    run['val/accuracy'].log(acc)
 
                 if not best_loss or mean_val_loss < best_loss:
                     #plot_example_images(exp_imgs, exp_ious)
