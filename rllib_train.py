@@ -59,10 +59,11 @@ def main(cfg):
                 "num_replay_buffer_shards": 1,
             }),
         "exploration_config": {
-            "type": "EpsilonGreedy",
-            "initial_epsilon": cfg.training.epsilon.start,
-            "final_epsilon": cfg.training.epsilon.end,
-            "epsilon_timesteps": cfg.training.epsilon.decay_steps * cfg.training.envs_per_worker,
+            # "type": "EpsilonGreedy",
+            # "initial_epsilon": cfg.training.epsilon.start,
+            # "final_epsilon": cfg.training.epsilon.end,
+            # "epsilon_timesteps": cfg.training.epsilon.decay_steps * cfg.training.envs_per_worker,
+            "type": "SoftQ"
         },
         # "n_step": 3,
         # "num_atoms": 51,
