@@ -1,0 +1,22 @@
+# @package _group_
+dataset: coco
+
+path: /data/coco_text
+
+json_path: null
+
+mix_path: null
+
+eval_dataset: null
+
+eval_path: 
+  - /data/ICDAR2013
+  - /data/ICDAR2015
+  - /data/ICDAR2011
+
+eval_gt_file: 
+  - icdar13_gt.zip
+  - icdar15_gt.zip
+  - icdar11_gt.zip
+
+eval_full_playout: true

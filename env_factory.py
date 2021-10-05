@@ -6,6 +6,7 @@ from text_localization_environment import TextLocEnv
 from assessor import AssessorModel
 from dataset.ICDAR_dataset import ICDARDataset
 from dataset.assessor_dataset import AssessorDataset
+from dataset.coco_text_dataset import COCOTextDataset
 from dataset.sign_dataset import SignDataset
 from dataset.sign_icdar_mix_dataset import SignIcdarMixDataset
 from dataset.simple_dataset import SimpleDataset
@@ -22,6 +23,8 @@ class EnvFactory:
             return SimpleDataset(path=data_path, json_path=None)
         elif dataset == "sign_icdar_mix":
             return SignIcdarMixDataset(path=data_path, json_path=json_path, mix_path=mix_path)
+        elif dataset == "coco":
+            return COCOTextDataset(path=data_path, json_path=json_path, split=split)
         else:
             raise Exception(f"Dataset name {dataset} not supported.")
 
@@ -79,6 +82,7 @@ class EnvFactory:
             bbox_transformer='base',
             ior_marker_type='cross',
             has_termination_action=False,
+            # has_repeat_penalty=True,
             mode='test',
             grayscale=framestacking_mode == 'grayscale'
         )
