@@ -97,7 +97,7 @@ class AddCoord(nn.Module):
 class AssessorModel(nn.Module):
     def __init__(self, alpha=True, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256, output=1, dual_image=False):
         super().__init__()
-        input_channels = 4 if alpha else 3
+        input_channels = 4 if alpha and not dual_image else 3
         self.resnet = nn.Sequential(
             ResBlock1(input_channels, hidden_1),
             nn.MaxPool2d(2, 2),
