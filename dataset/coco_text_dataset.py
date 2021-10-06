@@ -15,6 +15,8 @@ class COCOTextDataset(Dataset):
         for key, entry in gt_json.items():
             image_id = entry['image_id']
             bbox = list(map(int, entry['bbox']))
+            bbox[2] = bbox[0] + bbox[2]
+            bbox[3] = bbox[1] + bbox[3]
 
             if image_id in images_anns:
                 images_anns[image_id].append(bbox)
