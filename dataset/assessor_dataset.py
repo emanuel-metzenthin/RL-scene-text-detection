@@ -17,10 +17,11 @@ class AssessorDataset(Dataset):
     def __getitem__(self, index) -> T_co:
         image = Image.open(self.images[index])
         if self.dual_image:
-            image = image.convert('LA') if self.alpha else image.convert('L')
+            image = image.convert('RGBA') if self.alpha else image.convert('L')
             sur_image = Image.open(self.surrounding_images[index])
-            sur_image = sur_image.convert("L")
+            sur_image = sur_image.convert("RGBA")
             image, sur_image = self.transform([image, sur_image])
+            image, sur_image = image.unsqueeze(0), sur_image.unsqueeze(0)
 
             image = torch.vstack((image, sur_image))
         else:
