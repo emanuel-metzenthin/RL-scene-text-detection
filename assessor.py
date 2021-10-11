@@ -107,11 +107,12 @@ class AssessorModel(nn.Module):
             nn.MaxPool2d(2, 2),
             ResBlock3(hidden_3, hidden_3),
             nn.AvgPool2d(3),
-            nn.Flatten(),
-            nn.Linear(hidden_3, output, bias=False),
+            nn.Flatten()
             # nn.Sigmoid()
         )
+        self.feat = nn.Linear(hidden_3, output, bias=False)
         self.resnet.apply(self.init_weights)
+        self.feat.apply(self.init_weights)
         self.dual_image = dual_image
 
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
@@ -124,7 +125,9 @@ class AssessorModel(nn.Module):
             self.train_iter = iter(train_dataloader)
 
     def forward(self, X):
-        out = self.resnet(X)
+        repr = [self.resnet(x) for x in X]
+        repr = torch.stack(repr).view(-1, 512)
+        out = self.feat(repr)
 
         return out
 
