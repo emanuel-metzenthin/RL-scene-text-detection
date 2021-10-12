@@ -110,7 +110,7 @@ class AssessorModel(nn.Module):
             nn.Flatten()
             # nn.Sigmoid()
         )
-        self.feat = nn.Linear(hidden_3, output, bias=False)
+        self.feat = nn.Linear(hidden_3 * 2, output, bias=False)
         self.resnet.apply(self.init_weights)
         self.feat.apply(self.init_weights)
         self.dual_image = dual_image
