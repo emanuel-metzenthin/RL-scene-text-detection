@@ -111,11 +111,11 @@ class AssessorModel(nn.Module):
             # nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
-        self.feat.apply(self.init_weights)
         self.dual_image = dual_image
 
         feat_len = hidden_3 * 2 if self.dual_image else hidden_3
         self.feat = nn.Linear(feat_len, output, bias=False)
+        self.feat.apply(self.init_weights)
 
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
         self.mse = nn.MSELoss()
