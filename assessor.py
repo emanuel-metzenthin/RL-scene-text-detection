@@ -229,7 +229,7 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
                     loss = iou_loss + cut_loss
                 else:
                     pred = model(input)
-                    mse_loss = bce(pred, labels)
+                    mse_loss = mse(pred, labels)
                     loss = mse_loss
 
                 loss.backward()
@@ -277,7 +277,7 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
                         val_loss = iou_loss + cut_loss
                         # val_epoch.set_postfix({'val_acc': acc})
                     else:
-                        mse_loss = bce(pred, labels)
+                        mse_loss = mse(pred, labels)
                         val_loss = mse_loss
                         class_pred = sigmoid(pred) > 0.5
                         acc = sum(class_pred == labels) / len(labels)
