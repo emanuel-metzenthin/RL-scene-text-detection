@@ -110,10 +110,12 @@ class AssessorModel(nn.Module):
             nn.Flatten()
             # nn.Sigmoid()
         )
-        self.feat = nn.Linear(hidden_3, output, bias=False)
         self.resnet.apply(self.init_weights)
         self.feat.apply(self.init_weights)
         self.dual_image = dual_image
+
+        feat_len = hidden_3 * 2 if self.dual_image else hidden_3
+        self.feat = nn.Linear(feat_len, output, bias=False)
 
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
         self.mse = nn.MSELoss()
@@ -125,8 +127,12 @@ class AssessorModel(nn.Module):
             self.train_iter = iter(train_dataloader)
 
     def forward(self, X):
-        repr = [self.resnet(x) for x in X]
-        repr = torch.stack(repr).view(-1, 512)
+        if self.dual_image:
+            repr = [self.resnet(x) for x in X]
+            repr = torch.stack(repr).view(-1, 512)
+        else:
+            repr = self.resnet(X)
+
         out = self.feat(repr)
 
         return out
