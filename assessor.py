@@ -199,8 +199,8 @@ def train(train_path, val_path, trial, optimizer, model, alpha, tightness, dual_
 
     train_data = AssessorDataset(train_path, alpha, dual_image=dual_image)
     val_data = AssessorDataset(val_path, alpha, split="val", dual_image=dual_image)
-    train_loader = DataLoader(train_data, batch_size=128)
-    val_loader = DataLoader(val_data, batch_size=128)
+    train_loader = DataLoader(train_data, batch_size=64)
+    val_loader = DataLoader(val_data, batch_size=64)
 
     mse = nn.MSELoss()
     bce = nn.BCELoss()
