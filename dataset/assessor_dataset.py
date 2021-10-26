@@ -48,6 +48,6 @@ class AssessorDataset(Dataset):
                 self.images.append(os.path.join(self.path, img.replace('\n', '')))
                 self.surrounding_images.append(os.path.join(self.path, sur_img.replace('\n', '')))
             else:
-                self.images.append(os.path.join(self.path, file.replace('\n', '')))
+                self.images.append(os.path.join(self.path, file.replace('\n', '')[1:]))
 
         return self.images, self.surrounding_images, self.gt
