@@ -37,8 +37,7 @@ class AssessorDataset(Dataset):
         self.surrounding_images = []
         img_files = open(os.path.join(self.path, 'image_locations.txt')).readlines()
 
-        if self.dual_image:
-            img_files = [i.split(",") for i in img_files]
+        img_files = [i.split(",") for i in img_files]
 
         self.gt = np.load(os.path.join(self.path, 'ious.npy'), allow_pickle=True).astype(np.float32)
 
@@ -48,6 +47,6 @@ class AssessorDataset(Dataset):
                 self.images.append(os.path.join(self.path, img.replace('\n', '')))
                 self.surrounding_images.append(os.path.join(self.path, sur_img.replace('\n', '')))
             else:
-                self.images.append(os.path.join(self.path, file.replace('\n', '')))
+                self.images.append(os.path.join(self.path, file[0].replace('\n', '')))
 
         return self.images, self.surrounding_images, self.gt
