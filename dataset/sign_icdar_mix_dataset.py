@@ -8,8 +8,9 @@ from dataset.dataset import Dataset
 
 class SignIcdarMixDataset(Dataset):
 
-    def __init__(self, path: Text, json_path: Text, mix_path, split: Text = 'train', img_size=(224, 224)):
+    def __init__(self, path: Text, json_path: Text, mix_path, mix_labels, split: Text = 'train', img_size=(224, 224)):
         self.mix_path = mix_path
+        self.mix_labels = mix_labels
 
         super().__init__(path, json_path, split, img_size)
 
@@ -34,26 +35,29 @@ class SignIcdarMixDataset(Dataset):
         images = [os.path.join(folder, i) for i in file_names]
         gt = []
 
-        for file_name in file_names:
-            img_name, _ = os.path.splitext(file_name)
-            file = open(os.path.join(self.mix_path, self.split + '_gt', 'gt_' + img_name + '.txt'))
-            img_gt = []
+        if self.mix_labels:
+            for file_name in file_names:
+                img_name, _ = os.path.splitext(file_name)
+                file = open(os.path.join(self.mix_path, self.split + '_gt', 'gt_' + img_name + '.txt'))
+                img_gt = []
 
-            for line in file.readlines():
-                if line.isspace():
-                    continue
-                line = re.sub('".*?"', '', line)
+                for line in file.readlines():
+                    if line.isspace():
+                        continue
+                    line = re.sub('".*?"', '', line)
 
-                if ', ' in line:
-                    sep = ', '
-                elif ',' in line:
-                    sep = ','
-                else:
-                    sep = ' '
-                x1, y1, x2, y2 = line.split(sep)[:4]
-                img_gt.append((float(x1), float(y1), float(x2), float(y2)))
+                    if ', ' in line:
+                        sep = ', '
+                    elif ',' in line:
+                        sep = ','
+                    else:
+                        sep = ' '
+                    x1, y1, x2, y2 = line.split(sep)[:4]
+                    img_gt.append((float(x1), float(y1), float(x2), float(y2)))
 
-            gt.append(img_gt)
+                gt.append(img_gt)
+        else:
+            gt = [[] for _ in range(len(images))]
 
         return images, gt
 
