@@ -14,7 +14,7 @@ from dataset.simple_dataset import SimpleDataset
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, data_path, json_path, mix_path=None, split: Text = 'train'):
+    def load_dataset(dataset, data_path, json_path, mix_path=None, mix_labels=False, split: Text = 'train'):
         if dataset == "icdar2013":
             return ICDARDataset(path=data_path, json_path=None, split=split)
         elif dataset == "sign":
@@ -22,7 +22,7 @@ class EnvFactory:
         elif dataset == "simple":
             return SimpleDataset(path=data_path, json_path=None)
         elif dataset == "sign_icdar_mix":
-            return SignIcdarMixDataset(path=data_path, json_path=json_path, mix_path=mix_path)
+            return SignIcdarMixDataset(path=data_path, json_path=json_path, mix_path=mix_path, mix_labels=mix_labels)
         elif dataset == "coco":
             return COCOTextDataset(path=data_path, json_path=json_path, split=split)
         else:
