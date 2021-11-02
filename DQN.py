@@ -44,6 +44,7 @@ class ImageDQN(nn.Module):
         if backbone == 'vgg16':
             self.feature_extractor = backbone_model
             self.feature_extractor.classifier = nn.Sequential(
+                nn.Flatten(),
                 nn.Linear(25088, 4096),
                 nn.ReLU(),
                 nn.Linear(4096, 4096)
