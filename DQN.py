@@ -49,7 +49,7 @@ class ImageDQN(nn.Module):
                 nn.Linear(4096, 4096)
             )
             self.feature_extractor_output_size = 4096
-            self.feature_extractor = nn.Sequential(*list(backbone_model.children()))
+            self.feature_extractor = nn.Sequential(*list(self.feature_extractor.children()))
         else:
             self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
             if backbone == 'resnet50':
