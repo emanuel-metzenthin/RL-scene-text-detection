@@ -32,22 +32,30 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
 
 
 class ImageDQN(nn.Module):
-    BACKBONES = ['resnet18', 'resnet50']
+    BACKBONES = ['resnet18', 'resnet50', 'vgg16']
 
-    def __init__(self, backbone: Text = 'resnet50', dueling=False, num_actions: int = 9, num_history: int = 10, framestacking_mode: bool = None, grayscale: bool = False):
+    def __init__(self, backbone: Text = 'resnet18', dueling=False, num_actions: int = 9, num_history: int = 10, framestacking_mode: bool = None, grayscale: bool = False):
         super().__init__()
 
         if backbone not in ImageDQN.BACKBONES:
             raise Exception(f'{backbone} not supported.')
         backbone_model = getattr(models, backbone)(pretrained=True)
-        self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
-        
-        if backbone == 'resnet50':
-            for child in list(self.feature_extractor.children())[:-3]:
-                for param in child.parameters():
-                    param.requires_grad = False
 
-        self.feature_extractor_output_size = backbone_model.fc.in_features
+        if backbone == 'vgg16':
+            self.feature_extractor = backbone_model
+            self.feature_extractor.classifier = nn.Sequential(
+                nn.Linear(25088, 4096),
+                nn.ReLU(),
+                nn.Linear(4096, 4096)
+            )
+            self.feature_extractor_output_size = 4096
+        else:
+            self.feature_extractor = nn.Sequential(*list(backbone_model.children())[:-1])
+            if backbone == 'resnet50':
+                for child in list(self.feature_extractor.children())[:-3]:
+                    for param in child.parameters():
+                        param.requires_grad = False
+            self.feature_extractor_output_size = backbone_model.fc.in_features
 
         self.framestacking_mode = framestacking_mode
         self.grayscale = grayscale
