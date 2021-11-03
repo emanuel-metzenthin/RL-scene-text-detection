@@ -22,6 +22,28 @@ from DQN import RLLibImageDQN
 from NormalizeFilter import NormalizeFilter
 from env_factory import EnvFactory
 from logger import NeptuneLogger
+from utils import compute_iou
+
+
+def post_process(episode_pred_bboxes, episode_trigger_ious):
+    episode_pred_bboxes = list(map(list, episode_pred_bboxes))
+    boxes_ious = zip(episode_pred_bboxes, episode_trigger_ious)
+    boxes_ious = [(b, i) for b, i in boxes_ious if i > 0.5]
+    boxes_ious = sorted(boxes_ious, key=lambda x: x[1], reverse=True)
+
+    final_boxes = []
+
+    while len(boxes_ious) > 0:
+        best_bbox_iou = boxes_ious.pop(0)
+        final_boxes.append(best_bbox_iou)
+
+        for box, trigger_iou in boxes_ious:
+            iou = compute_iou(best_bbox_iou[0], box)
+
+            if iou > 0.5:
+                boxes_ious.remove((box, trigger_iou))
+
+    return final_boxes
 
 
 def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
@@ -74,8 +96,17 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             # for bbox in env.episode_true_bboxes:
             #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
 
-            for bbox in env.episode_pred_bboxes:
-                image_draw.rectangle(bbox.tolist(), outline=(255, 0, 0), width=3)
+            if env.assessor:
+                bboxes_ious = post_process(env.episode_pred_bboxes, env.episode_trigger_ious)
+            else:
+                bboxes_ious = list(env.episode_pred_bboxes)
+
+            for i, (bbox, trigger_iou) in enumerate(bboxes_ious):
+                if trigger_iou > 0.5:
+                    color = (0, 255, 0)
+                else:
+                    color = (255, 0, 0)
+                image_draw.rectangle(bbox, outline=color, width=4)
 
                 bbox = list(map(int, bbox))
                 if bbox[0] < 0 and bbox[2] < 0 or bbox[1] < 0 and bbox[3] < 0:
@@ -171,10 +202,11 @@ if __name__ == '__main__':
     parser.add_argument("--framestacking", type=str, default=None)
     parser.add_argument("--playout", type=bool, default=False)
     parser.add_argument("--json_path", type=str, default=None)
+    parser.add_argument("--assessor", type=str, default=None)
     args = parser.parse_args()
 
     ray.init()
-    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, args.json_path, framestacking_mode=args.framestacking, playout=args.playout)
+    test_env = EnvFactory.create_eval_env(args.dataset, args.data_path, args.json_path, framestacking_mode=args.framestacking, assessor_checkpoint=args.assessor, playout=args.playout)
     register_env("textloc", lambda config: test_env)
     ModelCatalog.register_custom_model("imagedqn", RLLibImageDQN)
     config = {
