@@ -71,7 +71,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                     #     os.makedirs(f"./examples/trajectories/{image_idx}")
                     # Image.fromarray(env.render(mode='rgb_array')).save(f"./examples/trajectories/{image_idx}/{step_count}.png")
 
-            #for bbox in env.episode_true_bboxes:
+            # for bbox in env.episode_true_bboxes:
             #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
 
             for bbox in env.episode_pred_bboxes:
@@ -83,7 +83,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
 
-            if image_idx % 20 == 0:
+            if image_idx % 5 == 0:
                 episode_image.save(f"./examples/{image_idx}.png")
                 # episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
 
