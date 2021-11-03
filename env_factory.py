@@ -69,8 +69,13 @@ class EnvFactory:
         return env
 
     @staticmethod
-    def create_eval_env(name, path, json_path, framestacking_mode, playout=False):
+    def create_eval_env(name, path, json_path, framestacking_mode, assessor_checkpoint=None, playout=False):
         dataset = EnvFactory.load_dataset(name, path, json_path, split="validation")
+        assessor_model = None
+
+        if assessor_checkpoint:
+            assessor_model = AssessorModel(alpha=True)
+            assessor_model.load_state_dict(torch.load(assessor_checkpoint, map_location="cpu"))
 
         env = TextLocEnv(
             dataset.images, dataset.gt,
@@ -80,9 +85,10 @@ class EnvFactory:
             bbox_scaling_w=0,
             bbox_scaling_h=0,
             bbox_transformer='base',
-            ior_marker_type='cross',
+            ior_marker_type='average',
             has_termination_action=False,
             # has_repeat_penalty=True,
+            assessor_model=assessor_model,
             mode='test',
             grayscale=framestacking_mode == 'grayscale'
         )
