@@ -22,7 +22,7 @@ from DQN import RLLibImageDQN
 from NormalizeFilter import NormalizeFilter
 from env_factory import EnvFactory
 from logger import NeptuneLogger
-from utils import compute_iou
+from utils import compute_iou, compute_area, compute_intersection
 
 
 def post_process(episode_pred_bboxes, episode_trigger_ious):
@@ -37,10 +37,15 @@ def post_process(episode_pred_bboxes, episode_trigger_ious):
         best_bbox_iou = boxes_ious.pop(0)
         final_boxes.append(best_bbox_iou)
 
-        for box, trigger_iou in boxes_ious:
-            iou = compute_iou(best_bbox_iou[0], box)
-
-            if iou > 0.5:
+        for box, trigger_iou in list(boxes_ious):
+            if compute_intersection(best_bbox_iou[0], box) / compute_area(box) > 0.5:
+                new_best_box = [min(best_bbox_iou[0][0], box[0]),
+                                min(best_bbox_iou[0][1], box[1]),
+                                max(best_bbox_iou[0][2], box[2]),
+                                max(best_bbox_iou[0][3], box[3])]
+                final_boxes.remove(best_bbox_iou)
+                best_bbox_iou = new_best_box, best_bbox_iou[1]
+                final_boxes.append(best_bbox_iou)
                 boxes_ious.remove((box, trigger_iou))
 
     return final_boxes
@@ -99,16 +104,16 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             if env.assessor:
                 bboxes_ious = post_process(env.episode_pred_bboxes, env.episode_trigger_ious)
             else:
-                bboxes_ious = list(env.episode_pred_bboxes)
+                bboxes_ious = zip(env.episode_pred_bboxes, env.episode_trigger_ious)
 
             for i, (bbox, trigger_iou) in enumerate(bboxes_ious):
                 if trigger_iou > 0.5:
                     color = (0, 255, 0)
                 else:
                     color = (255, 0, 0)
-                image_draw.rectangle(bbox, outline=color, width=4)
 
                 bbox = list(map(int, bbox))
+                image_draw.rectangle(bbox, outline=color, width=4)
                 if bbox[0] < 0 and bbox[2] < 0 or bbox[1] < 0 and bbox[3] < 0:
                     continue
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
