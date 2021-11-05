@@ -19,3 +19,10 @@ def compute_intersection(bbox, other_bbox):
         return 0
 
     return (right - left) * (bottom - top)
+
+
+def compute_area(box):
+    w = box[2] - box[0]
+    h = box[3] - box[1]
+
+    return w * h
