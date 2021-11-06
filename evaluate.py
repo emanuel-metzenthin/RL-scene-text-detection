@@ -69,6 +69,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         zipf_ic15 = zipfile.ZipFile(f'{dir_name_15}/res.zip', 'w', zipfile.ZIP_DEFLATED)
 
         ious = []
+        assessor_ious = []
         num_actions = []
 
         for image_idx in timages:
@@ -87,10 +88,13 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                 
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
-                # env.render()
+                env.render()
 
                 if env.is_trigger(action):
                     num_actions.append(step_count)
+                    ious.append(env.compute_best_iou())
+                    if env.assessor:
+                        assessor_ious.append(env.compute_assessor_iou())
 
                 # if image_idx % 20 == 0:
                 #     pass
@@ -102,9 +106,9 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
 
             if env.assessor:
-                bboxes_ious = post_process(env.episode_pred_bboxes, env.episode_trigger_ious)
+                bboxes_ious = post_process(env.episode_pred_bboxes, assessor_ious)
             else:
-                bboxes_ious = zip(env.episode_pred_bboxes, env.episode_trigger_ious)
+                bboxes_ious = zip(env.episode_pred_bboxes, ious)
 
             for i, (bbox, trigger_iou) in enumerate(bboxes_ious):
                 if trigger_iou > 0.5:
@@ -122,9 +126,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             if image_idx % 1 == 0:
                 episode_image.save(f"./examples/{image_idx}.png")
                 # episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
-
-            if env.episode_trigger_ious:
-                ious += env.episode_trigger_ious
 
             test_file_ic13.close()
             test_file_ic15.close()
