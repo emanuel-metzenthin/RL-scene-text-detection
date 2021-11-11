@@ -95,7 +95,7 @@ def main(cfg):
         logger = NeptuneLogger(cfg)
         callbacks += (logger,)
 
-    tune.run(DQNTrainer if cfg.training.dueling else SimpleQTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=300, config=config, stop=stop, callbacks=callbacks)
+    tune.run(DQNTrainer if cfg.training.dueling else SimpleQTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=cfg.training.eval_iterations, config=config, stop=stop, callbacks=callbacks)
 
     ray.shutdown()
 
