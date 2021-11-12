@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from text_localization_environment import TextLocEnv
 from assessor import AssessorModel
 from dataset.ICDAR_dataset import ICDARDataset
+from dataset.LSVT_dataset import LSVTDataset
 from dataset.assessor_dataset import AssessorDataset
 from dataset.coco_text_dataset import COCOTextDataset
 from dataset.sign_dataset import SignDataset
@@ -23,6 +24,8 @@ class EnvFactory:
             return SimpleDataset(path=data_path, json_path=None)
         elif dataset == "sign_icdar_mix":
             return SignIcdarMixDataset(path=data_path, json_path=json_path, mix_path=mix_path, mix_labels=mix_labels)
+        elif dataset == "lsvt":
+            return LSVTDataset(path=data_path, json_path=None)
         elif dataset == "coco":
             return COCOTextDataset(path=data_path, json_path=json_path, split=split)
         else:
