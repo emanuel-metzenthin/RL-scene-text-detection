@@ -101,7 +101,10 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                     best_gt_box = []
                     max_iou = 0
                     for box in env.episode_true_bboxes_unmasked:
-                        best_gt_box = max(max_iou, env.compute_iou(box))
+                        iou = env.compute_iou(box)
+                        if iou > max_iou:
+                            max_iou = iou
+                        best_gt_box = box
                     gt_box_area = compute_area(best_gt_box)
                     total_gt_area += gt_box_area
                     total_cut_area += gt_box_area - compute_intersection(env.bbox, best_gt_box)
