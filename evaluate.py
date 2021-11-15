@@ -71,6 +71,8 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         ious = []
         assessor_ious = []
         num_actions = []
+        total_gt_area = 0
+        total_cut_area = 0
 
         for image_idx in timages:
             step_count = 0
@@ -95,6 +97,18 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                     ious.append(env.compute_best_iou())
                     if env.assessor:
                        assessor_ious.append(env.compute_assessor_iou()[0].item())
+
+                    best_gt_box = []
+                    max_iou = 0
+                    for box in env.episode_true_bboxes_unmasked:
+                        best_gt_box = max(max_iou, env.compute_iou(box))
+                    gt_box_area = compute_area(best_gt_box)
+                    total_gt_area += gt_box_area
+                    total_cut_area += gt_box_area - compute_intersection(env.bbox, best_gt_box)
+
+                # do step in the environment
+                obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
+                # env.render()
 
                 # if image_idx % 20 == 0:
                 #     pass
@@ -136,6 +150,8 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
 
         zipf_ic13.close()
         zipf_ic15.close()
+
+        print(total_cut_area / total_gt_area)
 
         np.save("./detection_ious.npy", np.array(ious))
 
