@@ -88,13 +88,13 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                 
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
-                env.render()
+                # env.render()
 
                 if env.is_trigger(action):
                     num_actions.append(step_count)
                     ious.append(env.compute_best_iou())
                     if env.assessor:
-                        assessor_ious.append(env.compute_assessor_iou())
+                       assessor_ious.append(env.compute_assessor_iou()[0].item())
 
                 # if image_idx % 20 == 0:
                 #     pass
@@ -107,6 +107,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
 
             if env.assessor:
                 bboxes_ious = post_process(env.episode_pred_bboxes, assessor_ious)
+                #bboxes_ious = zip(env.episode_pred_bboxes, ious)
             else:
                 bboxes_ious = zip(env.episode_pred_bboxes, ious)
 
