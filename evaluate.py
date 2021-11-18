@@ -1,14 +1,15 @@
+import json
 import os
+import re
 import shutil
-import time
-import zipfile
 import subprocess
+import uuid
+import zipfile
+
 import numpy as np
 import ray
-import json
-import re
 import torch
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 from ray.rllib.agents.dqn import SimpleQTrainer
 import uuid
 from ray.rllib.agents.dqn.dqn import DQNTrainer, DEFAULT_CONFIG as DQN_CONFIG
@@ -17,12 +18,12 @@ from ray.tune import register_env
 from ray.tune.utils import merge_dicts
 from text_localization_environment import TextLocEnv
 from tqdm import tqdm
-#import plotly.express as px
+
+import plotly.express as px
 from DQN import RLLibImageDQN
 from NormalizeFilter import NormalizeFilter
 from env_factory import EnvFactory
-from logger import NeptuneLogger
-from utils import compute_iou, compute_area, compute_intersection
+from utils import compute_area, compute_intersection
 
 
 def post_process(episode_pred_bboxes, episode_trigger_ious):
@@ -88,26 +89,11 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                 step_count += 1
                 action = agent.compute_action(obs[_DUMMY_AGENT_ID], explore=False)
                 
-                # do step in the environment
-                obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
-                env.render()
-
                 if env.is_trigger(action):
                     num_actions.append(step_count)
                     ious.append(env.compute_best_iou())
                     if env.assessor:
                         assessor_ious.append(env.compute_assessor_iou()[0].item())
-
-                    best_gt_box = []
-                    max_iou = 0
-                    for box in env.episode_true_bboxes_unmasked:
-                        iou = env.compute_iou(box)
-                        if iou > max_iou:
-                            max_iou = iou
-                        best_gt_box = box
-                    gt_box_area = compute_area(best_gt_box)
-                    total_gt_area += gt_box_area
-                    total_cut_area += gt_box_area - compute_intersection(env.bbox, best_gt_box)
 
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
@@ -123,10 +109,10 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
             #for bbox in env.episode_true_bboxes:
             #    image_draw.rectangle(bbox, outline=(0, 255, 0), width=3)
 
-            if env.assessor:
-                bboxes_ious = post_process(env.episode_pred_bboxes, assessor_ious)
-            else:
-                bboxes_ious = zip(env.episode_pred_bboxes, ious)
+            # if env.assessor:
+            #     bboxes_ious = post_process(env.episode_pred_bboxes, assessor_ious)
+            # else:
+            bboxes_ious = zip(env.episode_pred_bboxes, ious)
 
             for i, (bbox, trigger_iou) in enumerate(bboxes_ious):
                 if trigger_iou > 0.5:
@@ -141,7 +127,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
                 test_file_ic13.write(f"{','.join(map(str, bbox))}\n")  # ICDAR 2013
                 test_file_ic15.write(f'{bbox[0]},{bbox[1]},{bbox[2]},{bbox[1]},{bbox[2]},{bbox[3]},{bbox[0]},{bbox[3]}\n')  # ICDAR 2015
 
-            if image_idx % 1 == 0:
+            if image_idx % 20 == 0:
                 episode_image.save(f"./examples/{image_idx}.png")
                 # episode_image.save(f"./examples/trajectories/{image_idx}_final.png")
 
@@ -153,8 +139,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
 
         zipf_ic13.close()
         zipf_ic15.close()
-
-        print(total_cut_area / total_gt_area)
 
         np.save("./detection_ious.npy", np.array(ious))
 
