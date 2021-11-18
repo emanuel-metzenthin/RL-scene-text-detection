@@ -57,7 +57,7 @@ class EnvFactory:
             bbox_scaling_w=cfg.env.bbox_scaling_width,
             bbox_scaling_h=cfg.env.bbox_scaling_height,
             bbox_transformer='base',
-            ior_marker_type='average',
+            ior_marker_type='cross',
             has_termination_action=cfg.env.termination,
             has_intermediate_reward=cfg.reward.intermediate_reward,
             has_repeat_penalty=cfg.reward.repeat_penalty,
