@@ -53,13 +53,7 @@ class Dataset(Dataset):
             ToTensor(),
         ])
 
-        if self.split == "train":
-            transforms = Compose([
-                resize,
-                augm
-            ])
-        else:
-            transforms = resize
+        transforms = resize
 
         if type(image) == list:
             return [transforms(img) for img in image]
