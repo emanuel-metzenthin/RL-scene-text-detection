@@ -97,7 +97,7 @@ class AddCoord(nn.Module):
 class AssessorModel(nn.Module):
     def __init__(self, alpha=True, train_dataloader=None, hidden_1=64, hidden_2=128, hidden_3=256, output=1, dual_image=False):
         super().__init__()
-        input_channels = 4 if alpha else 3
+        input_channels = 2 # 4 if alpha else 3
         self.resnet = nn.Sequential(
             ResBlock1(input_channels, hidden_1),
             nn.MaxPool2d(2, 2),
@@ -107,15 +107,16 @@ class AssessorModel(nn.Module):
             nn.MaxPool2d(2, 2),
             ResBlock3(hidden_3, hidden_3),
             nn.AvgPool2d(3),
-            nn.Flatten()
+            nn.Flatten(),
+            nn.Linear(hidden_3, output, bias=False),
             # nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
         self.dual_image = dual_image
 
-        feat_len = hidden_3 * 2 if self.dual_image else hidden_3
-        self.feat = nn.Linear(feat_len, output, bias=False)
-        self.feat.apply(self.init_weights)
+        # feat_len = hidden_3 * 2 if self.dual_image else hidden_3
+        # self.feat = nn.Linear(feat_len, output, bias=False)
+        # self.feat.apply(self.init_weights)
 
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
         self.mse = nn.MSELoss()
@@ -133,9 +134,9 @@ class AssessorModel(nn.Module):
         else:
             repr = self.resnet(X)
 
-        out = self.feat(repr)
+        # out = self.feat(repr)
 
-        return out
+        return repr
 
     @staticmethod
     def init_weights(m):
