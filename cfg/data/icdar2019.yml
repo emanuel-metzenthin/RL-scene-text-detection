@@ -1,0 +1,18 @@
+# @package _group_
+dataset: icdar2013
+
+path: /data/ICDAR2019_chinese
+
+json_path: null
+
+mix_path: null
+
+eval_dataset: icdar2013
+
+eval_path: 
+  - /data/ICDAR2019_chinese
+
+eval_gt_file: 
+  - chinese_gt.zip
+
+eval_full_playout: true
