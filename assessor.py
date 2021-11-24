@@ -107,15 +107,16 @@ class AssessorModel(nn.Module):
             nn.MaxPool2d(2, 2),
             ResBlock3(hidden_3, hidden_3),
             nn.AvgPool2d(3),
-            nn.Flatten()
+            nn.Flatten(),
+            nn.Linear(hidden_3, output, bias=False),
             # nn.Sigmoid()
         )
         self.resnet.apply(self.init_weights)
         self.dual_image = dual_image
 
-        feat_len = hidden_3 * 2 if self.dual_image else hidden_3
-        self.feat = nn.Linear(feat_len, output, bias=False)
-        self.feat.apply(self.init_weights)
+        # feat_len = hidden_3 * 2 if self.dual_image else hidden_3
+        # self.feat = nn.Linear(feat_len, output, bias=False)
+        # self.feat.apply(self.init_weights)
 
         self.optimizer = optim.Adam(self.parameters(), lr=1e-4)
         self.mse = nn.MSELoss()
@@ -133,9 +134,9 @@ class AssessorModel(nn.Module):
         else:
             repr = self.resnet(X)
 
-        out = self.feat(repr)
+        # out = self.feat(repr)
 
-        return out
+        return repr
 
     @staticmethod
     def init_weights(m):
