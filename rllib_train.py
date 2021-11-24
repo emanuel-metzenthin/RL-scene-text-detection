@@ -27,14 +27,14 @@ def main(cfg):
             result = {}
             for i, path in enumerate(cfg.data.eval_path):
                 gt_file = cfg.data.eval_gt_file[i]
-                eval_env = EnvFactory.create_eval_env(eval_dataset, path, cfg.data.json_path, cfg.env.framestacking_mode, playout=cfg.data.eval_full_playout)
+                eval_env = EnvFactory.create_eval_env(eval_dataset, path, cfg.data.json_path, cfg.env.framestacking_mode, ior_mode=cfg.env.ior_mode, playout=cfg.data.eval_full_playout)
                 new_result = evaluate(trainer, eval_env, gt_file)
                 renamed_result = {f"{gt_file.split('_')[0]}_{k}": v for k, v in new_result.items()}
                 result = {**result, **renamed_result}
 
             return result
         else:
-            eval_env = EnvFactory.create_eval_env(eval_dataset, cfg.data.eval_path, cfg.data.json_path, cfg.env.framestacking_mode, cfg.data.eval_full_playout, cfg.assessor.checkpoint)
+            eval_env = EnvFactory.create_eval_env(eval_dataset, cfg.data.eval_path, cfg.data.json_path, cfg.env.framestacking_mode, cfg.env.ior_mode, cfg.assessor.checkpoint, cfg.data.eval_full_playout)
 
             return evaluate(trainer, eval_env, cfg.data.eval_gt_file)
 
