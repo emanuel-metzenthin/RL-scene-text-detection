@@ -57,7 +57,7 @@ class EnvFactory:
             bbox_scaling_w=cfg.env.bbox_scaling_width,
             bbox_scaling_h=cfg.env.bbox_scaling_height,
             bbox_transformer='base',
-            ior_marker_type='cross',
+            ior_marker_type=cfg.env.ior_mode,
             has_termination_action=cfg.env.termination,
             has_intermediate_reward=cfg.reward.intermediate_reward,
             has_repeat_penalty=cfg.reward.repeat_penalty,
@@ -72,7 +72,7 @@ class EnvFactory:
         return env
 
     @staticmethod
-    def create_eval_env(name, path, json_path, framestacking_mode, assessor_checkpoint=None, playout=False):
+    def create_eval_env(name, path, json_path, framestacking_mode, ior_mode='cross', assessor_checkpoint=None, playout=False):
         dataset = EnvFactory.load_dataset(name, path, json_path, split="validation")
         assessor_model = None
 
@@ -88,7 +88,7 @@ class EnvFactory:
             bbox_scaling_w=0,
             bbox_scaling_h=0,
             bbox_transformer='base',
-            ior_marker_type='average',
+            ior_marker_type=ior_mode,
             has_termination_action=False,
             # has_repeat_penalty=True,
             assessor_model=assessor_model,

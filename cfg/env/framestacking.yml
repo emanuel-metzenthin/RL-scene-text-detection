@@ -20,3 +20,5 @@ eval_full_playout: false
 bbox_scaling_width: 0
 
 bbox_scaling_height: 0
+
+ior_mode: cross
