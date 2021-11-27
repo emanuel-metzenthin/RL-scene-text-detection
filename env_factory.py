@@ -8,6 +8,7 @@ from dataset.ICDAR_dataset import ICDARDataset
 from dataset.LSVT_dataset import LSVTDataset
 from dataset.assessor_dataset import AssessorDataset
 from dataset.coco_text_dataset import COCOTextDataset
+from dataset.icdar_mix_dataset import IcdarMixDataset
 from dataset.sign_dataset import SignDataset
 from dataset.sign_icdar_mix_dataset import SignIcdarMixDataset
 from dataset.simple_dataset import SimpleDataset
@@ -15,7 +16,7 @@ from dataset.simple_dataset import SimpleDataset
 
 class EnvFactory:
     @staticmethod
-    def load_dataset(dataset, data_path, json_path, mix_path=None, mix_labels=False, split: Text = 'train'):
+    def load_dataset(dataset, data_path, json_path, mix_path=None, mix_labels=True, split: Text = 'train'):
         if dataset == "icdar2013":
             return ICDARDataset(path=data_path, json_path=None, split=split)
         elif dataset == "sign":
@@ -24,6 +25,8 @@ class EnvFactory:
             return SimpleDataset(path=data_path, json_path=None)
         elif dataset == "sign_icdar_mix":
             return SignIcdarMixDataset(path=data_path, json_path=json_path, mix_path=mix_path, mix_labels=mix_labels)
+        elif dataset == "icdar_mix":
+            return IcdarMixDataset(path=data_path, json_path=json_path, mix_path=mix_path, mix_labels=mix_labels)
         elif dataset == "lsvt":
             return LSVTDataset(path=data_path, json_path=None)
         elif dataset == "coco":
