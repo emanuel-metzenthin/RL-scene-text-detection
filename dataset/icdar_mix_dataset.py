@@ -23,9 +23,6 @@ class LSVTIcdarMixDataset(Dataset):
         return images, gt
 
     def _load_icdar_gt(self):
-        self.images = []
-        self.gt = []
-
         folder = os.path.join(self.mix_path, self.split + '_images')
         file_names = [i for i in os.listdir(folder) if i.lower()[-4:] in ['.jpg', '.png', '.gif']]
         file_names.sort(key=lambda x: int(x.split('.')[0].split('_')[-1]))
