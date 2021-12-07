@@ -25,9 +25,8 @@ class AssessorDataset(Dataset):
 
             image = torch.vstack((image, sur_image))
         else:
-            image = image.convert('LA') if self.alpha else image.convert('RGB')
+            image = image.convert('RGBA') if self.alpha else image.convert('RGB')
             image = self.transform(image)
-
         gt = self.gt[index]
 
         return image, gt
@@ -48,6 +47,5 @@ class AssessorDataset(Dataset):
                 self.surrounding_images.append(os.path.join(self.path, sur_img.replace('\n', '')))
             else:
                 self.images.append(os.path.join(self.path, file[0].replace('\n', '').replace('./', '')))
-                self.images.append(os.path.join(self.path, file[0].replace('\n', '')[2:]))
 
         return self.images, self.surrounding_images, self.gt
