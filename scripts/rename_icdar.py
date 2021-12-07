@@ -8,7 +8,7 @@ args = parser.parse_args()
 
 new_path = os.path.join(args.path, "new")
 os.makedirs(new_path, exist_ok=True)
-ADD = -1
+ADD = 3500
 
 for fn in os.listdir(args.path):
   if not fn.endswith(".txt"):
