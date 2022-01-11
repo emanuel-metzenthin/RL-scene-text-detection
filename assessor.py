@@ -326,11 +326,12 @@ if __name__ == '__main__':
     parser.add_argument("--no_alpha", action='store_true', required=False)
     parser.add_argument("--tightness", action='store_true', required=False)
     parser.add_argument("--dual_image", action='store_true', required=False)
+    parser.add_argument("--neptune_project", type=str, required=False)
     args = parser.parse_args()
 
     torch.manual_seed(42)
 
-    run = neptune.init(project='emanuelm/assessor')
+    run = neptune.init(project=args.neptune_project)
     # run = None
     train_path, val_path = args.train_path, args.val_path
 

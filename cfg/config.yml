@@ -14,6 +14,7 @@ defaults:
 
 neptune:
   offline: true
+  project: "user/project"
   run_name: "experiment"
   run_id: null
 
