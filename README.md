@@ -7,7 +7,7 @@ The project is configured using [Hydra](https://hydra.cc/docs/intro/) in the [cf
 
 ## Training
 
-Train the model by executing [rllib_train.py](./rllib_train.py).
+We use [RLLib](https://docs.ray.io/en/master/rllib/index.html) as RL framework. Train the model by executing [rllib_train.py](./rllib_train.py).
 
 Every value in the [cfg](/cfg) folder can be altered by passing it as a CLI argument, while keeping the correct file hierarchy (e.g. `data.path=/data`). The folder _data_ contains templates for different dataset configurations.
 
