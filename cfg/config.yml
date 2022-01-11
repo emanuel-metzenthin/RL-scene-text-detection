@@ -8,12 +8,12 @@ hydra/job_logging: disabled
 hydra/hydra_logging: disabled
 
 defaults:
-  - env: default.yml
-  - data: simple_1_word.yml
-  - reward: base.yml
+  - env: framestacking.yml
+  - data: icdar.yml
+  - reward: tightness_aware.yml
 
 neptune:
-  offline: false
+  offline: true
   run_name: "experiment"
   run_id: null
 
@@ -30,10 +30,8 @@ training:
     end: 0.1
     decay_steps: 300000
   replay_buffer_size: 20000
-  explore_force_trigger: false
   iterations: 5000
   eval_iterations: 300
-  dueling: false
 
 assessor:
   data_path: null
@@ -41,7 +39,7 @@ assessor:
   dual_image: false
   output: 1
 
-log_dir: /Users/Emanuel/ray_results
+log_dir: ~/ray_results
 
 restore: null
 

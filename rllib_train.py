@@ -46,7 +46,6 @@ def main(cfg):
         "model": {
             "custom_model": "image_dqn",
             "custom_model_config": {
-                "dueling": cfg.training.dueling,
                 "framestacking_mode": cfg.env.framestacking_mode,
                 "backbone": cfg.training.backbone
             }
@@ -63,13 +62,7 @@ def main(cfg):
             "initial_epsilon": cfg.training.epsilon.start,
             "final_epsilon": cfg.training.epsilon.end,
             "epsilon_timesteps": cfg.training.epsilon.decay_steps * cfg.training.envs_per_worker,
-            # "type": "SoftQ"
         },
-        # "n_step": 3,
-        # "num_atoms": 51,
-        # "v_min": -3,
-        # "v_max": 70,
-        # "noisy": True,
         "lr": cfg.training.lr,
         "gamma": cfg.training.loss.gamma,
         "num_workers": 0,
@@ -83,7 +76,8 @@ def main(cfg):
         "batch_mode": "complete_episodes",
         "log_sys_usage": False,
         "custom_eval_function": custom_eval_fn,
-        "evaluation_interval": cfg.training.eval_iterations
+        "evaluation_interval": cfg.training.eval_iterations,
+        "render_env": True
     }
 
     stop = {
@@ -95,7 +89,7 @@ def main(cfg):
         logger = NeptuneLogger(cfg)
         callbacks += (logger,)
 
-    tune.run(DQNTrainer if cfg.training.dueling else SimpleQTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=cfg.training.eval_iterations, config=config, stop=stop, callbacks=callbacks)
+    tune.run(SimpleQTrainer, restore=cfg.restore, local_dir=cfg.log_dir, checkpoint_freq=cfg.training.eval_iterations, config=config, stop=stop, callbacks=callbacks)
 
     ray.shutdown()
 

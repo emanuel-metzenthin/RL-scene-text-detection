@@ -72,8 +72,6 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
         ious = []
         assessor_ious = []
         num_actions = []
-        total_gt_area = 0
-        total_cut_area = 0
 
         for image_idx in timages:
             step_count = 0
@@ -97,7 +95,7 @@ def evaluate(agent, env, gt_file='simple_gt.zip', plot_histograms=False):
 
                 # do step in the environment
                 obs[_DUMMY_AGENT_ID], r, done, _ = env.step(action)
-                # env.render()
+                env.render()
 
                 # if image_idx % 20 == 0:
                 #     pass
@@ -209,7 +207,7 @@ if __name__ == '__main__':
     parser.add_argument("gt_file", type=str)
     parser.add_argument("--dataset", type=str, default="simple")
     parser.add_argument("--framestacking", type=str, default=None)
-    parser.add_argument("--playout", type=bool, default=False)
+    parser.add_argument("--playout", type=bool, default=True)
     parser.add_argument("--json_path", type=str, default=None)
     parser.add_argument("--assessor", type=str, default=None)
     args = parser.parse_args()

@@ -16,11 +16,10 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
                               model_config, name)
         nn.Module.__init__(self)
         custom_model_cfg = model_config["custom_model_config"]
-        dueling = custom_model_cfg["dueling"]
         framestacking_mode = custom_model_cfg["framestacking_mode"] if "framestacking_mode" in custom_model_cfg else False
         backbone = custom_model_cfg["backbone"] if "backbone" in custom_model_cfg else "resnet18"
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = ImageDQN(backbone=backbone, dueling=dueling, num_actions=action_space.n, framestacking_mode=framestacking_mode).to(device)
+        self.model = ImageDQN(backbone=backbone, num_actions=action_space.n, framestacking_mode=framestacking_mode).to(device)
 
         if framestacking_mode:
             self.view_requirements['obs'] = ViewRequirement(shift="-3:0", space=obs_space)
@@ -34,7 +33,7 @@ class RLLibImageDQN(TorchModelV2, nn.Module):
 class ImageDQN(nn.Module):
     BACKBONES = ['resnet18', 'resnet50', 'vgg16']
 
-    def __init__(self, backbone: Text = 'resnet18', dueling=False, num_actions: int = 9, num_history: int = 10, framestacking_mode: bool = None, grayscale: bool = False):
+    def __init__(self, backbone: Text = 'resnet18', num_actions: int = 9, num_history: int = 10, framestacking_mode: bool = None, grayscale: bool = False):
         super().__init__()
 
         if backbone not in ImageDQN.BACKBONES:
@@ -71,7 +70,7 @@ class ImageDQN(nn.Module):
             nn.ReLU(),
             nn.Linear(1024, 1024),
             nn.ReLU(),
-            nn.Linear(1024, 256 if dueling else num_actions)
+            nn.Linear(1024, num_actions)
         )
 
         self.dqn.apply(self.init_weights)
