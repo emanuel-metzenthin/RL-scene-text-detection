@@ -24,6 +24,13 @@ Here are explanations for a few example parameters.
 | data.eval_path               | path to evaluation dataset                  | /data/ICDAR2013 |
 | data.eval_gt_file            | gt zip file for IC13/IC15/TIoU eval scripts | icdar13_gt.zip  |
 
+__Training weakly supervised__:
+
+| Parameter           | Description                                                                           |
+|---------------------|---------------------------------------------------------------------------------------|
+| assessor.data_path  | path to assessor training data for on-the-fly training of the assessor                |
+| assessor.checkpoint | path to assessor PyTorch (.pt) file. A pretained model can be downloaded here (soon). |
+
 __Loading a checkpoint__:
 
 Checkpoints need to be RLLib checkpoint folders. Our best three models (supervised, weakly supervised and semi-supervised) can be downloaded here (soon).
