@@ -1,13 +1,13 @@
 # Weakly Supervised Scene Text Detection using Deep Reinforcement Learning
 
 This repository contains the setup for all experiments performed in our Paper ...
-It is to be used in conjunction with the RL environment [text-localization-environment](https://github.com/emanuel-metzenthin/text-localization-environment), which is linked as a submodule. After cloning do `git submodule init` and `git submodule update`.
+It is to be used in conjunction with the RL environment [text-localization-environment](https://github.com/emanuel-metzenthin/text-localization-environment), which is linked as a submodule. After cloning do `git submodule init` and `git submodule update` and follow the installation instructions of that repo.
 
 The project is configured using [Hydra](https://hydra.cc/docs/intro/) in the [cfg](/cfg) folder.
 
 ## Training
 
-Train the model by executing [rllib_train.py](./rllib_train.py).
+We use [RLLib](https://docs.ray.io/en/master/rllib/index.html) as RL framework. Train the model by executing [rllib_train.py](./rllib_train.py).
 
 Every value in the [cfg](/cfg) folder can be altered by passing it as a CLI argument, while keeping the correct file hierarchy (e.g. `data.path=/data`). The folder _data_ contains templates for different dataset configurations.
 
