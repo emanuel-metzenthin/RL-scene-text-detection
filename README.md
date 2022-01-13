@@ -29,11 +29,11 @@ __Training weakly supervised__:
 | Parameter           | Description                                                                           |
 |---------------------|---------------------------------------------------------------------------------------|
 | assessor.data_path  | path to assessor training data for on-the-fly training of the assessor                |
-| assessor.checkpoint | path to assessor PyTorch (.pt) file. A pretained model can be downloaded here (soon). |
+| assessor.checkpoint | path to assessor PyTorch (.pt) file. A pretained model can be downloaded [here](https://bartzi.de/research/weakly-supervised-scene-text-detection). |
 
 __Loading a checkpoint__:
 
-Checkpoints need to be RLLib checkpoint folders. Our best three models (supervised, weakly supervised and semi-supervised) can be downloaded here (soon).
+Checkpoints need to be RLLib checkpoint folders. Our best three models (supervised, weakly supervised and semi-supervised) can be downloaded [here](https://bartzi.de/research/weakly-supervised-scene-text-detection).
 
 Set the parameter `restore` to the checkpoint directory. Training will resume from the checkpoint. The training iterations have to be increased, as the checkpoints were made at iteration 15k.
 
